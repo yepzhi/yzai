@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  openedai-speech:
+    image: ghcr.io/matatonic/openedai-speech-min:latest
+    container_name: openedai-speech
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - voices:/app/voices
+      - config:/app/config
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: open-webui
+    restart: always
+    ports:
+      - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - WHISPER_MODEL=medium
+    volumes:
+      - open-webui:/app/backend/data
+
+  comfyui:
+    image: rocm/pytorch:latest
+    container_name: comfyui
+    restart: always
+    ports:
+      - "8188:8188"
+    devices:
+      - "/dev/kfd:/dev/kfd"
+      - "/dev/dri:/dev/dri"
+    group_add:
+      - video
+      - render
+    environment:
+      - HSA_OVERRIDE_GFX_VERSION=11.0.0
+    volumes:
+      - /home/yepzhi/ComfyUI:/app
+    working_dir: /app
+    command: >
+      /bin/bash -c "pip install -r requirements.txt && python3 main.py --listen 0.0.0.0"
+
+volumes:
+  voices:
+  config:
+  open-webui:
