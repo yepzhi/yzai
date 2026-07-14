@@ -22,6 +22,16 @@ services:
     environment:
       - OLLAMA_BASE_URL=http://host.docker.internal:11434
       - WHISPER_MODEL=medium
+      - RAG_EMBEDDING_ENGINE=ollama
+      - RAG_EMBEDDING_MODEL=nomic-embed-text
+      - AUDIO_STT_ENGINE=openai
+      - AUDIO_TTS_ENGINE=openai
+      - AUDIO_TTS_OPENAI_API_BASE_URL=http://host.docker.internal:8000/v1
+      - AUDIO_TTS_OPENAI_API_KEY=sk-111
+      # Block all HuggingFace downloads — fully local
+      - HF_HUB_OFFLINE=1
+      - TRANSFORMERS_OFFLINE=1
+      - HF_DATASETS_OFFLINE=1
     volumes:
       - open-webui:/app/backend/data
 
@@ -44,6 +54,20 @@ services:
     working_dir: /app
     command: >
       /bin/bash -c "pip install -r requirements.txt && python3 main.py --listen 0.0.0.0"
+
+  yzai-ui:
+    image: nginx:alpine
+    container_name: yzai-ui
+    restart: always
+    ports:
+      - "8081:80"
+    volumes:
+      - ./yzai-ui:/usr/share/nginx/html:ro
+      - ./yzai-ui/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      - open-webui
 
 volumes:
   voices:
