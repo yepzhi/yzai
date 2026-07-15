@@ -1291,10 +1291,7 @@ async function sendMessage() {
         signal: abortCtrl.signal,
         body: JSON.stringify({ 
           model: selectedModel, 
-          messages: [
-            { role: "system", content: "Eres un asistente inteligente para Jóvenes STEM. Responde SIEMPRE de forma directa, al grano y extremadamente concisa. Usa máximo 3 oraciones cortas si no te piden detalles extensos." },
-            ...payload
-          ], 
+          messages: payload, 
           options: { 
             num_ctx: ctxSize, 
             num_gpu: (selectedModel.toLowerCase().includes('27b') || selectedModel.toLowerCase().includes('32b')) ? 60 : 99 
