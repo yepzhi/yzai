@@ -1144,6 +1144,11 @@ function checkRateLimit() {
   
   if (timestamps.length >= LIMIT) {
     const oldest = timestamps[0];
+    const waitTime = Math.ceil((WINDOW_MS - (now - oldest)) / 1000);
+    alert(`🚨 Límite de velocidad excedido. Has alcanzado el máximo de ${LIMIT} mensajes por minuto. Por favor, espera ${waitTime} segundos.`);
+    return false;
+  }
+  
   timestamps.push(now);
   localStorage.setItem('yzai_msg_timestamps', JSON.stringify(timestamps));
   return true;
