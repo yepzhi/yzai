@@ -1144,11 +1144,6 @@ function checkRateLimit() {
   
   if (timestamps.length >= LIMIT) {
     const oldest = timestamps[0];
-    const waitTime = Math.ceil((WINDOW_MS - (now - oldest)) / 1000);
-    alert(`🚨 Límite de velocidad excedido. Has alcanzado el máximo de ${LIMIT} mensajes por minuto. Por favor, espera ${waitTime} segundos.`);
-    return false;
-  }
-  
   timestamps.push(now);
   localStorage.setItem('yzai_msg_timestamps', JSON.stringify(timestamps));
   return true;
@@ -1196,12 +1191,54 @@ async function sendMessage() {
 
   setStreaming(true);
   abortCtrl = new AbortController();
-  let full = '';
-  let fullThinking = '';
   let firstTokenReceived = false;
   let startTime = 0;
   let tokenCount = 0;
   let liveTimer = null;
+
+  // Variables del Typewriter para suavidad
+  let targetText = '';
+  let targetThinking = '';
+  let currentText = '';
+  let currentThinking = '';
+  let typewriterTimer = null;
+  let streamFinished = false;
+
+  function startTypewriterLoop() {
+    if (typewriterTimer) return;
+    
+    typewriterTimer = setInterval(() => {
+      let hasChanges = false;
+      const pendingThinking = targetThinking.length - currentThinking.length;
+      const pendingText = targetText.length - currentText.length;
+      
+      if (pendingThinking > 0) {
+        // Velocidad adaptativa: si hay mucho acumulado, avanza más rápido
+        const step = Math.min(pendingThinking, Math.ceil(pendingThinking / 5) || 1);
+        currentThinking += targetThinking.substr(currentThinking.length, step);
+        hasChanges = true;
+      } else if (pendingText > 0) {
+        const step = Math.min(pendingText, Math.ceil(pendingText / 3) || 1);
+        currentText += targetText.substr(currentText.length, step);
+        hasChanges = true;
+      }
+      
+      if (hasChanges) {
+        renderMd(bubble, currentText, currentThinking);
+        bubble.innerHTML += '<span class="cursor"></span>';
+        scrollBottom();
+      } else if (streamFinished) {
+        clearInterval(typewriterTimer);
+        typewriterTimer = null;
+        
+        renderMd(bubble, targetText || '…', targetThinking);
+        messages.push({ role:'ai', content:targetText });
+        saveCurrentConv();
+        setStreaming(false);
+        document.getElementById('prompt').focus();
+      }
+    }, 16); // ~60fps para máxima suavidad visual
+  }
 
   let lastSize = 0;
   let loadTime = 0;
@@ -1213,20 +1250,28 @@ async function sendMessage() {
       if (firstTokenReceived) return; // Prevent async overwrite
       if (psRes.ok) {
         const data = await psRes.json();
-        if (firstTokenReceived) return; // Prevent async overwrite
         const model = data.models.find(m => m.name === selectedModel);
         if (model) {
           const total = model.size || 1;
-          const vram = model.size_vram || 0;
-          const vramGB = (vram/1024/1024/1024).toFixed(1);
-          const totalGB = (total/1024/1024/1024).toFixed(1);
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Evaluando prompt... (VRAM: ${vramGB}GB / Total: ${totalGB}GB)</span>`;
-        } else {
-          let etaStr = "ETA: ~20s";
-          if (selectedModel.includes('27b') || selectedModel.includes('32b')) etaStr = "ETA: 2-3 min";
-          else if (selectedModel.includes('14b')) etaStr = "ETA: ~45s";
+          const loaded = model.size_vram || 0;
+          const pct = ((loaded / total) * 100).toFixed(1);
+          let speedTxt = '';
+          if (loaded > lastSize) {
+            const speed = ((loaded - lastSize) / 1024 / 1024 * 2).toFixed(1); // Since interval is 500ms, * 2 gives MB/s
+            speedTxt = ` ${speed} MB/s`;
+          }
+          lastSize = loaded;
           
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Transfiriendo a RAM/VRAM... (${loadTime.toFixed(1)}s | ${etaStr})</span>`;
+          if (loaded === total || pct === '100.0') {
+            document.getElementById('token-count').textContent = 'Modelo cargado en RAM. Generando...';
+            clearInterval(loadInterval);
+          } else {
+            const ramGB = (loaded/1024/1024/1024).toFixed(2);
+            const ssdGB = (total/1024/1024/1024).toFixed(2);
+            document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Cargando desde SSD a RAM: ${pct}% (RAM: ${ramGB}GB / SSD: ${ssdGB}GB)${speedTxt}</span>`;
+          }
+        } else {
+          document.getElementById('token-count').innerHTML = '<span style="color:var(--cyan);font-weight:600;">⏳ Esperando a Ollama para cargar modelo desde SSD...</span>';
         }
       }
     } catch(e) {}
@@ -1242,6 +1287,7 @@ async function sendMessage() {
         body: JSON.stringify({ 
           model: selectedModel, 
           messages: [
+            { role: "system", content: "Eres un asistente inteligente para Jóvenes STEM. Responde SIEMPRE de forma directa, al grano y extremadamente concisa. Usa máximo 3 oraciones cortas si no te piden detalles extensos." },
             ...payload
           ], 
           options: { 
@@ -1255,19 +1301,21 @@ async function sendMessage() {
       if (!res.ok) {
         if ((res.status === 502 || res.status === 504 || res.status === 524) && !firstTokenReceived && retryCount < 5) {
           retryCount++;
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Timeout de red. Reintentando automáticamente (${retryCount}/5)... El modelo sigue cargando.</span>`;
-          await new Promise(r => setTimeout(r, 4000));
+          const waitTime = Math.pow(2, retryCount) * 1000;
+          document.getElementById('token-count').textContent = `Servidor ocupado. Reintentando en ${(waitTime/1000)}s... (Intento ${retryCount}/5)`;
+          await new Promise(r => setTimeout(r, waitTime));
           return attemptFetch();
         }
-        throw new Error('HTTP ' + res.status);
+        throw new Error(`HTTP ${res.status}`);
       }
       return res;
     } catch (e) {
-      if ((e.message.includes('502') || e.message.includes('504') || e.message.includes('524')) && !firstTokenReceived && retryCount < 5) {
-          retryCount++;
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Timeout de red. Reintentando automáticamente (${retryCount}/5)...</span>`;
-          await new Promise(r => setTimeout(r, 4000));
-          return attemptFetch();
+      if (retryCount < 5 && e.name !== 'AbortError') {
+        retryCount++;
+        const waitTime = Math.pow(2, retryCount) * 1000;
+        document.getElementById('token-count').textContent = `Fallo de conexión. Reintentando en ${(waitTime/1000)}s... (Intento ${retryCount}/5)`;
+        await new Promise(r => setTimeout(r, waitTime));
+        return attemptFetch();
       }
       throw e;
     }
@@ -1306,11 +1354,11 @@ async function sendMessage() {
             
             let hasChange = false;
             if (d.message?.content) {
-              full += d.message.content;
+              targetText += d.message.content;
               hasChange = true;
             }
             if (d.message?.thinking) {
-              fullThinking += d.message.thinking;
+              targetThinking += d.message.thinking;
               hasChange = true;
             }
             
