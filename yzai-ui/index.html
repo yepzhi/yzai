@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000">
 <title>yzai - Pro</title>
@@ -428,6 +428,19 @@ think::before {
 }
 .input-container:focus-within { border-color: rgba(139,92,246,0.5); box-shadow: 0 0 0 4px rgba(139,92,246,0.1), 0 20px 40px rgba(0,0,0,0.6); }
 
+.attach-btn {
+  background: none; border: none; color: var(--muted); padding: 8px; border-radius: 12px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+.attach-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+.img-preview-container {
+  display: none; position: absolute; bottom: calc(100% + 12px); left: 24px; background: rgba(20,20,25,0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 8px; border-radius: 16px; border: 1px solid var(--border-light); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 40;
+}
+.img-preview-container.has-img { display: block; }
+.img-preview-container img { max-height: 80px; max-width: 120px; object-fit: cover; border-radius: 8px; display: block; }
+.remove-img-btn {
+  position: absolute; top: -8px; right: -8px; background: var(--red); color: #fff; border: none; width: 22px; height: 22px; border-radius: 50%; font-size: 12px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+}
+.msg-img { max-width: 100%; border-radius: 12px; margin-bottom: 12px; display: block; border: 1px solid rgba(255,255,255,0.1); }
 #prompt {
   flex: 1; background: none; border: none; outline: none;
   color: #fff; font-size: 16px; font-family: var(--font-body);
@@ -653,8 +666,16 @@ think::before {
 
   <!-- INPUT -->
   <div class="input-wrapper">
+    <div class="img-preview-container" id="imgPreviewContainer">
+      <img id="imgPreview">
+      <button class="remove-img-btn" onclick="removeImage()">✕</button>
+    </div>
     <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Ready</div>
     <div class="input-container">
+      <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileSelect(event)">
+      <button class="attach-btn" onclick="document.getElementById('fileInput').click()" aria-label="Attach">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+      </button>
       <textarea id="prompt" rows="1" placeholder="Type a message..." oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
       <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -670,7 +691,17 @@ think::before {
 <div class="sheet-overlay" id="sheetOverlay" onclick="closeModelSheet()"></div>
 <div class="model-sheet" id="modelSheet">
   <div class="sheet-handle"></div>
-  <div class="sheet-title">Select AI Model</div>
+  <div class="sheet-title" style="display:flex; justify-content:space-between; align-items:center;">
+    <span>Select AI Model</span>
+    <select id="ctxSelect" onchange="updateCtxDisplay()" style="background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:6px 10px; font-size:13px; outline:none; cursor:pointer;">
+      <option value="8192" selected>8K Ctx</option>
+      <option value="16384">16K Ctx</option>
+      <option value="32768">32K Ctx</option>
+      <option value="65536">64K Ctx</option>
+      <option value="131072">128K Ctx</option>
+      <option value="262144">256K Ctx</option>
+    </select>
+  </div>
   <div class="sheet-models" id="sheetModels">
     <div style="padding:40px 20px;text-align:center;color:var(--muted)">Loading local models...</div>
   </div>
@@ -704,13 +735,22 @@ const ICONS = {
 };
 
 const MODEL_META = {
-  '27b':{ badge:'Pro', cls:'heavy', desc:'Highest precision & reasoning' },
-  '9b': { badge:'Fast',     cls:'',      desc:'Optimized for speed' },
-  '4b': { badge:'Lite',     cls:'',      desc:'Resource efficient' },
+  '4b':  { badge:'Ligero', cls:'badge-green', desc:'Rápido, ideal para tareas sencillas.', speed:'~85 t/s' },
+  '8b':  { badge:'Balance', cls:'badge-green', desc:'Excelente balance velocidad/calidad.', speed:'~55 t/s' },
+  '9b':  { badge:'Balance', cls:'badge-green', desc:'Excelente balance velocidad/calidad.', speed:'~45 t/s' },
+  '14b': { badge:'Avanzado', cls:'badge-blue', desc:'Alto razonamiento, tareas complejas.', speed:'~30 t/s' },
+  '27b': { badge:'Frontier', cls:'badge-gold', desc:'Máxima inteligencia y precisión.', speed:'~15 t/s' },
+  '32b': { badge:'Frontier', cls:'badge-gold', desc:'Máxima inteligencia y precisión.', speed:'~12 t/s' },
+  'deepseek-r1': { badge:'Reasoning', cls:'badge-blue', desc:'Modelo especializado en cadena de pensamiento.', speed:'Variable' },
+  'deepseek-v3': { badge:'Frontier', cls:'badge-gold', desc:'Máxima capacidad general de DeepSeek.', speed:'~10 t/s' },
+  'gemma4': { badge:'Google', cls:'badge-blue', desc:'Modelo avanzado de Google Gemma 4.', speed:'~30 t/s' }
 };
 
-// ── STATE ──────────────────────────────────────────────────
+// ── CONFIG & STATE ─────────────────────────────────────────
+let OLLAMA_URL = 'https://api-yzai.yepzhi.com';
+
 let selectedModel = null;
+let selectedModelDesc = '';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -718,18 +758,62 @@ let systemPrompt  = '';
 let abortCtrl     = null;
 let isStreaming   = false;
 let allModels     = [];
+let currentImageBase64 = null;
+
+const esc = (str) => String(str).replace(/[&<>"']/g, match => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
+
+// ── IMAGE HANDLING ─────────────────────────────────────────
+function handleFileSelect(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const base64String = event.target.result.split(',')[1];
+    currentImageBase64 = base64String;
+    document.getElementById('imgPreview').src = event.target.result;
+    document.getElementById('imgPreviewContainer').classList.add('has-img');
+  };
+  reader.readAsDataURL(file);
+}
+function removeImage() {
+  currentImageBase64 = null;
+  document.getElementById('fileInput').value = '';
+  document.getElementById('imgPreviewContainer').classList.remove('has-img');
+}
 
 // ── INIT ───────────────────────────────────────────────────
+async function discoverEndpoint() {
+  const candidates = [
+    'https://api-yzai.yepzhi.com',
+    'http://127.0.0.1:11434',
+    'http://192.168.1.238:11434'
+  ];
+  for (const url of candidates) {
+    try {
+      const c = new AbortController();
+      const t = setTimeout(() => c.abort(), 2000);
+      const r = await fetch(`${url}/api/tags`, { signal: c.signal });
+      clearTimeout(t);
+      if (r.ok) { OLLAMA_URL = url; return; }
+    } catch(e) {}
+  }
+}
+
 async function init() {
   loadConversations();
+  await discoverEndpoint();
   await loadModels();
 }
 
 async function loadModels() {
   try {
-    const res = await fetch('https://api-yzai.yepzhi.com/api/tags');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const { models = [] } = await res.json();
+    const res = await fetch(`${OLLAMA_URL}/api/tags`);
+    if (!res.ok) {
+      await discoverEndpoint(); // try to rediscover if it dropped
+      const retry = await fetch(`${OLLAMA_URL}/api/tags`);
+      if (!retry.ok) throw new Error('HTTP ' + retry.status);
+    }
+    const { models = [] } = await (res.ok ? res : await fetch(`${OLLAMA_URL}/api/tags`)).json();
     allModels = models;
 
     setStatus(true, `Mini PC Conectada · ${models.length} model${models.length!==1?'s':''}`);
@@ -764,21 +848,60 @@ function renderSheetModels(models) {
     const [base, tag=''] = m.name.split(':');
     const info = MODEL_META[tag] || { badge:'Ready', cls:'', desc:'Standard model' };
     const size = m.size ? (m.size/1e9).toFixed(1)+' GB' : '';
+    
+    let capBadges = '';
+    const caps = m.capabilities || [];
+    if (caps.length) {
+      const map = { vision: 'Imagen', completion: 'Texto', tools: 'Tools' };
+      const list = caps.map(c => map[c]).filter(Boolean);
+      if (list.length) capBadges = `<div style="font-size:11px;color:var(--cyan);margin-top:6px;font-weight:600;">${list.join(' · ')}</div>`;
+    }
+
+    const is27B = m.name.toLowerCase().includes('27b') || m.name.toLowerCase().includes('32b');
+    const disabledStyle = is27B ? ' style="opacity: 0.4; filter: grayscale(1);"' : '';
+    const clickHandler = is27B 
+      ? ` onclick="pickModelWithPassword('${esc(m.name)}');"`
+      : ` onclick="pickModel('${esc(m.name)}'); closeModelSheet()"`;
+    const devBadge = is27B ? `<span class="badge" style="background:var(--red); color:#fff; font-size:10px; font-weight:700; margin-left:8px;">En Desarrollo</span>` : '';
+
     return `
-      <div class="sheet-model-card${m.name===selectedModel?' active':''}" data-model="${esc(m.name)}" onclick="pickModel('${esc(m.name)}'); closeModelSheet()">
+      <div class="sheet-model-card${m.name===selectedModel?' active':''}" data-model="${esc(m.name)}"${disabledStyle}${clickHandler}>
         <div class="smc-icon">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="6" height="6"/><path d="M15 2v3M9 2v3M15 19v3M9 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
         </div>
         <div class="smc-info">
-          <div class="smc-name">${esc(base)}<span style="color:var(--muted);font-weight:400">:${esc(tag)}</span></div>
+          <div class="smc-name">${esc(base)}<span style="color:var(--muted);font-weight:400">:${esc(tag)}</span>${devBadge}</div>
           <div class="smc-meta">
             <span class="badge ${info.cls}">${info.badge}</span>
             ${size?`<span style="color:#fff">${size}</span>`:''}
             <span style="color:var(--muted)">${info.desc}</span>
+            ${info.speed?`<span style="color:var(--cyan);font-weight:500;font-size:11px;margin-left:auto;">${info.speed}</span>`:''}
           </div>
+          ${capBadges}
+        </div>
         ${m.name===selectedModel ? `<div class="smc-check">${ICONS.check}</div>` : ''}
       </div>`;
   }).join('');
+}
+
+function pickModelWithPassword(name) {
+  const pw = prompt("Introduce la contraseña para activar este modelo en desarrollo:");
+  if (pw === "1234") {
+    pickModel(name);
+    closeModelSheet();
+  } else {
+    alert("Contraseña incorrecta. El modelo sigue bloqueado.");
+  }
+}
+
+function updateCtxDisplay() {
+  if (!selectedModel) return;
+  const ctxVal = document.getElementById('ctxSelect').value;
+  const ctxK = (parseInt(ctxVal) / 1024).toFixed(0) + 'K';
+  document.getElementById('token-count').textContent = `Contexto: ${ctxK} · Listo para generar`;
+  if (selectedModelDesc) {
+    document.getElementById('activeSub').textContent = `${selectedModelDesc} (Ctx: ${ctxK})`;
+  }
 }
 
 function pickModel(name, silent) {
@@ -794,10 +917,30 @@ function pickModel(name, silent) {
   selectedModel = name;
   const [base, tag=''] = name.split(':');
   const info = MODEL_META[tag] || { badge:'Ready', cls:'', desc:'Standard execution' };
-  const mInfoForCtx = allModels.find(m => m.name === name);
-  const ctx = mInfoForCtx?.details?.context_length ? ` (Ctx: ${(mInfoForCtx.details.context_length/1024).toFixed(0)}k)` : '';
-  document.getElementById('activeSub').textContent  = info.desc + ctx;
-  document.getElementById('token-count').textContent = `Contexto: ${mInfo?.details?.context_length ? (mInfo.details.context_length/1024).toFixed(0)+'k' : '256k'} · Listo para generar`;
+  selectedModelDesc = info.desc;
+  
+  document.getElementById('activeName').textContent = tag ? `${base.toUpperCase()} (${tag.toUpperCase()})` : base.toUpperCase();
+  document.getElementById('activeSub').textContent  = info.desc;
+  
+  // Limitar contexto para modelos pesados (27B+)
+  const ctxSelect = document.getElementById('ctxSelect');
+  const nameLower = name.toLowerCase();
+  const isHeavy = nameLower.includes('27b') || nameLower.includes('32b');
+  
+  Array.from(ctxSelect.options).forEach(opt => {
+    const val = parseInt(opt.value);
+    if (isHeavy && val > 16384) {
+      opt.disabled = true;
+      opt.style.display = 'none'; // Ocultar para que no salgan en la lista
+      if (opt.selected) ctxSelect.value = "8192"; // Fallback a 8K si estaba en uno no permitido
+    } else {
+      opt.disabled = false;
+      opt.style.display = 'block'; // Mostrar si es un modelo ligero
+    }
+  });
+  
+  updateCtxDisplay();
+  
   if (!silent) renderSheetModels(allModels);
 }
 
@@ -860,7 +1003,9 @@ function renderMessages() {
   const el = document.getElementById('messages');
   el.innerHTML = '';
   if (!messages.length) { el.innerHTML = welcomeHTML(); return; }
-  messages.forEach(m => { if (m.role !== 'system') el.appendChild(createMsg(m.role, m.content)); });
+  messages.forEach(m => { 
+    if (m.role !== 'system') el.appendChild(createMsg(m.role, m.content, false, m.images)); 
+  });
   scrollBottom();
 }
 
@@ -880,7 +1025,7 @@ function welcomeHTML() {
   </div>`;
 }
 
-function createMsg(role, content, streaming=false) {
+function createMsg(role, content, streaming=false, images=null) {
   const div = document.createElement('div');
   div.className = `msg ${role}`;
 
@@ -893,8 +1038,17 @@ function createMsg(role, content, streaming=false) {
 
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
+  
+  let imgHtml = '';
+  if (images && images.length) {
+    imgHtml = `<img class="msg-img" src="data:image/jpeg;base64,${images[0]}">`;
+  }
+  
   if (streaming) bubble.innerHTML = '<span class="cursor"></span>';
-  else renderMd(bubble, content);
+  else {
+    renderMd(bubble, content);
+    bubble.innerHTML = imgHtml + bubble.innerHTML;
+  }
 
   const time = document.createElement('div');
   time.className = 'msg-time';
@@ -905,14 +1059,38 @@ function createMsg(role, content, streaming=false) {
   return div;
 }
 
-function renderMd(el, text) {
-  let thinking = '';
-  let clean = text.replace(/<think>([\s\S]*?)<\/think>/g, (_,t) => { thinking = t.trim(); return ''; }).trim();
+function renderMd(el, text, nativeThinking = '') {
+  let thinking = nativeThinking;
+  let clean = text;
+
+  // Handle closed think tags
+  clean = clean.replace(/<think>([\s\S]*?)<\/think>/g, (_,t) => { 
+    thinking += t.trim() + '\n\n'; 
+    return ''; 
+  });
+
+  // Handle open think tag (streaming)
+  const openMatch = clean.match(/<think>([\s\S]*)$/);
+  let isThinkingNow = false;
+  if (openMatch) {
+    isThinkingNow = true;
+    thinking += openMatch[1].trim();
+    clean = clean.replace(openMatch[0], '');
+  }
+
+  clean = clean.trim();
+  thinking = thinking.trim();
 
   let html = '';
-  if (thinking) html += `<details class="think-details"><summary>${ICONS.chev}<span>Thought Process</span></summary><div class="think-body">${esc(thinking)}</div></details>`;
-  html += marked.parse(clean || text);
-  el.innerHTML = html;
+  if (thinking || isThinkingNow) {
+    html += `<div class="think-body" style="color:var(--muted); font-style:italic; border-left: 2px solid var(--border-light); padding-left: 12px; margin-bottom: 12px; opacity: 0.8; font-size: 0.95em;">${esc(thinking)}${isThinkingNow ? '<span class="cursor"></span>' : ''}</div>`;
+  }
+  
+  if (clean) {
+    html += marked.parse(clean);
+  }
+  
+  el.innerHTML = html || (isThinkingNow ? '' : text);
 
   el.querySelectorAll('pre code').forEach(block => {
     const lang = (block.className.match(/language-(\w+)/) || [])[1] || 'code';
@@ -943,10 +1121,23 @@ async function sendMessage() {
   document.getElementById('token-count').textContent = 'Generating...';
 
   const payload = [];
-  if (systemPrompt) payload.push({ role:'system', content:systemPrompt });
-  messages.forEach(m => payload.push({ role: m.role==='ai'?'assistant':m.role, content:m.content }));
-  payload.push({ role:'user', content:text });
-  messages.push({ role:'user', content:text });
+  if (systemPrompt) payload.push({ role:'system', content: systemPrompt });
+  
+  messages.forEach(m => {
+    const msg = { role: m.role==='ai'?'assistant':m.role, content:m.content };
+    if (m.images) msg.images = m.images;
+    payload.push(msg);
+  });
+  
+  const userMsg = { role:'user', content:text };
+  if (currentImageBase64) {
+    userMsg.images = [currentImageBase64];
+  }
+  
+  payload.push(userMsg);
+  messages.push(userMsg);
+  
+  removeImage();
 
   const container = document.getElementById('messages');
   container.appendChild(createMsg('user', text));
@@ -955,43 +1146,41 @@ async function sendMessage() {
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom();
 
+  const ctxSize = parseInt(document.getElementById('ctxSelect').value) || 32768;
+
   setStreaming(true);
   abortCtrl = new AbortController();
   let full = '';
+  let fullThinking = '';
   let firstTokenReceived = false;
   let startTime = 0;
   let tokenCount = 0;
   let liveTimer = null;
 
   let lastSize = 0;
+  let loadTime = 0;
   let loadInterval = setInterval(async () => {
     if (firstTokenReceived) { clearInterval(loadInterval); return; }
+    loadTime += 0.5;
     try {
-      const psRes = await fetch('https://api-yzai.yepzhi.com/api/ps');
+      const psRes = await fetch(`${OLLAMA_URL}/api/ps`);
+      if (firstTokenReceived) return; // Prevent async overwrite
       if (psRes.ok) {
         const data = await psRes.json();
+        if (firstTokenReceived) return; // Prevent async overwrite
         const model = data.models.find(m => m.name === selectedModel);
         if (model) {
           const total = model.size || 1;
-          const loaded = model.size_vram || 0;
-          const pct = ((loaded / total) * 100).toFixed(1);
-          let speedTxt = '';
-          if (loaded > lastSize) {
-            const speed = ((loaded - lastSize) / 1024 / 1024 * 2).toFixed(1); // Since interval is 500ms, * 2 gives MB/s
-            speedTxt = ` ${speed} MB/s`;
-          }
-          lastSize = loaded;
-          
-          if (loaded === total || pct === '100.0') {
-            document.getElementById('token-count').textContent = 'Modelo cargado en RAM. Generando...';
-            clearInterval(loadInterval);
-          } else {
-            const ramGB = (loaded/1024/1024/1024).toFixed(2);
-            const ssdGB = (total/1024/1024/1024).toFixed(2);
-            document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Cargando desde SSD a RAM: ${pct}% (RAM: ${ramGB}GB / SSD: ${ssdGB}GB)${speedTxt}</span>`;
-          }
+          const vram = model.size_vram || 0;
+          const vramGB = (vram/1024/1024/1024).toFixed(1);
+          const totalGB = (total/1024/1024/1024).toFixed(1);
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Evaluando prompt... (VRAM: ${vramGB}GB / Total: ${totalGB}GB)</span>`;
         } else {
-          document.getElementById('token-count').innerHTML = '<span style="color:var(--cyan);font-weight:600;">⏳ Esperando a Ollama para cargar modelo desde SSD...</span>';
+          let etaStr = "ETA: ~20s";
+          if (selectedModel.includes('27b') || selectedModel.includes('32b')) etaStr = "ETA: 2-3 min";
+          else if (selectedModel.includes('14b')) etaStr = "ETA: ~45s";
+          
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Transfiriendo a RAM/VRAM... (${loadTime.toFixed(1)}s | ${etaStr})</span>`;
         }
       }
     } catch(e) {}
@@ -1000,16 +1189,20 @@ async function sendMessage() {
   let retryCount = 0;
   async function attemptFetch() {
     try {
-      const res = await fetch('https://api-yzai.yepzhi.com/api/chat', {
+      const res = await fetch(`${OLLAMA_URL}/api/chat`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         signal: abortCtrl.signal,
         body: JSON.stringify({ 
           model: selectedModel, 
           messages: [
-            { role: "system", content: "Eres un asistente inteligente para Jóvenes STEM. Responde SIEMPRE de forma directa, al grano y extremadamente concisa. Usa máximo 3 oraciones cortas si no te piden detalles extensos." },
             ...payload
           ], 
+          options: { 
+            num_ctx: ctxSize, 
+            num_gpu: (selectedModel.toLowerCase().includes('27b') || selectedModel.toLowerCase().includes('32b')) ? 60 : 99 
+          },
+          think: false,
           stream: true 
         })
       });
@@ -1050,10 +1243,11 @@ async function sendMessage() {
         if (!line.trim()) continue;
         try {
           const d = JSON.parse(line);
-          if (d.message?.content) {
+          if (d.message !== undefined) {
             if (!firstTokenReceived) { 
               firstTokenReceived = true; 
-              clearInterval(loadInterval); 
+              if (loadInterval) { clearInterval(loadInterval); loadInterval = null; }
+              document.getElementById('token-count').textContent = 'Generando...';
               startTime = Date.now();
               liveTimer = setInterval(() => {
                 const elapsed = (Date.now() - startTime) / 1000;
@@ -1063,11 +1257,23 @@ async function sendMessage() {
                 }
               }, 500);
             }
-            tokenCount++;
-            full += d.message.content;
-            renderMd(bubble, full);
-            bubble.innerHTML += '<span class="cursor"></span>';
-            scrollBottom();
+            
+            let hasChange = false;
+            if (d.message?.content) {
+              full += d.message.content;
+              hasChange = true;
+            }
+            if (d.message?.thinking) {
+              fullThinking += d.message.thinking;
+              hasChange = true;
+            }
+            
+            if (hasChange) {
+              tokenCount++;
+              renderMd(bubble, full, fullThinking);
+              bubble.innerHTML += '<span class="cursor"></span>';
+              scrollBottom();
+            }
           }
           if (d.done && d.eval_count) {
             clearInterval(liveTimer);
@@ -1086,7 +1292,7 @@ async function sendMessage() {
 
   clearInterval(loadInterval);
   if (liveTimer) clearInterval(liveTimer);
-  renderMd(bubble, full || '…');
+  renderMd(bubble, full || '…', fullThinking);
   messages.push({ role:'ai', content:full });
   saveCurrentConv();
   setStreaming(false);
@@ -1110,7 +1316,10 @@ function clearChat()     { if (messages.length && !confirm('Clear this conversat
 function sendSuggestion(btn) { document.getElementById('prompt').value=btn.textContent; sendMessage(); }
 function openSystemModal()  { document.getElementById('systemPromptInput').value=systemPrompt; document.getElementById('systemModal').classList.add('open'); }
 function closeSystemModal() { document.getElementById('systemModal').classList.remove('open'); }
-function saveSystemPrompt() { systemPrompt=document.getElementById('systemPromptInput').value.trim(); closeSystemModal(); }
+function saveSystemPrompt() { 
+  systemPrompt = document.getElementById('systemPromptInput').value.trim(); 
+  closeSystemModal(); 
+}
 document.getElementById('systemModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeSystemModal(); });
 document.getElementById('prompt').addEventListener('keydown', e => {
   if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
@@ -1130,10 +1339,10 @@ if (window.visualViewport) {
 (function(){
   const css=document.createElement('link');
   css.rel='stylesheet';
-  css.href='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark-reasonable.min.css';
+  css.href='https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark-reasonable.min.css';
   document.head.appendChild(css);
   const s1=document.createElement('script');
-  s1.src='https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js';
+  s1.src='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js';
   s1.onload=()=>{
     const s2=document.createElement('script');
     s2.src='https://cdn.jsdelivr.net/npm/marked@12/marked.min.js';
