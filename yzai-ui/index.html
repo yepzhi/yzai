@@ -1129,12 +1129,38 @@ function copyCode(btn) {
     .then(() => { btn.textContent='Copied'; btn.classList.add('copied'); setTimeout(()=>{ btn.textContent='Copy'; btn.classList.remove('copied'); }, 2000); });
 }
 
+function checkRateLimit() {
+  const LIMIT = 10; // Max 10 mensajes por minuto
+  const WINDOW_MS = 60 * 1000;
+  const now = Date.now();
+  
+  let timestamps = [];
+  try {
+    timestamps = JSON.parse(localStorage.getItem('yzai_msg_timestamps') || '[]');
+  } catch(e) {}
+  
+  // Filtrar marcas de tiempo mayores a 1 minuto
+  timestamps = timestamps.filter(t => now - t < WINDOW_MS);
+  
+  if (timestamps.length >= LIMIT) {
+    const oldest = timestamps[0];
+    const waitTime = Math.ceil((WINDOW_MS - (now - oldest)) / 1000);
+    alert(`🚨 Límite de velocidad excedido. Has alcanzado el máximo de ${LIMIT} mensajes por minuto. Por favor, espera ${waitTime} segundos.`);
+    return false;
+  }
+  
+  timestamps.push(now);
+  localStorage.setItem('yzai_msg_timestamps', JSON.stringify(timestamps));
+  return true;
+}
+
 // ── CHAT ───────────────────────────────────────────────────
 async function sendMessage() {
   const input = document.getElementById('prompt');
   const text  = input.value.trim();
   if (!text || isStreaming) return;
   if (!selectedModel) { openModelSheet(); return; }
+  if (!checkRateLimit()) return;
 
   input.value = ''; autoResize(input);
   document.getElementById('welcome')?.remove();
