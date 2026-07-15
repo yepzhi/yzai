@@ -1369,9 +1369,7 @@ async function sendMessage() {
             
             if (hasChange) {
               tokenCount++;
-              renderMd(bubble, full, fullThinking);
-              bubble.innerHTML += '<span class="cursor"></span>';
-              scrollBottom();
+              startTypewriterLoop();
             }
           }
           if (d.done && d.eval_count) {
@@ -1384,18 +1382,21 @@ async function sendMessage() {
         } catch(e) {}
       }
     }
+    
+    streamFinished = true;
+    startTypewriterLoop(); // Forzar el drenado final del búfer
+    
+    clearInterval(loadInterval);
+    if (liveTimer) clearInterval(liveTimer);
   } catch(e) {
-    if (e.name !== 'AbortError')
+    if (e.name !== 'AbortError') {
       bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${esc(e.message)}</span>`;
+    }
+    clearInterval(loadInterval);
+    if (liveTimer) clearInterval(liveTimer);
+    if (typewriterTimer) clearInterval(typewriterTimer);
+    setStreaming(false);
   }
-
-  clearInterval(loadInterval);
-  if (liveTimer) clearInterval(liveTimer);
-  renderMd(bubble, full || '…', fullThinking);
-  messages.push({ role:'ai', content:full });
-  saveCurrentConv();
-  setStreaming(false);
-  document.getElementById('prompt').focus();
 }
 
 function stopGeneration() { if (abortCtrl) abortCtrl.abort(); }
