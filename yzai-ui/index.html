@@ -374,6 +374,27 @@ body {
 .bubble pre { margin: 0; padding: 16px; overflow-x: auto; background: #0d0d12 !important; font-family: var(--font-mono); font-size: 14px; line-height: 1.6; }
 .bubble pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
 
+think { 
+  display: block; 
+  color: #a0a0a0; 
+  font-style: italic; 
+  border-left: 3px solid var(--primary); 
+  padding-left: 16px; 
+  margin: 12px 0; 
+  background: rgba(255,255,255,0.02); 
+  padding: 12px 16px; 
+  border-radius: 0 12px 12px 0;
+}
+think::before { 
+  content: "🤔 Pensando..."; 
+  display: block; 
+  font-weight: bold; 
+  margin-bottom: 8px; 
+  font-size: 0.85em; 
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
 .think-details { margin-bottom: 12px; }
 .think-details summary {
   cursor: pointer; list-style: none; display: inline-flex; align-items: center; gap: 8px;
@@ -600,6 +621,7 @@ body {
         <div class="model-pill-name" id="activeName">Select Model</div>
         <div class="model-pill-sub" id="activeSub">Tap to choose</div>
       </div>
+      <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
       <div class="model-pill-chev">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
       </div>
@@ -631,6 +653,7 @@ body {
 
   <!-- INPUT -->
   <div class="input-wrapper">
+    <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Ready</div>
     <div class="input-container">
       <textarea id="prompt" rows="1" placeholder="Type a message..." oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
       <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send">
@@ -640,7 +663,6 @@ body {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
       </button>
     </div>
-    <div class="input-hint" id="token-count">Ready</div>
   </div>
 </div>
 
@@ -705,28 +727,35 @@ async function init() {
 
 async function loadModels() {
   try {
-    const res = await fetch('/api/tags');
+    const res = await fetch('https://api-yzai.yepzhi.com/api/tags');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const { models = [] } = await res.json();
     allModels = models;
 
-    setStatus(true, `Ollama · ${models.length} model${models.length!==1?'s':''}`);
+    setStatus(true, `Mini PC Conectada · ${models.length} model${models.length!==1?'s':''}`);
     renderSheetModels(models);
-    if (models.length) {
-      const defaultModel = models.find(m => m.name.includes('9b')) || models[0];
+    if (models.length && !selectedModel) {
+      const defaultModel = models.find(m => m.name.includes('4b')) || models[0];
       pickModel(defaultModel.name, true);
     }
   } catch(e) {
-    setStatus(false, 'Ollama Offline');
-    document.getElementById('sheetModels').innerHTML =
-      `<div style="padding:40px 20px;text-align:center;color:var(--red)">Cannot reach local Ollama instance.</div>`;
+    setStatus(false, 'Feynmann Engine Apagado');
+    document.getElementById('sheetModels').innerHTML = `<div style="padding:40px 20px;text-align:center;color:var(--red)">Cannot reach Feynmann Engine.<br><small style="opacity:0.7">The hardware might be turned off or rebooting.</small></div>`;
   }
 }
 
+// Ping periodically
+setInterval(loadModels, 10000);
+
 function setStatus(ok, text) {
   const dot = document.getElementById('statusDot');
-  dot.classList.toggle('offline', !ok);
-  document.getElementById('statusText').textContent = text;
+  if (dot) dot.classList.toggle('offline', !ok);
+  
+  const topDot = document.getElementById('topStatusDot');
+  if (topDot) topDot.classList.toggle('offline', !ok);
+  
+  const txt = document.getElementById('statusText');
+  if (txt) txt.textContent = text;
 }
 
 function renderSheetModels(models) {
@@ -747,18 +776,28 @@ function renderSheetModels(models) {
             ${size?`<span style="color:#fff">${size}</span>`:''}
             <span style="color:var(--muted)">${info.desc}</span>
           </div>
-        </div>
         ${m.name===selectedModel ? `<div class="smc-check">${ICONS.check}</div>` : ''}
       </div>`;
   }).join('');
 }
 
-function pickModel(name, silent=false) {
+function pickModel(name, silent) {
+  const mInfo = allModels.find(m => m.name === name);
+  
+  if (!silent && mInfo && name !== selectedModel) {
+    const sizeGB = mInfo.size / 1024 / 1024 / 1024;
+    const estSeconds = Math.max(1, Math.round(sizeGB / 2));
+    const msg = `¿Deseas activar el modelo ${name}?\n\nEste modelo pesa ${sizeGB.toFixed(1)} GB. A nuestro hardware le tomará aproximadamente ${estSeconds} a ${estSeconds + 2} segundos cargarlo desde el NVMe a la memoria RAM.`;
+    if (!confirm(msg)) return;
+  }
+
   selectedModel = name;
   const [base, tag=''] = name.split(':');
   const info = MODEL_META[tag] || { badge:'Ready', cls:'', desc:'Standard execution' };
-  document.getElementById('activeName').textContent = base + ':' + tag;
-  document.getElementById('activeSub').textContent  = info.desc || 'Ready';
+  const mInfoForCtx = allModels.find(m => m.name === name);
+  const ctx = mInfoForCtx?.details?.context_length ? ` (Ctx: ${(mInfoForCtx.details.context_length/1024).toFixed(0)}k)` : '';
+  document.getElementById('activeSub').textContent  = info.desc + ctx;
+  document.getElementById('token-count').textContent = `Contexto: ${mInfo?.details?.context_length ? (mInfo.details.context_length/1024).toFixed(0)+'k' : '256k'} · Listo para generar`;
   if (!silent) renderSheetModels(allModels);
 }
 
@@ -793,7 +832,7 @@ function renderConvList() {
 function newChat() {
   if (messages.length) saveCurrentConv();
   messages = []; currentConvId = Date.now().toString();
-  document.getElementById('token-count').textContent = 'Ready';
+  pickModel(selectedModel, true); // Reset token count to show context
   renderMessages();
 }
 
@@ -924,31 +963,55 @@ async function sendMessage() {
   let tokenCount = 0;
   let liveTimer = null;
 
+  let lastSize = 0;
   let loadInterval = setInterval(async () => {
     if (firstTokenReceived) { clearInterval(loadInterval); return; }
     try {
-      const psRes = await fetch('/api/ps');
+      const psRes = await fetch('https://api-yzai.yepzhi.com/api/ps');
       if (psRes.ok) {
         const data = await psRes.json();
-        const isLoaded = data.models.some(m => m.name === selectedModel);
-        if (isLoaded) {
-          document.getElementById('token-count').textContent = 'Modelo cargado. Generando...';
-          clearInterval(loadInterval);
+        const model = data.models.find(m => m.name === selectedModel);
+        if (model) {
+          const total = model.size || 1;
+          const loaded = model.size_vram || 0;
+          const pct = ((loaded / total) * 100).toFixed(1);
+          let speedTxt = '';
+          if (loaded > lastSize) {
+            const speed = ((loaded - lastSize) / 1024 / 1024 * 2).toFixed(1); // Since interval is 500ms, * 2 gives MB/s
+            speedTxt = ` ${speed} MB/s`;
+          }
+          lastSize = loaded;
+          
+          if (loaded === total || pct === '100.0') {
+            document.getElementById('token-count').textContent = 'Modelo cargado en RAM. Generando...';
+            clearInterval(loadInterval);
+          } else {
+            const ramGB = (loaded/1024/1024/1024).toFixed(2);
+            const ssdGB = (total/1024/1024/1024).toFixed(2);
+            document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Cargando desde SSD a RAM: ${pct}% (RAM: ${ramGB}GB / SSD: ${ssdGB}GB)${speedTxt}</span>`;
+          }
         } else {
-          document.getElementById('token-count').innerHTML = '<span style="color:var(--cyan);font-weight:600;">⏳ Cargando a la VRAM... (La API no provee el % exacto)</span>';
+          document.getElementById('token-count').innerHTML = '<span style="color:var(--cyan);font-weight:600;">⏳ Esperando a Ollama para cargar modelo desde SSD...</span>';
         }
       }
     } catch(e) {}
-  }, 1000);
+  }, 500);
 
   let retryCount = 0;
   async function attemptFetch() {
     try {
-      const res = await fetch('/api/chat', {
+      const res = await fetch('https://api-yzai.yepzhi.com/api/chat', {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         signal: abortCtrl.signal,
-        body: JSON.stringify({ model:selectedModel, messages:payload, stream:true })
+        body: JSON.stringify({ 
+          model: selectedModel, 
+          messages: [
+            { role: "system", content: "Eres un asistente inteligente para Jóvenes STEM. Responde SIEMPRE de forma directa, al grano y extremadamente concisa. Usa máximo 3 oraciones cortas si no te piden detalles extensos." },
+            ...payload
+          ], 
+          stream: true 
+        })
       });
       if (!res.ok) {
         if ((res.status === 502 || res.status === 504 || res.status === 524) && !firstTokenReceived && retryCount < 5) {
@@ -1043,15 +1106,17 @@ function setStreaming(on) {
 function handleKey(e) { if (e.key==='Enter' && !e.shiftKey && window.innerWidth>=768) { e.preventDefault(); sendMessage(); } }
 function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,150)+'px'; }
 function scrollBottom()  { const m=document.getElementById('messages-wrapper'); m.scrollTop=m.scrollHeight; }
-function clearChat()     { if (messages.length && !confirm('Clear this conversation?')) return; messages=[]; currentConvId=Date.now().toString(); renderMessages(); document.getElementById('token-count').textContent = 'Ready'; }
+function clearChat()     { if (messages.length && !confirm('Clear this conversation?')) return; messages=[]; currentConvId=Date.now().toString(); renderMessages(); pickModel(selectedModel, true); }
 function sendSuggestion(btn) { document.getElementById('prompt').value=btn.textContent; sendMessage(); }
 function openSystemModal()  { document.getElementById('systemPromptInput').value=systemPrompt; document.getElementById('systemModal').classList.add('open'); }
 function closeSystemModal() { document.getElementById('systemModal').classList.remove('open'); }
 function saveSystemPrompt() { systemPrompt=document.getElementById('systemPromptInput').value.trim(); closeSystemModal(); }
 document.getElementById('systemModal').addEventListener('click', e => { if(e.target===e.currentTarget) closeSystemModal(); });
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+document.getElementById('prompt').addEventListener('keydown', e => {
+  if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+});
 
-// Visual Viewport API — keeps input above keyboard on iOS/Android
+// Fix for iOS Safari Keyboard hiding input bar
 if (window.visualViewport) {
   window.visualViewport.addEventListener('resize', () => {
     const iw = document.querySelector('.input-wrapper');
