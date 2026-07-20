@@ -21,7 +21,7 @@ Group=ollama
 Restart=always
 RestartSec=3
 Environment="OLLAMA_KEEP_ALIVE=-1"
-Environment="OLLAMA_NUM_PARALLEL=2"
+Environment="OLLAMA_NUM_PARALLEL=4"
 Environment="OLLAMA_MAX_LOADED_MODELS=1"
 Environment="OLLAMA_FLASH_ATTENTION=1"
 Environment="OLLAMA_ORIGINS=*"
