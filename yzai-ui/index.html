@@ -740,7 +740,7 @@ const MODEL_META = {
   '9b':  { badge:'Balance', cls:'badge-gree// ── CONFIG & STATE ─────────────────────────────────────────
 let OLLAMA_URL = 'https://api-yzai.yepzhi.com';
 
-let selectedModel = 'gemma4:26b';
+let selectedModel = 'gemma4-26b-MoE:latest';
 const FIXED_CTX   = 65536; // 64K Context Only
 let selectedModelDesc = 'Gemma 4 26B MoE (64K Ctx)';
 let messages      = [];
@@ -872,7 +872,7 @@ function renderSheetModels(models) {}
 function pickModelWithPassword(name) {}
 function updateCtxDisplay() { updateModelHeader(); }
 function pickModel(name, silent) {
-  selectedModel = name || 'gemma4:26b';
+  selectedModel = name || 'gemma4-26b-MoE:latest';
   updateModelHeader();
 }
 
