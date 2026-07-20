@@ -323,7 +323,7 @@ body {
 .chip:active { transform: translateY(0) scale(0.98); }
 
 /* Message bubbles */
-.msg { display: flex; gap: 16px; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+.msg { display: flex; gap: 16px; animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1); min-width: 0; width: 100%; }
 @keyframes slideUp { from{opacity:0;transform:translateY(15px)} to{opacity:1;transform:translateY(0)} }
 .msg.user { flex-direction: row-reverse; }
 
@@ -335,13 +335,13 @@ body {
 .avatar.ai { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: #fff; }
 .avatar.user { background: linear-gradient(135deg, var(--muted2), #0f172a); color: #e2e8f0; border: 1px solid rgba(255,255,255,0.1); }
 
-.msg-col { display: flex; flex-direction: column; max-width: calc(100% - 50px); }
+.msg-col { display: flex; flex-direction: column; max-width: calc(100% - 50px); min-width: 0; }
 .msg.user .msg-col { align-items: flex-end; }
 
 .bubble {
   padding: 14px 18px; border-radius: 20px;
-  font-size: 15px; line-height: 1.6; word-break: break-word;
-  color: var(--text);
+  font-size: 15px; line-height: 1.6; word-break: break-word; overflow-wrap: anywhere;
+  color: var(--text); min-width: 0; max-width: 100%;
 }
 .msg.ai .bubble { 
   background: var(--surface); border: 1px solid var(--border-light); 
@@ -394,8 +394,8 @@ body {
 }
 .copy-btn:hover { background: rgba(255,255,255,0.1); }
 .copy-btn.copied { color: var(--green); border-color: var(--green); background: rgba(16,185,129,0.1); }
-.bubble pre { margin: 0; padding: 16px; overflow-x: auto; background: #0d0d12 !important; font-family: var(--font-mono); font-size: 14px; line-height: 1.6; }
-.bubble pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; }
+.bubble pre { margin: 0; padding: 16px; overflow-x: auto; max-width: 100%; white-space: pre-wrap; word-break: break-all; background: #0d0d12 !important; font-family: var(--font-mono); font-size: 14px; line-height: 1.6; }
+.bubble pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; white-space: pre-wrap; word-break: break-all; }
 
 think { 
   display: block; 
