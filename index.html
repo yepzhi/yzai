@@ -909,12 +909,31 @@ async function discoverEndpoint() {
       const data = await r.json();
       if (Array.isArray(data.models)) { OLLAMA_URL = url; return; }
     } catch(e) {}
+}
+
+let COMFY_URL = 'http://127.0.0.1:8188';
+async function probeComfy() {
+  const host = window.location.hostname;
+  const origin = window.location.origin;
+  const candidates = [
+    `http://${host}:8188`,
+    'http://192.168.1.72:8188',
+    'http://127.0.0.1:8188'
+  ];
+  for (const url of candidates) {
+    try {
+      const c = new AbortController();
+      const t = setTimeout(() => c.abort(), 1000);
+      const r = await fetch(`${url}/system_stats`, { signal: c.signal });
+      clearTimeout(t);
+      if (r.ok) { COMFY_URL = url; return; }
+    } catch(e) {}
   }
 }
 
 async function init() {
   loadConversations();
-  await discoverEndpoint();
+  await Promise.all([discoverEndpoint(), probeComfy()]);
   await loadModels();
 }
 
@@ -1848,7 +1867,7 @@ async function generateImage(promptText) {
   };
 
   try {
-    const res = await fetch('http://127.0.0.1:8188/prompt', {
+    const res = await fetch(`${COMFY_URL}/prompt`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: workflow })
@@ -1861,7 +1880,7 @@ async function generateImage(promptText) {
     // Polling ComfyUI history for completion
     const pollInterval = setInterval(async () => {
       try {
-        const histRes = await fetch(`http://127.0.0.1:8188/history/${promptId}`);
+        const histRes = await fetch(`${COMFY_URL}/history/${promptId}`);
         const histData = await histRes.json();
         if (histData[promptId]) {
           clearInterval(pollInterval);
@@ -1869,7 +1888,7 @@ async function generateImage(promptText) {
           const node = Object.keys(outputs)[0]; // node 9
           const filename = outputs[node].images[0].filename;
           
-          bubble.innerHTML = `<img src="http://127.0.0.1:8188/view?filename=${filename}&type=output" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
+          bubble.innerHTML = `<img src="${COMFY_URL}/view?filename=${filename}&type=output" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
           scrollBottom();
           resetInputUI();
         }
