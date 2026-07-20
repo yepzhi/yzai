@@ -69,6 +69,16 @@ services:
     depends_on:
       - open-webui
 
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: cloudflared
+    restart: always
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:-}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
 volumes:
   voices:
   config:
