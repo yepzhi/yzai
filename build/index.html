@@ -783,50 +783,41 @@ function handleFileSelect(e) {
 
   // ── 1. IMAGES → resize+compress, base64 stored internally, thumbnail shown ──
   if (file.type.startsWith('image/')) {
-    document.getElementById('token-count').innerHTML =
-      `<span style="color:var(--cyan);">⏳ Procesando imagen...</span>`;
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      // Resize to max IMG_MAX_PX preserving aspect ratio
-      let w = img.naturalWidth, h = img.naturalHeight;
-      if (w > IMG_MAX_PX || h > IMG_MAX_PX) {
-        const ratio = Math.min(IMG_MAX_PX/w, IMG_MAX_PX/h);
-        w = Math.round(w * ratio); h = Math.round(h * ratio);
-      }
-      const canvas = document.createElement('canvas');
-      canvas.width = w; canvas.height = h;
-      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-      // Compress to JPEG 82% — base64 stored but NEVER shown as text
-      currentImageBase64 = canvas.toDataURL('image/jpeg', 0.82).split(',')[1];
-      URL.revokeObjectURL(url);
-      // Show thumbnail preview (the actual pixels, not the base64 string)
-      document.getElementById('imgPreview').src = canvas.toDataURL('image/jpeg', 0.82);
-      document.getElementById('imgPreviewContainer').style.display = 'block';
-      const kb = Math.round(currentImageBase64.length * 0.75 / 1024);
-      document.getElementById('token-count').innerHTML =
-        `<span style="color:var(--cyan);">📸 Imagen lista (${w}×${h}px, ~${kb}KB) · ~256 tokens de contexto</span>`;
+    document.getElementById('token-count').textContent = 'Procesando imagen...';
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if (w > IMG_MAX_PX || h > IMG_MAX_PX) {
+          const ratio = Math.min(IMG_MAX_PX/w, IMG_MAX_PX/h);
+          w = Math.round(w * ratio); h = Math.round(h * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        currentImageBase64 = canvas.toDataURL('image/jpeg', 0.82).split(',')[1];
+        document.getElementById('imgPreview').src = canvas.toDataURL('image/jpeg', 0.82);
+        document.getElementById('imgPreviewContainer').style.display = 'block';
+        const kb = Math.round(currentImageBase64.length * 0.75 / 1024);
+        document.getElementById('token-count').textContent = `Imagen lista (${w}x${h}px, ~${kb}KB)`;
+      };
+      img.src = ev.target.result;
     };
-    img.onerror = () => {
-      URL.revokeObjectURL(url);
-      document.getElementById('token-count').innerHTML =
-        `<span style="color:var(--red);font-weight:600;">⚠️ No se pudo cargar la imagen</span>`;
-    };
-    img.src = url;
+    reader.readAsDataURL(file);
     return;
   }
 
-  // ── 2. PDF → extract text via PDF.js, paste into prompt ──────────────────
+  // ── 2. PDF → read as ArrayBuffer (avoids blob: CSP issue), extract via PDF.js ──
   if (ext === 'pdf' || file.type === 'application/pdf') {
     if (!window.pdfjsLib) {
-      document.getElementById('token-count').innerHTML =
-        `<span style="color:var(--red);">⚠️ PDF.js aún no cargado, espera un momento e intenta de nuevo</span>`;
+      document.getElementById('token-count').textContent = 'PDF.js no listo, espera un momento e intenta de nuevo';
       return;
     }
-    document.getElementById('token-count').innerHTML =
-      `<span style="color:var(--cyan);">⏳ Extrayendo texto del PDF...</span>`;
-    const fileURL = URL.createObjectURL(file);
-    pdfjsLib.getDocument(fileURL).promise.then(async (pdf) => {
+    document.getElementById('token-count').textContent = 'Extrayendo texto del PDF...';
+    file.arrayBuffer().then(arrayBuffer => {
+      return pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+    }).then(async (pdf) => {
       let allText = '';
       let truncated = false;
       for (let i = 1; i <= pdf.numPages; i++) {
@@ -834,12 +825,11 @@ function handleFileSelect(e) {
         const page = await pdf.getPage(i);
         const content = await page.getTextContent();
         const pageText = content.items.map(s => s.str).join(' ');
-        allText += `\n--- Página ${i} ---\n${pageText}`;
+        allText += `\n--- Pagina ${i} ---\n${pageText}`;
       }
-      URL.revokeObjectURL(fileURL);
       allText = allText.slice(0, PDF_MAX_CHARS);
       const promptEl = document.getElementById('prompt');
-      const formatted = `[PDF: ${file.name}${truncated?' (truncado a ~20K tokens)':''}]\n\`\`\`\n${allText.trim()}\n\`\`\``;
+      const formatted = `[PDF: ${file.name}${truncated?' (truncado ~20K tokens)':''}]\n\`\`\`\n${allText.trim()}\n\`\`\``;
       promptEl.value = promptEl.value ? `${promptEl.value}\n\n${formatted}` : formatted;
       autoResize(promptEl);
       const pages = Math.min(pdf.numPages, truncated ? '40+' : pdf.numPages);
@@ -873,8 +863,7 @@ function handleFileSelect(e) {
     const formatted = `[Archivo: ${file.name}]\n\`\`\`${ext}\n${content}\n\`\`\``;
     promptEl.value = promptEl.value ? `${promptEl.value}\n\n${formatted}` : formatted;
     autoResize(promptEl);
-    document.getElementById('token-count').innerHTML =
-      `<span style="color:var(--cyan);">📎 "${file.name}" cargado (${(file.size/1024).toFixed(1)}KB)</span>`;
+    document.getElementById('token-count').textContent = `"${file.name}" cargado (${(file.size/1024).toFixed(1)}KB)`;
   };
   reader.readAsText(file, 'UTF-8');
 }
@@ -1284,25 +1273,16 @@ async function sendMessage() {
       const model = data.models.find(m => m.name === selectedModel);
       const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
       if (model) {
-        const ratio = (model.size_vram || 0) / (model.size || 1);
-        if (ratio >= 0.85) {
-          // Model fully loaded – show queue message only if taking >2s
-          if (loadTime >= 2) {
-            const eta = Math.max(1, Math.round(15 - loadTime));
-            document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Petición en cola (modelo ocupado) · ETA ~${eta}s</span>`;
-            loadingIndicatorActive = true;
-          }
-        } else {
-          // Model still loading from disk
-          const pct = Math.min(100, ((model.size_vram || 0) / (model.size || 1) * 100)).toFixed(1);
-          const ramGB = ((model.size_vram || 0)/1024/1024/1024).toFixed(2);
-          const ssdGB = ((model.size || 0)/1024/1024/1024).toFixed(2);
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Cargando a VRAM: ${pct}% (${ramGB}GB / ${ssdGB}GB)</span>`;
+        // Model is in /api/ps = already loaded & running (even if partial VRAM offload).
+        // Only show a message if the request is taking unexpectedly long (>2s)
+        if (loadTime >= 2) {
+          const eta = Math.max(1, Math.round(15 - loadTime));
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} En cola · ETA ~${eta}s</span>`;
           loadingIndicatorActive = true;
         }
       } else {
-        // Model not in ps yet (first ever load)
-        if (loadTime >= 2) {
+        // Model not in ps yet = first cold load
+        if (loadTime >= 1.5) {
           const eta = Math.max(1, Math.round(20 - loadTime));
           document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Iniciando modelo · ETA ~${eta}s</span>`;
           loadingIndicatorActive = true;
