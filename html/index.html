@@ -689,10 +689,17 @@ think::before {
 
   <!-- INPUT -->
   <div class="input-wrapper">
-
+    <!-- Image preview (thumbnail only — base64 never exposed to user) -->
+    <div id="imgPreviewContainer" style="display:none;padding:6px 12px;">
+      <div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:8px;padding:6px 10px;width:fit-content;">
+        <img id="imgPreview" style="height:40px;width:40px;object-fit:cover;border-radius:6px;">
+        <span style="font-size:12px;color:var(--text-secondary);">📎 Imagen adjunta</span>
+        <button onclick="removeImage()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px 4px;font-size:14px;">✕</button>
+      </div>
+    </div>
     <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Contexto: 32K · Listo para generar</div>
     <div class="input-container">
-      <input type="file" id="fileInput" accept=".txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.py,.sh,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r" style="display:none" onchange="handleFileSelect(event)">
+      <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.py,.sh,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r" style="display:none" onchange="handleFileSelect(event)">
       <button class="attach-btn" onclick="document.getElementById('fileInput').click()" aria-label="Attach">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
       </button>
@@ -751,52 +758,131 @@ let systemPrompt  = '';
 let abortCtrl     = null;
 let isStreaming   = false;
 let allModels     = [];
+let currentImageBase64 = null; // stored internally, NEVER shown as text to user
 
 
 const esc = (str) => String(str).replace(/[&<>"']/g, match => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
 
-// ── FILE & IMAGE HANDLING ─────────────────────────────────
+// ── FILE, PDF & IMAGE HANDLING ────────────────────────────
 const TEXT_EXTENSIONS = ['txt','md','markdown','json','jsonl','csv','tsv',
   'js','ts','jsx','tsx','py','sh','bash','html','css','xml','yaml','yml',
   'toml','ini','conf','log','sql','r','cpp','c','h','java','rs','go','php',
   'rb','swift','kt','dart','vue','svelte','env','gitignore'];
 
+// PDF: max chars to extract (~80K ≈ 20K tokens, leaving 12K for conversation)
+const PDF_MAX_CHARS = 80_000;
+// Image: max dimension before compressing (Gemma 4 vision encoder = 896px native)
+const IMG_MAX_PX = 1024;
+
 function handleFileSelect(e) {
   const file = e.target.files[0];
   if (!file) return;
+  document.getElementById('fileInput').value = '';
 
   const ext = file.name.split('.').pop().toLowerCase();
-  const isTextMime = file.type.startsWith('text/') || file.type === 'application/json';
-  const isTextExt  = TEXT_EXTENSIONS.includes(ext);
 
-  if (!isTextMime && !isTextExt) {
+  // ── 1. IMAGES → resize+compress, base64 stored internally, thumbnail shown ──
+  if (file.type.startsWith('image/')) {
     document.getElementById('token-count').innerHTML =
-      `<span style="color:var(--red);font-weight:600;">⚠️ "${file.name}": solo archivos de texto (txt, md, json, py, js, etc.)</span>`;
-    document.getElementById('fileInput').value = '';
+      `<span style="color:var(--cyan);">⏳ Procesando imagen...</span>`;
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      // Resize to max IMG_MAX_PX preserving aspect ratio
+      let w = img.naturalWidth, h = img.naturalHeight;
+      if (w > IMG_MAX_PX || h > IMG_MAX_PX) {
+        const ratio = Math.min(IMG_MAX_PX/w, IMG_MAX_PX/h);
+        w = Math.round(w * ratio); h = Math.round(h * ratio);
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+      // Compress to JPEG 82% — base64 stored but NEVER shown as text
+      currentImageBase64 = canvas.toDataURL('image/jpeg', 0.82).split(',')[1];
+      URL.revokeObjectURL(url);
+      // Show thumbnail preview (the actual pixels, not the base64 string)
+      document.getElementById('imgPreview').src = canvas.toDataURL('image/jpeg', 0.82);
+      document.getElementById('imgPreviewContainer').style.display = 'block';
+      const kb = Math.round(currentImageBase64.length * 0.75 / 1024);
+      document.getElementById('token-count').innerHTML =
+        `<span style="color:var(--cyan);">📸 Imagen lista (${w}×${h}px, ~${kb}KB) · ~256 tokens de contexto</span>`;
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      document.getElementById('token-count').innerHTML =
+        `<span style="color:var(--red);font-weight:600;">⚠️ No se pudo cargar la imagen</span>`;
+    };
+    img.src = url;
     return;
   }
 
+  // ── 2. PDF → extract text via PDF.js, paste into prompt ──────────────────
+  if (ext === 'pdf' || file.type === 'application/pdf') {
+    if (!window.pdfjsLib) {
+      document.getElementById('token-count').innerHTML =
+        `<span style="color:var(--red);">⚠️ PDF.js aún no cargado, espera un momento e intenta de nuevo</span>`;
+      return;
+    }
+    document.getElementById('token-count').innerHTML =
+      `<span style="color:var(--cyan);">⏳ Extrayendo texto del PDF...</span>`;
+    const fileURL = URL.createObjectURL(file);
+    pdfjsLib.getDocument(fileURL).promise.then(async (pdf) => {
+      let allText = '';
+      let truncated = false;
+      for (let i = 1; i <= pdf.numPages; i++) {
+        if (allText.length >= PDF_MAX_CHARS) { truncated = true; break; }
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const pageText = content.items.map(s => s.str).join(' ');
+        allText += `\n--- Página ${i} ---\n${pageText}`;
+      }
+      URL.revokeObjectURL(fileURL);
+      allText = allText.slice(0, PDF_MAX_CHARS);
+      const promptEl = document.getElementById('prompt');
+      const formatted = `[PDF: ${file.name}${truncated?' (truncado a ~20K tokens)':''}]\n\`\`\`\n${allText.trim()}\n\`\`\``;
+      promptEl.value = promptEl.value ? `${promptEl.value}\n\n${formatted}` : formatted;
+      autoResize(promptEl);
+      const pages = Math.min(pdf.numPages, truncated ? '40+' : pdf.numPages);
+      document.getElementById('token-count').innerHTML =
+        `<span style="color:var(--cyan);">📄 PDF "${file.name}" — ${pages} págs, ${(allText.length/1000).toFixed(0)}K chars${truncated?' ⚠️ truncado':''}</span>`;
+    }).catch(err => {
+      URL.revokeObjectURL(fileURL);
+      document.getElementById('token-count').innerHTML =
+        `<span style="color:var(--red);">⚠️ Error leyendo PDF: ${err.message}</span>`;
+    });
+    return;
+  }
+
+  // ── 3. TEXT FILES → paste raw into prompt ────────────────────────────────
+  const isTextMime = file.type.startsWith('text/') || file.type === 'application/json';
+  const isTextExt  = TEXT_EXTENSIONS.includes(ext);
+  if (!isTextMime && !isTextExt) {
+    document.getElementById('token-count').innerHTML =
+      `<span style="color:var(--red);font-weight:600;">⚠️ "${file.name}": formato no soportado. Usa imágenes, PDF o archivos de texto.</span>`;
+    return;
+  }
   if (file.size > 500_000) {
     document.getElementById('token-count').innerHTML =
       `<span style="color:var(--red);font-weight:600;">⚠️ Archivo demasiado grande (${(file.size/1024).toFixed(0)}KB). Máximo 500KB.</span>`;
-    document.getElementById('fileInput').value = '';
     return;
   }
-
   const reader = new FileReader();
-  reader.onload = (event) => {
+  reader.onload = (ev) => {
     const promptEl = document.getElementById('prompt');
-    const content = event.target.result;
+    const content = ev.target.result;
     const formatted = `[Archivo: ${file.name}]\n\`\`\`${ext}\n${content}\n\`\`\``;
     promptEl.value = promptEl.value ? `${promptEl.value}\n\n${formatted}` : formatted;
     autoResize(promptEl);
-    const docSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
-    document.getElementById('token-count').innerHTML = `${docSvg} "${file.name}" cargado (${(file.size/1024).toFixed(1)}KB)`;
+    document.getElementById('token-count').innerHTML =
+      `<span style="color:var(--cyan);">📎 "${file.name}" cargado (${(file.size/1024).toFixed(1)}KB)</span>`;
   };
   reader.readAsText(file, 'UTF-8');
 }
+
 function removeImage() {
-  document.getElementById('fileInput').value = '';
+  currentImageBase64 = null;
+  document.getElementById('imgPreviewContainer').style.display = 'none';
+  document.getElementById('imgPreview').src = '';
 }
 
 // ── INIT ───────────────────────────────────────────────────
@@ -1105,14 +1191,20 @@ async function sendMessage() {
 
   const payload = [];
   if (systemPrompt) payload.push({ role:'system', content: systemPrompt });
-  
+
   messages.forEach(m => {
-    payload.push({ role: m.role==='ai'?'assistant':m.role, content:m.content });
+    const msg = { role: m.role==='ai'?'assistant':m.role, content: m.content };
+    if (m.images) msg.images = m.images; // base64 in API only, never shown as text
+    payload.push(msg);
   });
 
   const userMsg = { role:'user', content:text };
+  if (currentImageBase64) {
+    userMsg.images = [currentImageBase64]; // sent to Ollama API only
+  }
   payload.push(userMsg);
   messages.push(userMsg);
+  removeImage();
 
   const container = document.getElementById('messages');
   container.appendChild(createMsg('user', text));
@@ -1390,16 +1482,39 @@ if (window.visualViewport) {
 
 // ── LOAD LIBS ──────────────────────────────────────────────
 (function(){
-  const css=document.createElement('link');
-  css.rel='stylesheet';
-  css.href='https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark-reasonable.min.css';
+  // 1. Highlight.js CSS
+  const css = document.createElement('link');
+  css.rel = 'stylesheet';
+  css.href = 'https://cdn.jsdelivr.net/npm/highlight.js@11.9.0/styles/atom-one-dark-reasonable.min.css';
   document.head.appendChild(css);
-  const s1=document.createElement('script');
-  s1.src='https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js';
-  s1.onload=()=>{
-    const s2=document.createElement('script');
-    s2.src='https://cdn.jsdelivr.net/npm/marked@12/marked.min.js';
-    s2.onload=()=>{ marked.setOptions({breaks:true,gfm:true}); init(); };
+
+  // 2. PDF.js (loaded async — available by the time user picks a PDF)
+  const pdfjs = document.createElement('script');
+  pdfjs.src = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs';
+  pdfjs.type = 'module';
+  pdfjs.onload = () => {
+    // PDF.js 4.x uses ES modules; expose globally for handleFileSelect
+    import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs').then(m => {
+      window.pdfjsLib = m;
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs';
+    });
+  };
+  document.head.appendChild(pdfjs);
+  // Also load via import() immediately (module script)
+  import('https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.min.mjs').then(m => {
+    window.pdfjsLib = m;
+    window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+      'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.4.168/build/pdf.worker.min.mjs';
+  }).catch(() => {});
+
+  // 3. Highlight.js → Marked → init()
+  const s1 = document.createElement('script');
+  s1.src = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js';
+  s1.onload = () => {
+    const s2 = document.createElement('script');
+    s2.src = 'https://cdn.jsdelivr.net/npm/marked@12/marked.min.js';
+    s2.onload = () => { marked.setOptions({breaks:true, gfm:true}); init(); };
     document.head.appendChild(s2);
   };
   document.head.appendChild(s1);
