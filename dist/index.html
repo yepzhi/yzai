@@ -798,12 +798,14 @@ function removeImage() {
 async function discoverEndpoint() {
   const origin = window.location.origin;
   const host = window.location.hostname || '127.0.0.1';
+  // api-yzai.yepzhi.com first — prevents Cloudflare Pages (which returns 200
+  // for everything via _redirects) from being mistaken as an Ollama endpoint.
   const candidates = [
-    origin,
+    'https://api-yzai.yepzhi.com',
     `http://${host}:11434`,
     'http://192.168.1.72:11434',
     'http://127.0.0.1:11434',
-    'https://api-yzai.yepzhi.com'
+    origin
   ];
   for (const url of candidates) {
     try {
@@ -811,7 +813,13 @@ async function discoverEndpoint() {
       const t = setTimeout(() => c.abort(), 2000);
       const r = await fetch(`${url}/api/tags`, { signal: c.signal });
       clearTimeout(t);
-      if (r.ok) { OLLAMA_URL = url; return; }
+      if (!r.ok) continue;
+      // Validate it's real Ollama JSON — not an HTML page (Cloudflare Pages
+      // returns 200 HTML for all routes via _redirects, which fools r.ok).
+      const ct = r.headers.get('content-type') || '';
+      if (!ct.includes('application/json')) continue;
+      const data = await r.json();
+      if (Array.isArray(data.models)) { OLLAMA_URL = url; return; }
     } catch(e) {}
   }
 }
