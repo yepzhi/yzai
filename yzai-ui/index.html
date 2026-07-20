@@ -1172,24 +1172,20 @@ async function sendMessage() {
         if (model) {
           const total = model.size || 1;
           const loaded = model.size_vram || 0;
-          const pct = ((loaded / total) * 100).toFixed(1);
-          let speedTxt = '';
-          if (loaded > lastSize) {
-            const speed = ((loaded - lastSize) / 1024 / 1024 * 2).toFixed(1); // Since interval is 500ms, * 2 gives MB/s
-            speedTxt = ` ${speed} MB/s`;
-          }
-          lastSize = loaded;
+          const ratio = loaded / total;
           
-          if (loaded === total || pct === '100.0') {
-            document.getElementById('token-count').textContent = 'Modelo cargado en RAM. Generando...';
-            clearInterval(loadInterval);
+          if (ratio >= 0.85) {
+            const eta = Math.max(1, Math.round(15 - loadTime));
+            document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Petición en cola de espera (Gemma 4 26B MoE ocupado) · ETA estimado: ~${eta}s</span>`;
           } else {
+            const pct = Math.min(100, (ratio * 100)).toFixed(1);
             const ramGB = (loaded/1024/1024/1024).toFixed(2);
             const ssdGB = (total/1024/1024/1024).toFixed(2);
-            document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Cargando desde SSD a RAM: ${pct}% (RAM: ${ramGB}GB / SSD: ${ssdGB}GB)${speedTxt}</span>`;
+            document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Cargando desde SSD a VRAM: ${pct}% (RAM: ${ramGB}GB / SSD: ${ssdGB}GB)</span>`;
           }
         } else {
-          document.getElementById('token-count').innerHTML = '<span style="color:var(--cyan);font-weight:600;">⏳ Esperando a Ollama para cargar modelo desde SSD...</span>';
+          const eta = Math.max(1, Math.round(15 - loadTime));
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Petición en cola del servidor · ETA estimado: ~${eta}s</span>`;
         }
       }
     } catch(e) {}
