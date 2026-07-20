@@ -409,7 +409,7 @@ think {
   border-radius: 0 12px 12px 0;
 }
 think::before { 
-  content: "🤔 Pensando..."; 
+  content: "Pensamiento del Modelo"; 
   display: block; 
   font-weight: bold; 
   margin-bottom: 8px; 
@@ -417,6 +417,9 @@ think::before {
   text-transform: uppercase;
   letter-spacing: 1px;
 }
+
+.spin-svg { animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; margin-right: 6px; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
 
 .think-details { margin-bottom: 12px; }
 .think-details summary {
@@ -688,7 +691,9 @@ think::before {
   <div class="input-wrapper">
     <div class="img-preview-container" id="imgPreviewContainer">
       <img id="imgPreview">
-      <button class="remove-img-btn" onclick="removeImage()">✕</button>
+      <button class="remove-img-btn" onclick="removeImage()" aria-label="Remove Image">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
     </div>
     <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Contexto: 64K · Listo para generar</div>
     <div class="input-container">
@@ -777,7 +782,8 @@ function handleFileSelect(e) {
       const formatted = `[Documento adjunto: ${file.name}]\n\`\`\`\n${content}\n\`\`\``;
       promptEl.value = promptEl.value ? `${promptEl.value}\n\n${formatted}` : formatted;
       autoResize(promptEl);
-      document.getElementById('token-count').textContent = `📄 Documento "${file.name}" cargado en el contexto 64K`;
+      const docSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+      document.getElementById('token-count').innerHTML = `${docSvg} Documento "${file.name}" cargado en el contexto 64K`;
     };
     reader.readAsText(file);
   }
@@ -848,8 +854,9 @@ async function loadModels() {
     const secs = offlineSec % 60;
     const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
     
+    const warnSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`;
     if (mins >= 5) {
-      setStatus(false, `Offline hace ${timeStr} ⚠️ Algo anda mal en la Mini PC`);
+      setStatus(false, `Offline hace ${timeStr} ${warnSvg} Algo anda mal en la Mini PC`);
     } else {
       setStatus(false, `Offline hace ${timeStr} · Reconectando...`);
     }
@@ -1070,7 +1077,7 @@ function checkRateLimit() {
   if (timestamps.length >= LIMIT) {
     const oldest = timestamps[0];
     const waitTime = Math.ceil((WINDOW_MS - (now - oldest)) / 1000);
-    alert(`🚨 Límite de velocidad excedido. Has alcanzado el máximo de ${LIMIT} mensajes por minuto. Por favor, espera ${waitTime} segundos.`);
+    alert(`Límite de velocidad excedido. Has alcanzado el máximo de ${LIMIT} mensajes por minuto. Por favor, espera ${waitTime} segundos.`);
     return false;
   }
   
@@ -1188,18 +1195,20 @@ async function sendMessage() {
           const loaded = model.size_vram || 0;
           const ratio = loaded / total;
           
+          const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
           if (ratio >= 0.85) {
             const eta = Math.max(1, Math.round(15 - loadTime));
-            document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Petición en cola de espera (Gemma 4 26B MoE ocupado) · ETA estimado: ~${eta}s</span>`;
+            document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Petición en cola de espera (Gemma 4 26B MoE ocupado) · ETA estimado: ~${eta}s</span>`;
           } else {
             const pct = Math.min(100, (ratio * 100)).toFixed(1);
             const ramGB = (loaded/1024/1024/1024).toFixed(2);
             const ssdGB = (total/1024/1024/1024).toFixed(2);
-            document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Cargando desde SSD a VRAM: ${pct}% (RAM: ${ramGB}GB / SSD: ${ssdGB}GB)</span>`;
+            document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Cargando desde SSD a VRAM: ${pct}% (RAM: ${ramGB}GB / SSD: ${ssdGB}GB)</span>`;
           }
         } else {
+          const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
           const eta = Math.max(1, Math.round(15 - loadTime));
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">⏳ Petición en cola del servidor · ETA estimado: ~${eta}s</span>`;
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Petición en cola del servidor · ETA estimado: ~${eta}s</span>`;
         }
       }
     } catch(e) {}
