@@ -1071,7 +1071,7 @@ async function sendMessage() {
   const input = document.getElementById('prompt');
   const text  = input.value.trim();
   if (!text || isStreaming) return;
-  if (!selectedModel) selectedModel = 'gemma4:26b';
+  if (!selectedModel) selectedModel = 'gemma4-26b-MoE:latest';
   if (!checkRateLimit()) return;
 
   input.value = ''; autoResize(input);
