@@ -1,0 +1,8 @@
+{
+  "name": "yzai",
+  "version": "1.0.0",
+  "description": "yZAI AI Interface",
+  "scripts": {
+    "build": "mkdir -p dist && cp yzai-ui/index.html dist/index.html && cp index.html dist/index.html"
+  }
+}
