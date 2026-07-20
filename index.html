@@ -746,7 +746,8 @@ const MODEL_META = {
 };
 
 // ── CONFIG & STATE ─────────────────────────────────────────
-let OLLAMA_URL = 'https://api-yzai.yepzhi.com';
+let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
+const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
 let selectedModel = 'gemma4-26b-MoE:latest';
 const FIXED_CTX   = 32768; // 32K Context Only
@@ -1166,6 +1167,29 @@ function checkRateLimit() {
   return true;
 }
 
+// ── WEB SEARCH TOOL ────────────────────────────────────────
+const WEB_SEARCH_TOOL = {
+  type: 'function',
+  function: {
+    name: 'web_search',
+    description: 'Search the web with DuckDuckGo for current information, news, facts, prices, events, or anything that may be outside your training data. Always use this when asked about recent events or real-time data.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'The search query string' }
+      },
+      required: ['query']
+    }
+  }
+};
+
+async function executeWebSearch(query) {
+  const res = await fetch(`${SEARCH_URL}/search?q=${encodeURIComponent(query)}&n=6`);
+  if (!res.ok) throw new Error(`Search proxy error: ${res.status}`);
+  const data = await res.json();
+  return data.results || [];
+}
+
 // ── CHAT ───────────────────────────────────────────────────
 async function sendMessage() {
   const input = document.getElementById('prompt');
@@ -1210,6 +1234,7 @@ async function sendMessage() {
   let startTime = 0;
   let tokenCount = 0;
   let liveTimer = null;
+  let collectedToolCalls = []; // For web_search tool calling
 
   // Variables del Typewriter para suavidad
   let targetText = '';
@@ -1311,7 +1336,8 @@ async function sendMessage() {
         signal: abortCtrl.signal,
         body: JSON.stringify({ 
           model: selectedModel, 
-          messages: payload, 
+          messages: payload,
+          tools: [WEB_SEARCH_TOOL],
           options: { 
             num_ctx: 32768
           },
@@ -1392,6 +1418,11 @@ async function sendMessage() {
               startTypewriterLoop();
             }
           }
+          // ── Tool calls from model ──
+          if (d.message?.tool_calls?.length) {
+            collectedToolCalls.push(...d.message.tool_calls);
+          }
+
           if (d.done && d.eval_count) {
             clearInterval(liveTimer);
             const tps = d.eval_duration ? (d.eval_count / (d.eval_duration/1e9)).toFixed(1) : null;
@@ -1402,7 +1433,96 @@ async function sendMessage() {
         } catch(e) {}
       }
     }
-    
+
+    // ── Execute tool calls if model requested web_search ──
+    if (collectedToolCalls.length > 0) {
+      clearInterval(liveTimer);
+      for (const tc of collectedToolCalls) {
+        if (tc.function?.name === 'web_search') {
+          const q = tc.function.arguments?.query || tc.function.arguments?.q || '';
+          if (!q) continue;
+          // Show searching indicator in bubble
+          bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Buscando: <em>${esc(q)}</em>…</span>`;
+          document.getElementById('token-count').textContent = 'Buscando en DuckDuckGo...';
+          try {
+            const results = await executeWebSearch(q);
+            // Build tool result text
+            const resultText = results.length
+              ? results.map((r,i) => `${i+1}. **${r.title}**\n   ${r.url}\n   ${r.snippet}`).join('\n\n')
+              : 'No results found.';
+            // Add assistant tool_call message and tool result to payload
+            payload.push({
+              role: 'assistant',
+              content: '',
+              tool_calls: [{ function: { name: 'web_search', arguments: { query: q } } }]
+            });
+            payload.push({
+              role: 'tool',
+              content: `Web search results for "${q}":\n\n${resultText}`
+            });
+            // Reset stream state for second call
+            targetText = '';
+            targetThinking = '';
+            currentText = '';
+            currentThinking = '';
+            firstTokenReceived = false;
+            tokenCount = 0;
+            startTime = Date.now();
+            document.getElementById('token-count').textContent = 'Generando respuesta...';
+            bubble.innerHTML = '<span class="cursor"></span>';
+            // Second Ollama call with tool results
+            const res2 = await fetch(`${OLLAMA_URL}/api/chat`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              signal: abortCtrl.signal,
+              body: JSON.stringify({
+                model: selectedModel,
+                messages: payload,
+                tools: [WEB_SEARCH_TOOL],
+                options: { num_ctx: 32768 },
+                think: false,
+                stream: true
+              })
+            });
+            if (!res2.ok) throw new Error(`HTTP ${res2.status}`);
+            const reader2 = res2.body.getReader();
+            const decoder2 = new TextDecoder();
+            let buf2 = '';
+            liveTimer = setInterval(() => {
+              const elapsed = (Date.now() - startTime) / 1000;
+              if (elapsed > 0 && tokenCount > 0) {
+                const tps2 = (tokenCount / elapsed).toFixed(1);
+                document.getElementById('token-count').textContent = `Generando... ~${tps2} t/s`;
+              }
+            }, 500);
+            while (true) {
+              const { done, value } = await reader2.read();
+              if (done) break;
+              buf2 += decoder2.decode(value, { stream: true });
+              const lines2 = buf2.split('\n'); buf2 = lines2.pop();
+              for (const line2 of lines2) {
+                if (!line2.trim()) continue;
+                try {
+                  const d2 = JSON.parse(line2);
+                  if (d2.message?.content) { targetText += d2.message.content; tokenCount++; startTypewriterLoop(); }
+                  if (d2.message?.thinking) { targetThinking += d2.message.thinking; startTypewriterLoop(); }
+                  if (d2.done && d2.eval_count) {
+                    clearInterval(liveTimer);
+                    const tps2 = d2.eval_duration ? (d2.eval_count / (d2.eval_duration/1e9)).toFixed(1) : null;
+                    const lt2 = d2.load_duration ? (d2.load_duration/1e9).toFixed(1) : 0;
+                    document.getElementById('token-count').textContent = `${d2.eval_count} tokens · ${tps2 ? tps2+' t/s' : ''} (con búsqueda web)`;
+                  }
+                } catch(e) {}
+              }
+            }
+          } catch(searchErr) {
+            console.error('[web_search]', searchErr);
+            bubble.innerHTML += `<br><span style="color:var(--red);font-size:0.85em;">Error en búsqueda: ${esc(searchErr.message)}</span>`;
+          }
+        }
+      }
+    }
+
     streamFinished = true;
     startTypewriterLoop(); // Forzar el drenado final del búfer
     
