@@ -6,6 +6,9 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#030305">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
 
 <!-- SEO Básico -->
 <title>yZAI - Cliente de Inteligencia Artificial Local Avanzado</title>
@@ -646,18 +649,15 @@ think::before {
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
     </button>
 
-    <div class="model-pill" onclick="openModelSheet()" role="button">
+    <div class="model-pill" style="cursor:default">
       <div class="model-pill-icon">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="6" height="6"/><path d="M15 2v3M9 2v3M15 19v3M9 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
       </div>
       <div class="model-pill-info">
-        <div class="model-pill-name" id="activeName">Select Model</div>
-        <div class="model-pill-sub" id="activeSub">Tap to choose</div>
+        <div class="model-pill-name" id="activeName">GEMMA 4 (26B MOE)</div>
+        <div class="model-pill-sub" id="activeSub">Contexto: 64K · Listo</div>
       </div>
       <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
-      <div class="model-pill-chev">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="6 9 12 15 18 9"/></svg>
-      </div>
     </div>
 
     <button class="action-btn" onclick="newChat()" aria-label="New chat" title="New chat">
@@ -690,7 +690,7 @@ think::before {
       <img id="imgPreview">
       <button class="remove-img-btn" onclick="removeImage()">✕</button>
     </div>
-    <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Ready</div>
+    <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Contexto: 64K · Listo para generar</div>
     <div class="input-container">
       <input type="file" id="fileInput" accept="image/*" style="display:none" onchange="handleFileSelect(event)">
       <button class="attach-btn" onclick="document.getElementById('fileInput').click()" aria-label="Attach">
@@ -704,26 +704,6 @@ think::before {
         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>
       </button>
     </div>
-  </div>
-</div>
-
-<!-- MODEL SHEET -->
-<div class="sheet-overlay" id="sheetOverlay" onclick="closeModelSheet()"></div>
-<div class="model-sheet" id="modelSheet">
-  <div class="sheet-handle"></div>
-  <div class="sheet-title" style="display:flex; justify-content:space-between; align-items:center;">
-    <span>Select AI Model</span>
-    <select id="ctxSelect" onchange="updateCtxDisplay()" style="background:var(--surface2); color:var(--text); border:1px solid var(--border); border-radius:8px; padding:6px 10px; font-size:13px; outline:none; cursor:pointer;">
-      <option value="8192" selected>8K Ctx</option>
-      <option value="16384">16K Ctx</option>
-      <option value="32768">32K Ctx</option>
-      <option value="65536">64K Ctx</option>
-      <option value="131072">128K Ctx</option>
-      <option value="262144">256K Ctx</option>
-    </select>
-  </div>
-  <div class="sheet-models" id="sheetModels">
-    <div style="padding:40px 20px;text-align:center;color:var(--muted)">Loading local models...</div>
   </div>
 </div>
 
@@ -757,20 +737,12 @@ const ICONS = {
 const MODEL_META = {
   '4b':  { badge:'Ligero', cls:'badge-green', desc:'Rápido, ideal para tareas sencillas.', speed:'~85 t/s' },
   '8b':  { badge:'Balance', cls:'badge-green', desc:'Excelente balance velocidad/calidad.', speed:'~55 t/s' },
-  '9b':  { badge:'Balance', cls:'badge-green', desc:'Excelente balance velocidad/calidad.', speed:'~45 t/s' },
-  '14b': { badge:'Avanzado', cls:'badge-blue', desc:'Alto razonamiento, tareas complejas.', speed:'~30 t/s' },
-  '27b': { badge:'Frontier', cls:'badge-gold', desc:'Máxima inteligencia y precisión.', speed:'~15 t/s' },
-  '32b': { badge:'Frontier', cls:'badge-gold', desc:'Máxima inteligencia y precisión.', speed:'~12 t/s' },
-  'deepseek-r1': { badge:'Reasoning', cls:'badge-blue', desc:'Modelo especializado en cadena de pensamiento.', speed:'Variable' },
-  'deepseek-v3': { badge:'Frontier', cls:'badge-gold', desc:'Máxima capacidad general de DeepSeek.', speed:'~10 t/s' },
-  'gemma4': { badge:'Google', cls:'badge-blue', desc:'Modelo avanzado de Google Gemma 4.', speed:'~30 t/s' }
-};
-
-// ── CONFIG & STATE ─────────────────────────────────────────
+  '9b':  { badge:'Balance', cls:'badge-gree// ── CONFIG & STATE ─────────────────────────────────────────
 let OLLAMA_URL = 'https://api-yzai.yepzhi.com';
 
-let selectedModel = null;
-let selectedModelDesc = '';
+let selectedModel = 'gemma4:26b';
+const FIXED_CTX   = 65536; // 64K Context Only
+let selectedModelDesc = 'Gemma 4 26B MoE (64K Ctx)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -836,15 +808,20 @@ async function loadModels() {
     const { models = [] } = await (res.ok ? res : await fetch(`${OLLAMA_URL}/api/tags`)).json();
     allModels = models;
 
-    setStatus(true, `Mini PC Conectada · ${models.length} model${models.length!==1?'s':''}`);
-    renderSheetModels(models);
-    if (models.length && !selectedModel) {
-      const defaultModel = models.find(m => m.name.includes('4b')) || models[0];
-      pickModel(defaultModel.name, true);
+    if (models.length) {
+      const gemmaModel = models.find(m => {
+        const lower = m.name.toLowerCase();
+        return lower.includes('gemma') && (lower.includes('26b') || lower.includes('moe'));
+      }) || models.find(m => m.name.toLowerCase().includes('gemma'));
+      if (gemmaModel) {
+        selectedModel = gemmaModel.name;
+      }
     }
+
+    setStatus(true, `Mini PC Conectada · Gemma 4 26B MoE (64K)`);
+    updateModelHeader();
   } catch(e) {
     setStatus(false, 'Feynmann Engine Apagado');
-    document.getElementById('sheetModels').innerHTML = `<div style="padding:40px 20px;text-align:center;color:var(--red)">Cannot reach Feynmann Engine.<br><small style="opacity:0.7">The hardware might be turned off or rebooting.</small></div>`;
   }
 }
 
@@ -862,115 +839,32 @@ function setStatus(ok, text) {
   if (txt) txt.textContent = text;
 }
 
-function renderSheetModels(models) {
-  const el = document.getElementById('sheetModels');
-  el.innerHTML = models.map(m => {
-    const [base, tag=''] = m.name.split(':');
-    const info = MODEL_META[tag] || { badge:'Ready', cls:'', desc:'Standard model' };
-    const size = m.size ? (m.size/1e9).toFixed(1)+' GB' : '';
-    
-    let capBadges = '';
-    const caps = m.capabilities || [];
-    if (caps.length) {
-      const map = { vision: 'Imagen', completion: 'Texto', tools: 'Tools' };
-      const list = caps.map(c => map[c]).filter(Boolean);
-      if (list.length) capBadges = `<div style="font-size:11px;color:var(--cyan);margin-top:6px;font-weight:600;">${list.join(' · ')}</div>`;
-    }
-
-    const is27B = m.name.toLowerCase().includes('27b') || m.name.toLowerCase().includes('32b');
-    const disabledStyle = is27B ? ' style="opacity: 0.4; filter: grayscale(1);"' : '';
-    const clickHandler = is27B 
-      ? ` onclick="pickModelWithPassword('${esc(m.name)}');"`
-      : ` onclick="pickModel('${esc(m.name)}'); closeModelSheet()"`;
-    const devBadge = is27B ? `<span class="badge" style="background:var(--red); color:#fff; font-size:10px; font-weight:700; margin-left:8px;">En Desarrollo</span>` : '';
-
-    return `
-      <div class="sheet-model-card${m.name===selectedModel?' active':''}" data-model="${esc(m.name)}"${disabledStyle}${clickHandler}>
-        <div class="smc-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="6" height="6"/><path d="M15 2v3M9 2v3M15 19v3M9 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
-        </div>
-        <div class="smc-info">
-          <div class="smc-name">${esc(base)}<span style="color:var(--muted);font-weight:400">:${esc(tag)}</span>${devBadge}</div>
-          <div class="smc-meta">
-            <span class="badge ${info.cls}">${info.badge}</span>
-            ${size?`<span style="color:#fff">${size}</span>`:''}
-            <span style="color:var(--muted)">${info.desc}</span>
-            ${info.speed?`<span style="color:var(--cyan);font-weight:500;font-size:11px;margin-left:auto;">${info.speed}</span>`:''}
-          </div>
-          ${capBadges}
-        </div>
-        ${m.name===selectedModel ? `<div class="smc-check">${ICONS.check}</div>` : ''}
-      </div>`;
-  }).join('');
-}
-
-function pickModelWithPassword(name) {
-  const pw = prompt("Introduce la contraseña para activar este modelo en desarrollo:");
-  if (pw === "1234") {
-    pickModel(name);
-    closeModelSheet();
-  } else {
-    alert("Contraseña incorrecta. El modelo sigue bloqueado.");
+function updateModelHeader() {
+  const activeName = document.getElementById('activeName');
+  if (activeName) activeName.textContent = 'GEMMA 4 (26B MOE)';
+  const activeSub = document.getElementById('activeSub');
+  if (activeSub) activeSub.textContent = 'Contexto: 64K · Listo';
+  const tokenCount = document.getElementById('token-count');
+  if (tokenCount && tokenCount.textContent.includes('Contexto:')) {
+    tokenCount.textContent = 'Contexto: 64K · Listo para generar';
   }
 }
 
-function updateCtxDisplay() {
-  if (!selectedModel) return;
-  const ctxVal = document.getElementById('ctxSelect').value;
-  const ctxK = (parseInt(ctxVal) / 1024).toFixed(0) + 'K';
-  document.getElementById('token-count').textContent = `Contexto: ${ctxK} · Listo para generar`;
-  if (selectedModelDesc) {
-    document.getElementById('activeSub').textContent = `${selectedModelDesc} (Ctx: ${ctxK})`;
-  }
-}
-
+function renderSheetModels(models) {}
+function pickModelWithPassword(name) {}
+function updateCtxDisplay() { updateModelHeader(); }
 function pickModel(name, silent) {
-  const mInfo = allModels.find(m => m.name === name);
-  
-  if (!silent && mInfo && name !== selectedModel) {
-    const sizeGB = mInfo.size / 1024 / 1024 / 1024;
-    const estSeconds = Math.max(1, Math.round(sizeGB / 2));
-    const msg = `¿Deseas activar el modelo ${name}?\n\nEste modelo pesa ${sizeGB.toFixed(1)} GB. A nuestro hardware le tomará aproximadamente ${estSeconds} a ${estSeconds + 2} segundos cargarlo desde el NVMe a la memoria RAM.`;
-    if (!confirm(msg)) return;
-  }
-
-  selectedModel = name;
-  const [base, tag=''] = name.split(':');
-  const info = MODEL_META[tag] || { badge:'Ready', cls:'', desc:'Standard execution' };
-  selectedModelDesc = info.desc;
-  
-  document.getElementById('activeName').textContent = tag ? `${base.toUpperCase()} (${tag.toUpperCase()})` : base.toUpperCase();
-  document.getElementById('activeSub').textContent  = info.desc;
-  
-  // Limitar contexto para modelos pesados (27B+)
-  const ctxSelect = document.getElementById('ctxSelect');
-  const nameLower = name.toLowerCase();
-  const isHeavy = nameLower.includes('27b') || nameLower.includes('32b');
-  
-  Array.from(ctxSelect.options).forEach(opt => {
-    const val = parseInt(opt.value);
-    if (isHeavy && val > 16384) {
-      opt.disabled = true;
-      opt.style.display = 'none'; // Ocultar para que no salgan en la lista
-      if (opt.selected) ctxSelect.value = "8192"; // Fallback a 8K si estaba en uno no permitido
-    } else {
-      opt.disabled = false;
-      opt.style.display = 'block'; // Mostrar si es un modelo ligero
-    }
-  });
-  
-  updateCtxDisplay();
-  
-  if (!silent) renderSheetModels(allModels);
+  selectedModel = name || 'gemma4:26b';
+  updateModelHeader();
 }
 
 // ── DRAWER ─────────────────────────────────────────────────
 function openDrawer()  { document.getElementById('drawer').classList.add('open'); document.getElementById('drawerOverlay').classList.add('open'); }
 function closeDrawer() { document.getElementById('drawer').classList.remove('open'); document.getElementById('drawerOverlay').classList.remove('open'); }
 
-// ── MODEL SHEET ────────────────────────────────────────────
-function openModelSheet()  { document.getElementById('modelSheet').classList.add('open'); document.getElementById('sheetOverlay').classList.add('open'); }
-function closeModelSheet() { document.getElementById('modelSheet').classList.remove('open'); document.getElementById('sheetOverlay').classList.remove('open'); }
+// ── MODEL SHEET STUBS ──────────────────────────────────────
+function openModelSheet()  {}
+function closeModelSheet() {}
 
 // ── CONVERSATIONS ──────────────────────────────────────────
 function loadConversations() {
@@ -1159,7 +1053,7 @@ async function sendMessage() {
   const input = document.getElementById('prompt');
   const text  = input.value.trim();
   if (!text || isStreaming) return;
-  if (!selectedModel) { openModelSheet(); return; }
+  if (!selectedModel) selectedModel = 'gemma4:26b';
   if (!checkRateLimit()) return;
 
   input.value = ''; autoResize(input);
@@ -1192,7 +1086,7 @@ async function sendMessage() {
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom();
 
-  const ctxSize = parseInt(document.getElementById('ctxSelect').value) || 32768;
+  const ctxSize = 65536; // Forced 64K Context
 
   setStreaming(true);
   abortCtrl = new AbortController();
@@ -1293,8 +1187,7 @@ async function sendMessage() {
           model: selectedModel, 
           messages: payload, 
           options: { 
-            num_ctx: ctxSize, 
-            num_gpu: (selectedModel.toLowerCase().includes('27b') || selectedModel.toLowerCase().includes('32b')) ? 60 : 99 
+            num_ctx: 65536
           },
           think: false,
           stream: true 

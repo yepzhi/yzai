@@ -166,6 +166,20 @@ oficial de ComfyUI-Examples. Cárgalo en la interfaz de ComfyUI con
 
 ---
 
+## 🎨 FASE 4.1 — Integración Nativa Visual en yzai-ui (Próximo Milestone)
+
+**Objetivo:** Eliminar la dependencia de Open WebUI para imágenes y videos, logrando que *yzai-ui* sea tu única interfaz para texto, imagen y video de forma súper elegante.
+
+**Arquitectura del Frontend (`index.html`):**
+1. **Selector de Modalidad:** Arriba, junto al selector de modelo, pondremos un switch para: `[Chat] | [Imagen] | [Video]`.
+2. **Conexión API (HTTP):** Cuando elijas [Imagen] y pidas algo, *yzai-ui* interceptará tu petición. En lugar de mandarla a Ollama (`:11434`), cargará un esqueleto JSON (un workflow de ComfyUI prefabricado para Flux) e inyectará tu prompt en el nodo de texto. Ese JSON se mandará vía POST a `http://yzai-local:8188/prompt`.
+3. **Barra de Progreso en Vivo (WebSockets):** Crearemos una conexión de WebSocket (`ws://yzai-local:8188/ws`) para que la barra de abajo te muestre exactamente el porcentaje de renderizado (Ej. `Generando Imagen: Paso 14 de 20...`).
+4. **Galería Dinámica:** Cuando ComfyUI termine, enviará el nombre del archivo. *yzai-ui* hará un GET a `/view?filename=...` y pintará la foto/video con bordes redondeados y sombra suave directo en el chat.
+
+**Ventajas:** Todo vivirá en una sola pantalla, con animaciones fluidas, sin tener que abrir la aburrida interfaz de ComfyUI ni el pesado Open WebUI.
+
+---
+
 ## 🔬 FASE 4.5 — Colibri + GLM-5.2 (bonus experimental, NO interactivo)
 
 **Qué es:** Colibrì es un motor de inferencia en C puro (lanzado el 10 de
@@ -176,10 +190,10 @@ se necesitan. No usa GPU, solo CPU + RAM + disco.
 
 **Por qué es "bonus" y no tu modelo Pro/Frontier principal:** la velocidad
 real reportada en hardware similar al tuyo (CPUs Ryzen de esta clase) es de
-**0.05 a 0.3 tokens por segundo**. Eso significa que una respuesta de ~250
-palabras puede tardar entre 15 minutos y más de una hora. El propio autor lo
-describe como prueba de concepto, no como asistente práctico. `qwen3.6:27b`
-sigue siendo tu modelo del día a día — esto es para curiosidad, no para chat.
+**Optimización de Interfaz (Yzai):**
+Para mejorar la experiencia, implementaremos:
+1. **Parser de `<think>`:** Modificación de `index.html` para renderizar etiquetas `<think>` en gris/cursiva, permitiendo ver el proceso de razonamiento en tiempo real sin ocultarlo ni romper el layout.
+2. **System Prompt Anti-Biblias:** Configuración en el perfil del asistente para inyectar: *"Responde de forma concisa y directa. Evita introducciones largas o explicaciones redundantes. Prioriza la brevedad."*
 
 **Requisitos:**
 - ~370GB libres en el NVMe (revisa espacio antes de empezar)
