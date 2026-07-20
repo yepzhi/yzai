@@ -1272,7 +1272,7 @@ async function sendMessage() {
         // Inject results as a system context message before the user message
         const searchContext = {
           role: 'system',
-          content: `[Búsqueda web en tiempo real para: "${searchQuery}"]\n\n${resultsText}\n\nUsa esta información para responder. La fecha actual es ${new Date().toLocaleDateString('es-MX', {weekday:'long', year:'numeric', month:'long', day:'numeric'})}.`
+          content: `[Búsqueda web en tiempo real para: "${searchQuery}"]\n\n${resultsText}\n\nUsa esta información para responder. Current Date: ${new Date().toISOString().split('T')[0]}`
         };
         // Insert before the last user message
         payload.splice(payload.length - 1, 0, searchContext);
