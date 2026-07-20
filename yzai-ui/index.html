@@ -747,8 +747,8 @@ const MODEL_META = {
 let OLLAMA_URL = 'https://api-yzai.yepzhi.com';
 
 let selectedModel = 'gemma4-26b-MoE:latest';
-const FIXED_CTX   = 65536; // 64K Context Only
-let selectedModelDesc = 'Gemma 4 26B MoE (64K Ctx)';
+const FIXED_CTX   = 131072; // 128K Context Only
+let selectedModelDesc = 'Gemma 4 26B MoE (128K Ctx)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -783,7 +783,7 @@ function handleFileSelect(e) {
       promptEl.value = promptEl.value ? `${promptEl.value}\n\n${formatted}` : formatted;
       autoResize(promptEl);
       const docSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
-      document.getElementById('token-count').innerHTML = `${docSvg} Documento "${file.name}" cargado en el contexto 64K`;
+      document.getElementById('token-count').innerHTML = `${docSvg} Documento "${file.name}" cargado en el contexto 128K`;
     };
     reader.readAsText(file);
   }
@@ -846,7 +846,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Mini PC Conectada · Gemma 4 26B MoE (64K)`);
+    setStatus(true, `Mini PC Conectada · Gemma 4 26B MoE (128K)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -881,10 +881,10 @@ function updateModelHeader() {
   const activeName = document.getElementById('activeName');
   if (activeName) activeName.textContent = 'GEMMA 4 (26B MOE)';
   const activeSub = document.getElementById('activeSub');
-  if (activeSub) activeSub.textContent = 'Contexto: 64K · Listo';
+  if (activeSub) activeSub.textContent = 'Contexto: 128K · Listo';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Contexto:')) {
-    tokenCount.textContent = 'Contexto: 64K · Listo para generar';
+    tokenCount.textContent = 'Contexto: 128K · Listo para generar';
   }
 }
 
@@ -1124,7 +1124,7 @@ async function sendMessage() {
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom();
 
-  const ctxSize = 65536; // Forced 64K Context
+  const ctxSize = 131072; // Forced 128K Context
 
   setStreaming(true);
   abortCtrl = new AbortController();
