@@ -658,7 +658,7 @@ think::before {
       </div>
       <div class="model-pill-info">
         <div class="model-pill-name" id="activeName">GEMMA 4 (26B MOE)</div>
-        <div class="model-pill-sub" id="activeSub">Contexto: 64K · Listo</div>
+        <div class="model-pill-sub" id="activeSub">Contexto: 32K · Listo</div>
       </div>
       <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
     </div>
@@ -695,7 +695,7 @@ think::before {
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Contexto: 64K · Listo para generar</div>
+    <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Contexto: 32K · Listo para generar</div>
     <div class="input-container">
       <input type="file" id="fileInput" accept="*/*" style="display:none" onchange="handleFileSelect(event)">
       <button class="attach-btn" onclick="document.getElementById('fileInput').click()" aria-label="Attach">
@@ -747,8 +747,8 @@ const MODEL_META = {
 let OLLAMA_URL = 'https://api-yzai.yepzhi.com';
 
 let selectedModel = 'gemma4-26b-MoE:latest';
-const FIXED_CTX   = 131072; // 128K Context Only
-let selectedModelDesc = 'Gemma 4 26B MoE (128K Ctx)';
+const FIXED_CTX   = 32768; // 32K Context Only
+let selectedModelDesc = 'Gemma 4 26B MoE (32K Ctx)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -783,7 +783,7 @@ function handleFileSelect(e) {
       promptEl.value = promptEl.value ? `${promptEl.value}\n\n${formatted}` : formatted;
       autoResize(promptEl);
       const docSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
-      document.getElementById('token-count').innerHTML = `${docSvg} Documento "${file.name}" cargado en el contexto 128K`;
+      document.getElementById('token-count').innerHTML = `${docSvg} Documento "${file.name}" cargado en el contexto 32K`;
     };
     reader.readAsText(file);
   }
@@ -846,7 +846,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Mini PC Conectada · Gemma 4 26B MoE (128K)`);
+    setStatus(true, `Mini PC Conectada · Gemma 4 26B MoE (32K)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -881,10 +881,10 @@ function updateModelHeader() {
   const activeName = document.getElementById('activeName');
   if (activeName) activeName.textContent = 'GEMMA 4 (26B MOE)';
   const activeSub = document.getElementById('activeSub');
-  if (activeSub) activeSub.textContent = 'Contexto: 128K · Listo';
+  if (activeSub) activeSub.textContent = 'Contexto: 32K · Listo';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Contexto:')) {
-    tokenCount.textContent = 'Contexto: 128K · Listo para generar';
+    tokenCount.textContent = 'Contexto: 32K · Listo para generar';
   }
 }
 
@@ -1124,7 +1124,7 @@ async function sendMessage() {
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom();
 
-  const ctxSize = 131072; // Forced 128K Context
+  const ctxSize = 32768; // Forced 32K Context
 
   setStreaming(true);
   abortCtrl = new AbortController();
