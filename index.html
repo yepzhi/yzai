@@ -1150,6 +1150,8 @@ async function sendMessage() {
         typewriterTimer = null;
         
         renderMd(bubble, targetText || '…', targetThinking);
+        bubble.querySelectorAll('.cursor').forEach(el => el.remove());
+
         messages.push({ role:'ai', content:targetText });
         saveCurrentConv();
         setStreaming(false);
@@ -1310,7 +1312,10 @@ function setStreaming(on) {
   isStreaming = on;
   document.getElementById('sendBtn').style.display = on ? 'none' : 'flex';
   document.getElementById('stopBtn').style.display = on ? 'flex' : 'none';
-  if (!on) { abortCtrl = null; }
+  if (!on) { 
+    abortCtrl = null; 
+    document.querySelectorAll('#messages .cursor').forEach(el => el.remove());
+  }
 }
 
 // ── HELPERS ────────────────────────────────────────────────
