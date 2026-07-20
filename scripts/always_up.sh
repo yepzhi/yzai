@@ -45,7 +45,7 @@ done
 
 # 4. Precargar permanentemente Gemma 4 26B MoE en VRAM
 echo "🧠 Cargando modelo Gemma 4 26B MoE permanentemente en VRAM..."
-curl -s http://localhost:11434/api/generate -d '{"model":"gemma4:26b", "keep_alive":-1}' > /dev/null
+curl -s http://localhost:11434/api/generate -d '{"model":"gemma4-26b-MoE:latest", "keep_alive":-1}' > /dev/null
 
 echo "=============================================================================="
 echo "✅ ¡Configuración completada con éxito!"
