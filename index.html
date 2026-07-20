@@ -1190,6 +1190,32 @@ async function executeWebSearch(query) {
   return data.results || [];
 }
 
+// Detects if the user wants a web search (keywords in Spanish & English)
+function needsWebSearch(text) {
+  const lower = text.toLowerCase();
+  const searchPhrases = [
+    'busca ', 'buscar ', 'busca en internet', 'search for', 'search the web',
+    'busca en la web', 'busca en google', 'googlea', 'investiga ',
+    'quien gano', 'quién ganó', 'who won', 'who is', 'what happened',
+    'latest news', 'noticias de', 'precio de', 'precio del', 'price of',
+    'what is the', 'cuánto cuesta', 'cuanto cuesta', 'how much is',
+    'current', 'today', 'hoy', 'ayer', 'yesterday', 'this week', 'esta semana',
+    'en internet', 'en la web', 'on the internet', 'online'
+  ];
+  return searchPhrases.some(p => lower.includes(p));
+}
+
+// Extracts a good search query from user text
+function extractSearchQuery(text) {
+  const lower = text.toLowerCase();
+  // Remove common prefixes and return cleaned query
+  let q = text
+    .replace(/^(busca|buscar|busca en internet|busca en la web|busca en google|googlea|investiga|search for|search the web|search|find me|find)/i, '')
+    .replace(/^(,|\s)+/, '')
+    .trim();
+  return q || text;
+}
+
 // ── CHAT ───────────────────────────────────────────────────
 async function sendMessage() {
   const input = document.getElementById('prompt');
@@ -1225,6 +1251,35 @@ async function sendMessage() {
   container.appendChild(aiEl);
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom();
+
+  // ── Proactive Web Search Injection ──
+  // If user seems to want a search, run it and inject results BEFORE calling Ollama
+  // This bypasses tool calling (Gemma 4 GGUF doesn't support structured tool calls)
+  if (needsWebSearch(text)) {
+    const searchQuery = extractSearchQuery(text);
+    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Buscando: <em>${esc(searchQuery)}</em>…</span>`;
+    document.getElementById('token-count').textContent = 'Buscando en DuckDuckGo...';
+    try {
+      const results = await executeWebSearch(searchQuery);
+      if (results.length) {
+        const resultsText = results.map((r,i) =>
+          `${i+1}. **${r.title}**\n   URL: ${r.url}\n   ${r.snippet}`
+        ).join('\n\n');
+        // Inject results as a system context message before the user message
+        const searchContext = {
+          role: 'system',
+          content: `[Búsqueda web en tiempo real para: "${searchQuery}"]\n\n${resultsText}\n\nUsa esta información para responder. La fecha actual es ${new Date().toLocaleDateString('es-MX', {weekday:'long', year:'numeric', month:'long', day:'numeric'})}.`
+        };
+        // Insert before the last user message
+        payload.splice(payload.length - 1, 0, searchContext);
+        document.getElementById('token-count').textContent = 'Generando con datos actuales...';
+      }
+    } catch(searchErr) {
+      console.warn('[auto-search]', searchErr.message);
+      // Continue without search if it fails
+    }
+    bubble.innerHTML = '<span class="cursor"></span>';
+  }
 
   const ctxSize = 32768; // 32K Context – matches FIXED_CTX for max t/s
 
