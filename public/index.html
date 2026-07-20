@@ -1124,7 +1124,7 @@ async function sendMessage() {
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom();
 
-  const ctxSize = 32768; // Forced 32K Context
+  const ctxSize = 32768; // 32K Context – matches FIXED_CTX for max t/s
 
   setStreaming(true);
   abortCtrl = new AbortController();
@@ -1179,39 +1179,58 @@ async function sendMessage() {
     }, 16); // ~60fps para máxima suavidad visual
   }
 
-  let lastSize = 0;
   let loadTime = 0;
-  let loadInterval = setInterval(async () => {
-    if (firstTokenReceived) { clearInterval(loadInterval); return; }
-    loadTime += 0.5;
+  // Only show loading UI if model is NOT already fully in VRAM
+  // We check once immediately – if model is ready (>=85% VRAM), we stay silent
+  // and only start the polling interval if it's actually loading.
+  let loadInterval = null;
+  let loadingIndicatorActive = false;
+
+  async function checkModelAndMaybeShowLoading() {
+    if (firstTokenReceived) return;
     try {
       const psRes = await fetch(`${OLLAMA_URL}/api/ps`);
-      if (firstTokenReceived) return; // Prevent async overwrite
-      if (psRes.ok) {
-        const data = await psRes.json();
-        const model = data.models.find(m => m.name === selectedModel);
-        if (model) {
-          const total = model.size || 1;
-          const loaded = model.size_vram || 0;
-          const ratio = loaded / total;
-          
-          const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
-          if (ratio >= 0.85) {
+      if (!psRes.ok || firstTokenReceived) return;
+      const data = await psRes.json();
+      const model = data.models.find(m => m.name === selectedModel);
+      const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
+      if (model) {
+        const ratio = (model.size_vram || 0) / (model.size || 1);
+        if (ratio >= 0.85) {
+          // Model fully loaded – show queue message only if taking >2s
+          if (loadTime >= 2) {
             const eta = Math.max(1, Math.round(15 - loadTime));
-            document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Petición en cola de espera (Gemma 4 26B MoE ocupado) · ETA estimado: ~${eta}s</span>`;
-          } else {
-            const pct = Math.min(100, (ratio * 100)).toFixed(1);
-            const ramGB = (loaded/1024/1024/1024).toFixed(2);
-            const ssdGB = (total/1024/1024/1024).toFixed(2);
-            document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Cargando desde SSD a VRAM: ${pct}% (RAM: ${ramGB}GB / SSD: ${ssdGB}GB)</span>`;
+            document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Petición en cola (modelo ocupado) · ETA ~${eta}s</span>`;
+            loadingIndicatorActive = true;
           }
         } else {
-          const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
-          const eta = Math.max(1, Math.round(15 - loadTime));
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Petición en cola del servidor · ETA estimado: ~${eta}s</span>`;
+          // Model still loading from disk
+          const pct = Math.min(100, ((model.size_vram || 0) / (model.size || 1) * 100)).toFixed(1);
+          const ramGB = ((model.size_vram || 0)/1024/1024/1024).toFixed(2);
+          const ssdGB = ((model.size || 0)/1024/1024/1024).toFixed(2);
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Cargando a VRAM: ${pct}% (${ramGB}GB / ${ssdGB}GB)</span>`;
+          loadingIndicatorActive = true;
+        }
+      } else {
+        // Model not in ps yet (first ever load)
+        if (loadTime >= 2) {
+          const eta = Math.max(1, Math.round(20 - loadTime));
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Iniciando modelo · ETA ~${eta}s</span>`;
+          loadingIndicatorActive = true;
         }
       }
     } catch(e) {}
+  }
+
+  // Start polling 500ms after send to avoid flicker on fast responses
+  const loadPollStart = setTimeout(() => {
+    if (firstTokenReceived) return;
+    checkModelAndMaybeShowLoading();
+    loadInterval = setInterval(async () => {
+      if (firstTokenReceived) { clearInterval(loadInterval); loadInterval = null; return; }
+      loadTime += 0.5;
+      await checkModelAndMaybeShowLoading();
+    }, 500);
   }, 500);
 
   let retryCount = 0;
@@ -1225,7 +1244,7 @@ async function sendMessage() {
           model: selectedModel, 
           messages: payload, 
           options: { 
-            num_ctx: 65536
+            num_ctx: 32768
           },
           think: false,
           stream: true 
@@ -1272,9 +1291,13 @@ async function sendMessage() {
           const d = JSON.parse(line);
           if (d.message !== undefined) {
             if (!firstTokenReceived) { 
-              firstTokenReceived = true; 
+              firstTokenReceived = true;
+              clearTimeout(loadPollStart);
               if (loadInterval) { clearInterval(loadInterval); loadInterval = null; }
-              document.getElementById('token-count').textContent = 'Generando...';
+              // Only reset the label if we had shown a loading indicator
+              if (loadingIndicatorActive) {
+                document.getElementById('token-count').textContent = 'Generando...';
+              }
               startTime = Date.now();
               liveTimer = setInterval(() => {
                 const elapsed = (Date.now() - startTime) / 1000;
@@ -1314,13 +1337,15 @@ async function sendMessage() {
     streamFinished = true;
     startTypewriterLoop(); // Forzar el drenado final del búfer
     
-    clearInterval(loadInterval);
+    clearTimeout(loadPollStart);
+    if (loadInterval) clearInterval(loadInterval);
     if (liveTimer) clearInterval(liveTimer);
   } catch(e) {
     if (e.name !== 'AbortError') {
       bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${esc(e.message)}</span>`;
     }
-    clearInterval(loadInterval);
+    clearTimeout(loadPollStart);
+    if (loadInterval) clearInterval(loadInterval);
     if (liveTimer) clearInterval(liveTimer);
     if (typewriterTimer) clearInterval(typewriterTimer);
     setStreaming(false);
