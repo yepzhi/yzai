@@ -816,11 +816,13 @@ async function init() {
   await loadModels();
 }
 
+let lastOnlineTimestamp = Date.now();
+
 async function loadModels() {
   try {
     const res = await fetch(`${OLLAMA_URL}/api/tags`);
     if (!res.ok) {
-      await discoverEndpoint(); // try to rediscover if it dropped
+      await discoverEndpoint();
       const retry = await fetch(`${OLLAMA_URL}/api/tags`);
       if (!retry.ok) throw new Error('HTTP ' + retry.status);
     }
@@ -837,10 +839,20 @@ async function loadModels() {
       }
     }
 
+    lastOnlineTimestamp = Date.now();
     setStatus(true, `Mini PC Conectada · Gemma 4 26B MoE (64K)`);
     updateModelHeader();
   } catch(e) {
-    setStatus(false, 'Feynmann Engine Apagado');
+    const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
+    const mins = Math.floor(offlineSec / 60);
+    const secs = offlineSec % 60;
+    const timeStr = mins > 0 ? `${mins}m ${secs}s` : `${secs}s`;
+    
+    if (mins >= 5) {
+      setStatus(false, `Offline hace ${timeStr} ⚠️ Algo anda mal en la Mini PC`);
+    } else {
+      setStatus(false, `Offline hace ${timeStr} · Reconectando...`);
+    }
   }
 }
 
