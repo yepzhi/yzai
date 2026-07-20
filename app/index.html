@@ -139,19 +139,13 @@ body {
 .drawer-logo { display: flex; align-items: center; gap: 12px; }
 .logo-icon {
   width: 38px; height: 38px;
-  background: linear-gradient(135deg, var(--secondary), var(--primary));
-  border-radius: 12px;
+  background: transparent;
   display: flex; align-items: center; justify-content: center;
-  color: #fff;
-  box-shadow: 0 4px 20px rgba(236,72,153,0.4);
   flex-shrink: 0;
   position: relative;
 }
 .logo-icon::after {
-  content: ''; position: absolute; inset: -1px; border-radius: 13px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.5), transparent);
-  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor; mask-composite: exclude; padding: 1px; pointer-events: none;
+  display: none;
 }
 .logo-text { font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
 .logo-sub  { font-family: var(--font-display); font-size: 11px; color: var(--primary); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-top: 4px; }
@@ -586,6 +580,16 @@ think::before {
 </head>
 <body>
 
+<svg style="width:0;height:0;position:absolute;" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="aiGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="50%" stop-color="#8b5cf6"/>
+      <stop offset="100%" stop-color="#ec4899"/>
+    </linearGradient>
+  </defs>
+</svg>
+
 <div class="bg-mesh">
   <div class="orb orb-1"></div>
   <div class="orb orb-2"></div>
@@ -600,7 +604,7 @@ think::before {
   <div class="drawer-header">
     <div class="drawer-logo">
       <div class="logo-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z" fill="url(#aiGrad)"/><circle cx="12" cy="12" r="2.5" fill="#ffffff" opacity="0.9"/></svg>
       </div>
       <div>
         <div class="logo-text">yzai</div>
@@ -654,7 +658,7 @@ think::before {
 
     <div class="model-pill" style="cursor:default">
       <div class="model-pill-icon">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="6" height="6"/><path d="M15 2v3M9 2v3M15 19v3M9 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z" fill="url(#aiGrad)"/><circle cx="12" cy="12" r="2.5" fill="#ffffff" opacity="0.9"/></svg>
       </div>
       <div class="model-pill-info">
         <div class="model-pill-name" id="activeName">GEMMA 4 (26B MOE)</div>
@@ -673,7 +677,7 @@ think::before {
     <div class="messages" id="messages">
       <div class="welcome" id="welcome">
         <div class="welcome-icon">
-          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="9" width="6" height="6"/><path d="M15 2v3M9 2v3M15 19v3M9 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z" fill="url(#aiGrad)"/><circle cx="12" cy="12" r="2.5" fill="#ffffff" opacity="0.9"/></svg>
         </div>
         <h2>Welcome to <span>yzai</span></h2>
         <p>Your premium, 100% private AI assistant powered by local hardware.</p>
@@ -746,7 +750,8 @@ const MODEL_META = {
 };
 
 // ── CONFIG & STATE ─────────────────────────────────────────
-let OLLAMA_URL = 'https://api-yzai.yepzhi.com';
+let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
+const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
 let selectedModel = 'gemma4-26b-MoE:latest';
 const FIXED_CTX   = 32768; // 32K Context Only
@@ -1052,7 +1057,7 @@ function renderMessages() {
 function welcomeHTML() {
   return `<div class="welcome" id="welcome">
     <div class="welcome-icon">
-      <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><rect x="9" y="9" width="6" height="6"/><path d="M15 2v3M9 2v3M15 19v3M9 19v3M2 9h3M2 15h3M19 9h3M19 15h3"/><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
+      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z" fill="url(#aiGrad)"/><circle cx="12" cy="12" r="2.5" fill="#ffffff" opacity="0.9"/></svg>
     </div>
     <h2>Welcome to <span>yzai</span></h2>
     <p>Your premium, 100% private AI assistant powered by local hardware.</p>
@@ -1166,6 +1171,55 @@ function checkRateLimit() {
   return true;
 }
 
+// ── WEB SEARCH TOOL ────────────────────────────────────────
+const WEB_SEARCH_TOOL = {
+  type: 'function',
+  function: {
+    name: 'web_search',
+    description: 'Search the web with DuckDuckGo for current information, news, facts, prices, events, or anything that may be outside your training data. Always use this when asked about recent events or real-time data.',
+    parameters: {
+      type: 'object',
+      properties: {
+        query: { type: 'string', description: 'The search query string' }
+      },
+      required: ['query']
+    }
+  }
+};
+
+async function executeWebSearch(query) {
+  const res = await fetch(`${SEARCH_URL}/search?q=${encodeURIComponent(query)}&n=6`);
+  if (!res.ok) throw new Error(`Search proxy error: ${res.status}`);
+  const data = await res.json();
+  return data.results || [];
+}
+
+// Detects if the user wants a web search (keywords in Spanish & English)
+function needsWebSearch(text) {
+  const lower = text.toLowerCase();
+  const searchPhrases = [
+    'busca ', 'buscar ', 'busca en internet', 'search for', 'search the web',
+    'busca en la web', 'busca en google', 'googlea', 'investiga ',
+    'quien gano', 'quién ganó', 'who won', 'who is', 'what happened',
+    'latest news', 'noticias de', 'precio de', 'precio del', 'price of',
+    'what is the', 'cuánto cuesta', 'cuanto cuesta', 'how much is',
+    'current', 'today', 'hoy', 'ayer', 'yesterday', 'this week', 'esta semana',
+    'en internet', 'en la web', 'on the internet', 'online'
+  ];
+  return searchPhrases.some(p => lower.includes(p));
+}
+
+// Extracts a good search query from user text
+function extractSearchQuery(text) {
+  const lower = text.toLowerCase();
+  // Remove common prefixes and return cleaned query
+  let q = text
+    .replace(/^(busca|buscar|busca en internet|busca en la web|busca en google|googlea|investiga|search for|search the web|search|find me|find)/i, '')
+    .replace(/^(,|\s)+/, '')
+    .trim();
+  return q || text;
+}
+
 // ── CHAT ───────────────────────────────────────────────────
 async function sendMessage() {
   const input = document.getElementById('prompt');
@@ -1202,6 +1256,35 @@ async function sendMessage() {
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom();
 
+  // ── Proactive Web Search Injection ──
+  // If user seems to want a search, run it and inject results BEFORE calling Ollama
+  // This bypasses tool calling (Gemma 4 GGUF doesn't support structured tool calls)
+  if (needsWebSearch(text)) {
+    const searchQuery = extractSearchQuery(text);
+    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Buscando: <em>${esc(searchQuery)}</em>…</span>`;
+    document.getElementById('token-count').textContent = 'Buscando en DuckDuckGo...';
+    try {
+      const results = await executeWebSearch(searchQuery);
+      if (results.length) {
+        const resultsText = results.map((r,i) =>
+          `${i+1}. **${r.title}**\n   URL: ${r.url}\n   ${r.snippet}`
+        ).join('\n\n');
+        // Inject results as a system context message before the user message
+        const searchContext = {
+          role: 'system',
+          content: `[Búsqueda web en tiempo real para: "${searchQuery}"]\n\n${resultsText}\n\nUsa esta información para responder. Current Date: ${new Date().toISOString().split('T')[0]}`
+        };
+        // Insert before the last user message
+        payload.splice(payload.length - 1, 0, searchContext);
+        document.getElementById('token-count').textContent = 'Generando con datos actuales...';
+      }
+    } catch(searchErr) {
+      console.warn('[auto-search]', searchErr.message);
+      // Continue without search if it fails
+    }
+    bubble.innerHTML = '<span class="cursor"></span>';
+  }
+
   const ctxSize = 32768; // 32K Context – matches FIXED_CTX for max t/s
 
   setStreaming(true);
@@ -1210,6 +1293,7 @@ async function sendMessage() {
   let startTime = 0;
   let tokenCount = 0;
   let liveTimer = null;
+  let collectedToolCalls = []; // For web_search tool calling
 
   // Variables del Typewriter para suavidad
   let targetText = '';
@@ -1311,7 +1395,8 @@ async function sendMessage() {
         signal: abortCtrl.signal,
         body: JSON.stringify({ 
           model: selectedModel, 
-          messages: payload, 
+          messages: payload,
+          tools: [WEB_SEARCH_TOOL],
           options: { 
             num_ctx: 32768
           },
@@ -1392,6 +1477,11 @@ async function sendMessage() {
               startTypewriterLoop();
             }
           }
+          // ── Tool calls from model ──
+          if (d.message?.tool_calls?.length) {
+            collectedToolCalls.push(...d.message.tool_calls);
+          }
+
           if (d.done && d.eval_count) {
             clearInterval(liveTimer);
             const tps = d.eval_duration ? (d.eval_count / (d.eval_duration/1e9)).toFixed(1) : null;
@@ -1402,7 +1492,96 @@ async function sendMessage() {
         } catch(e) {}
       }
     }
-    
+
+    // ── Execute tool calls if model requested web_search ──
+    if (collectedToolCalls.length > 0) {
+      clearInterval(liveTimer);
+      for (const tc of collectedToolCalls) {
+        if (tc.function?.name === 'web_search') {
+          const q = tc.function.arguments?.query || tc.function.arguments?.q || '';
+          if (!q) continue;
+          // Show searching indicator in bubble
+          bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Buscando: <em>${esc(q)}</em>…</span>`;
+          document.getElementById('token-count').textContent = 'Buscando en DuckDuckGo...';
+          try {
+            const results = await executeWebSearch(q);
+            // Build tool result text
+            const resultText = results.length
+              ? results.map((r,i) => `${i+1}. **${r.title}**\n   ${r.url}\n   ${r.snippet}`).join('\n\n')
+              : 'No results found.';
+            // Add assistant tool_call message and tool result to payload
+            payload.push({
+              role: 'assistant',
+              content: '',
+              tool_calls: [{ function: { name: 'web_search', arguments: { query: q } } }]
+            });
+            payload.push({
+              role: 'tool',
+              content: `Web search results for "${q}":\n\n${resultText}`
+            });
+            // Reset stream state for second call
+            targetText = '';
+            targetThinking = '';
+            currentText = '';
+            currentThinking = '';
+            firstTokenReceived = false;
+            tokenCount = 0;
+            startTime = Date.now();
+            document.getElementById('token-count').textContent = 'Generando respuesta...';
+            bubble.innerHTML = '<span class="cursor"></span>';
+            // Second Ollama call with tool results
+            const res2 = await fetch(`${OLLAMA_URL}/api/chat`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              signal: abortCtrl.signal,
+              body: JSON.stringify({
+                model: selectedModel,
+                messages: payload,
+                tools: [WEB_SEARCH_TOOL],
+                options: { num_ctx: 32768 },
+                think: false,
+                stream: true
+              })
+            });
+            if (!res2.ok) throw new Error(`HTTP ${res2.status}`);
+            const reader2 = res2.body.getReader();
+            const decoder2 = new TextDecoder();
+            let buf2 = '';
+            liveTimer = setInterval(() => {
+              const elapsed = (Date.now() - startTime) / 1000;
+              if (elapsed > 0 && tokenCount > 0) {
+                const tps2 = (tokenCount / elapsed).toFixed(1);
+                document.getElementById('token-count').textContent = `Generando... ~${tps2} t/s`;
+              }
+            }, 500);
+            while (true) {
+              const { done, value } = await reader2.read();
+              if (done) break;
+              buf2 += decoder2.decode(value, { stream: true });
+              const lines2 = buf2.split('\n'); buf2 = lines2.pop();
+              for (const line2 of lines2) {
+                if (!line2.trim()) continue;
+                try {
+                  const d2 = JSON.parse(line2);
+                  if (d2.message?.content) { targetText += d2.message.content; tokenCount++; startTypewriterLoop(); }
+                  if (d2.message?.thinking) { targetThinking += d2.message.thinking; startTypewriterLoop(); }
+                  if (d2.done && d2.eval_count) {
+                    clearInterval(liveTimer);
+                    const tps2 = d2.eval_duration ? (d2.eval_count / (d2.eval_duration/1e9)).toFixed(1) : null;
+                    const lt2 = d2.load_duration ? (d2.load_duration/1e9).toFixed(1) : 0;
+                    document.getElementById('token-count').textContent = `${d2.eval_count} tokens · ${tps2 ? tps2+' t/s' : ''} (con búsqueda web)`;
+                  }
+                } catch(e) {}
+              }
+            }
+          } catch(searchErr) {
+            console.error('[web_search]', searchErr);
+            bubble.innerHTML += `<br><span style="color:var(--red);font-size:0.85em;">Error en búsqueda: ${esc(searchErr.message)}</span>`;
+          }
+        }
+      }
+    }
+
     streamFinished = true;
     startTypewriterLoop(); // Forzar el drenado final del búfer
     
