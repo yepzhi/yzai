@@ -689,15 +689,10 @@ think::before {
 
   <!-- INPUT -->
   <div class="input-wrapper">
-    <div class="img-preview-container" id="imgPreviewContainer">
-      <img id="imgPreview">
-      <button class="remove-img-btn" onclick="removeImage()" aria-label="Remove Image">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
+
     <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Contexto: 32K · Listo para generar</div>
     <div class="input-container">
-      <input type="file" id="fileInput" accept="*/*" style="display:none" onchange="handleFileSelect(event)">
+      <input type="file" id="fileInput" accept=".txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.py,.sh,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r" style="display:none" onchange="handleFileSelect(event)">
       <button class="attach-btn" onclick="document.getElementById('fileInput').click()" aria-label="Attach">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
       </button>
@@ -756,42 +751,52 @@ let systemPrompt  = '';
 let abortCtrl     = null;
 let isStreaming   = false;
 let allModels     = [];
-let currentImageBase64 = null;
+
 
 const esc = (str) => String(str).replace(/[&<>"']/g, match => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
 
 // ── FILE & IMAGE HANDLING ─────────────────────────────────
+const TEXT_EXTENSIONS = ['txt','md','markdown','json','jsonl','csv','tsv',
+  'js','ts','jsx','tsx','py','sh','bash','html','css','xml','yaml','yml',
+  'toml','ini','conf','log','sql','r','cpp','c','h','java','rs','go','php',
+  'rb','swift','kt','dart','vue','svelte','env','gitignore'];
+
 function handleFileSelect(e) {
   const file = e.target.files[0];
   if (!file) return;
 
-  if (file.type.startsWith('image/')) {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const base64String = event.target.result.split(',')[1];
-      currentImageBase64 = base64String;
-      document.getElementById('imgPreview').src = event.target.result;
-      document.getElementById('imgPreviewContainer').classList.add('has-img');
-    };
-    reader.readAsDataURL(file);
-  } else {
-    const reader = new FileReader();
-    reader.onload = (event) => {
-      const promptEl = document.getElementById('prompt');
-      const content = event.target.result;
-      const formatted = `[Documento adjunto: ${file.name}]\n\`\`\`\n${content}\n\`\`\``;
-      promptEl.value = promptEl.value ? `${promptEl.value}\n\n${formatted}` : formatted;
-      autoResize(promptEl);
-      const docSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
-      document.getElementById('token-count').innerHTML = `${docSvg} Documento "${file.name}" cargado en el contexto 32K`;
-    };
-    reader.readAsText(file);
+  const ext = file.name.split('.').pop().toLowerCase();
+  const isTextMime = file.type.startsWith('text/') || file.type === 'application/json';
+  const isTextExt  = TEXT_EXTENSIONS.includes(ext);
+
+  if (!isTextMime && !isTextExt) {
+    document.getElementById('token-count').innerHTML =
+      `<span style="color:var(--red);font-weight:600;">⚠️ "${file.name}": solo archivos de texto (txt, md, json, py, js, etc.)</span>`;
+    document.getElementById('fileInput').value = '';
+    return;
   }
+
+  if (file.size > 500_000) {
+    document.getElementById('token-count').innerHTML =
+      `<span style="color:var(--red);font-weight:600;">⚠️ Archivo demasiado grande (${(file.size/1024).toFixed(0)}KB). Máximo 500KB.</span>`;
+    document.getElementById('fileInput').value = '';
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (event) => {
+    const promptEl = document.getElementById('prompt');
+    const content = event.target.result;
+    const formatted = `[Archivo: ${file.name}]\n\`\`\`${ext}\n${content}\n\`\`\``;
+    promptEl.value = promptEl.value ? `${promptEl.value}\n\n${formatted}` : formatted;
+    autoResize(promptEl);
+    const docSvg = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:middle;margin-right:4px;"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>`;
+    document.getElementById('token-count').innerHTML = `${docSvg} "${file.name}" cargado (${(file.size/1024).toFixed(1)}KB)`;
+  };
+  reader.readAsText(file, 'UTF-8');
 }
 function removeImage() {
-  currentImageBase64 = null;
   document.getElementById('fileInput').value = '';
-  document.getElementById('imgPreviewContainer').classList.remove('has-img');
 }
 
 // ── INIT ───────────────────────────────────────────────────
@@ -964,7 +969,7 @@ function renderMessages() {
   el.innerHTML = '';
   if (!messages.length) { el.innerHTML = welcomeHTML(); return; }
   messages.forEach(m => { 
-    if (m.role !== 'system') el.appendChild(createMsg(m.role, m.content, false, m.images)); 
+    if (m.role !== 'system') el.appendChild(createMsg(m.role, m.content, false)); 
   });
   scrollBottom();
 }
@@ -985,7 +990,7 @@ function welcomeHTML() {
   </div>`;
 }
 
-function createMsg(role, content, streaming=false, images=null) {
+function createMsg(role, content, streaming=false) {
   const div = document.createElement('div');
   div.className = `msg ${role}`;
 
@@ -998,17 +1003,9 @@ function createMsg(role, content, streaming=false, images=null) {
 
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
-  
-  let imgHtml = '';
-  if (images && images.length) {
-    imgHtml = `<img class="msg-img" src="data:image/jpeg;base64,${images[0]}">`;
-  }
-  
+
   if (streaming) bubble.innerHTML = '<span class="cursor"></span>';
-  else {
-    renderMd(bubble, content);
-    bubble.innerHTML = imgHtml + bubble.innerHTML;
-  }
+  else renderMd(bubble, content);
 
   const time = document.createElement('div');
   time.className = 'msg-time';
@@ -1110,20 +1107,12 @@ async function sendMessage() {
   if (systemPrompt) payload.push({ role:'system', content: systemPrompt });
   
   messages.forEach(m => {
-    const msg = { role: m.role==='ai'?'assistant':m.role, content:m.content };
-    if (m.images) msg.images = m.images;
-    payload.push(msg);
+    payload.push({ role: m.role==='ai'?'assistant':m.role, content:m.content });
   });
-  
+
   const userMsg = { role:'user', content:text };
-  if (currentImageBase64) {
-    userMsg.images = [currentImageBase64];
-  }
-  
   payload.push(userMsg);
   messages.push(userMsg);
-  
-  removeImage();
 
   const container = document.getElementById('messages');
   container.appendChild(createMsg('user', text));
