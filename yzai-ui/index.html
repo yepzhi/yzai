@@ -789,8 +789,10 @@ function removeImage() {
 
 // ── INIT ───────────────────────────────────────────────────
 async function discoverEndpoint() {
+  const origin = window.location.origin;
   const host = window.location.hostname || '127.0.0.1';
   const candidates = [
+    origin,
     `http://${host}:11434`,
     'http://192.168.1.72:11434',
     'http://127.0.0.1:11434',
