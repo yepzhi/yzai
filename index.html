@@ -910,6 +910,7 @@ async function discoverEndpoint() {
       const data = await r.json();
       if (Array.isArray(data.models)) { OLLAMA_URL = url; return; }
     } catch(e) {}
+  }
 }
 
 let COMFY_URL = 'http://127.0.0.1:8188';
