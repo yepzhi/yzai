@@ -1462,6 +1462,7 @@ async function sendMessage() {
     const decoder = new TextDecoder();
     let buf = '';
 
+    let ollamaDone = false;
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -1511,6 +1512,7 @@ async function sendMessage() {
           }
 
           if (d.done && d.eval_count) {
+            ollamaDone = true;
             clearInterval(liveTimer);
             const tps = d.eval_duration ? (d.eval_count / (d.eval_duration/1e9)).toFixed(1) : null;
             const loadTime = d.load_duration ? (d.load_duration/1e9).toFixed(1) : 0;
@@ -1519,6 +1521,10 @@ async function sendMessage() {
           }
         } catch(e) {}
       }
+    }
+
+    if (!ollamaDone && targetText) {
+      targetText += '\n\n*(⚠️ La respuesta se interrumpió por un tiempo de espera en la red o desconexión del servidor)*';
     }
 
     // ── Execute tool calls if model requested web_search ──
@@ -1618,7 +1624,20 @@ async function sendMessage() {
     if (liveTimer) clearInterval(liveTimer);
   } catch(e) {
     if (e.name !== 'AbortError') {
-      bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${esc(e.message)}</span>`;
+      const isOfflineErr = e.message.includes('Failed to fetch') || e.message.includes('502') || e.message.includes('521') || e.message.includes('522') || e.message.includes('523') || e.message.includes('524');
+      const errorMsg = isOfflineErr 
+        ? '🔴 El servidor de IA (MiniPC) está apagado o no responde. Por favor enciéndelo.'
+        : `⚠️ Error de conexión: ${esc(e.message)}`;
+
+      if (targetText.trim()) {
+        targetText += `\n\n*(${errorMsg})*`;
+        renderMd(bubble, targetText, targetThinking);
+        messages.push({ role:'ai', content:targetText });
+        saveCurrentConv();
+      } else {
+        bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${errorMsg}</span>`;
+      }
+      document.getElementById('token-count').textContent = isOfflineErr ? 'Servidor apagado / desconectado' : 'Error de respuesta';
     }
     clearTimeout(loadPollStart);
     if (loadInterval) clearInterval(loadInterval);
