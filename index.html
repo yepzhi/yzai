@@ -899,7 +899,7 @@ async function discoverEndpoint() {
     try {
       const c = new AbortController();
       const t = setTimeout(() => c.abort(), 2000);
-      const r = await fetch(`${url}/api/tags`, { signal: c.signal });
+      const r = await fetch(`${url}/api/tags?clave=secreta123`, { signal: c.signal });
       clearTimeout(t);
       if (!r.ok) continue;
       // Validate it's real Ollama JSON — not an HTML page (Cloudflare Pages
@@ -941,13 +941,13 @@ let lastOnlineTimestamp = Date.now();
 
 async function loadModels() {
   try {
-    const res = await fetch(`${OLLAMA_URL}/api/tags`);
+    const res = await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123`);
     if (!res.ok) {
       await discoverEndpoint();
-      const retry = await fetch(`${OLLAMA_URL}/api/tags`);
+      const retry = await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123`);
       if (!retry.ok) throw new Error('HTTP ' + retry.status);
     }
-    const { models = [] } = await (res.ok ? res : await fetch(`${OLLAMA_URL}/api/tags`)).json();
+    const { models = [] } = await (res.ok ? res : await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123`)).json();
     allModels = models;
 
     if (models.length) {
@@ -1379,7 +1379,7 @@ async function sendMessage() {
   async function checkModelAndMaybeShowLoading() {
     if (firstTokenReceived) return;
     try {
-      const psRes = await fetch(`${OLLAMA_URL}/api/ps`);
+      const psRes = await fetch(`${OLLAMA_URL}/api/ps?clave=secreta123`);
       if (!psRes.ok || firstTokenReceived) return;
       const data = await psRes.json();
       const model = data.models.find(m => m.name === selectedModel);
@@ -1417,7 +1417,7 @@ async function sendMessage() {
   let retryCount = 0;
   async function attemptFetch() {
     try {
-      const res = await fetch(`${OLLAMA_URL}/api/chat`, {
+      const res = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         signal: abortCtrl.signal,
@@ -1558,7 +1558,7 @@ async function sendMessage() {
             document.getElementById('token-count').textContent = 'Generando respuesta...';
             bubble.innerHTML = '<span class="cursor"></span>';
             // Second Ollama call with tool results
-            const res2 = await fetch(`${OLLAMA_URL}/api/chat`, {
+            const res2 = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               signal: abortCtrl.signal,
