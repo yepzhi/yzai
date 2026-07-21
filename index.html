@@ -913,7 +913,7 @@ async function discoverEndpoint() {
   }
 }
 
-let COMFY_URL = 'http://127.0.0.1:8188';
+let COMFY_URL = null;
 async function probeComfy() {
   const host = window.location.hostname;
   const origin = window.location.origin;
@@ -1896,6 +1896,15 @@ async function generateImage(promptText) {
     }
   };
 
+  if (!COMFY_URL) {
+    await probeComfy();
+  }
+  if (!COMFY_URL) {
+    bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} 🔴 No se encontró el servidor de imágenes (ComfyUI) en la red local. Verifica que la MiniPC esté encendida.</span>`;
+    resetInputUI();
+    return;
+  }
+
   try {
     const res = await fetch(`${COMFY_URL}/prompt`, {
       method: 'POST',
@@ -1926,7 +1935,11 @@ async function generateImage(promptText) {
     }, 2000);
     
   } catch (err) {
-    bubble.innerHTML = `<span style="color:var(--red);">Error generando imagen: ${err.message}</span>`;
+    const isConnErr = err.message.includes('Failed to fetch') || err.message.includes('Content Security Policy') || err.message.includes('violates');
+    const msg = isConnErr 
+      ? '🔴 No se pudo conectar con ComfyUI. Verifica que la MiniPC esté encendida y conectada a la red local.'
+      : `Error generando imagen: ${esc(err.message)}`;
+    bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${msg}</span>`;
     resetInputUI();
   }
 }
