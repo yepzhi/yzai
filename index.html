@@ -891,6 +891,8 @@ async function discoverEndpoint() {
   const candidates = [
     'https://api-yzai.yepzhi.com',
     `http://${host}:11434`,
+    'http://yzai.local:11434',
+    'http://192.168.1.222:11434',
     'http://192.168.1.86:11434',
     'http://192.168.1.72:11434',
     'http://127.0.0.1:11434',
@@ -919,6 +921,8 @@ async function probeComfy() {
   const origin = window.location.origin;
   const candidates = [
     `http://${host}:8188`,
+    'http://yzai.local:8188',
+    'http://192.168.1.222:8188',
     'http://192.168.1.86:8188',
     'http://192.168.1.72:8188',
     'http://127.0.0.1:8188'
