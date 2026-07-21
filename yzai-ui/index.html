@@ -915,24 +915,23 @@ async function discoverEndpoint() {
   }
 }
 
-let COMFY_URL = 'https://img-yzai.yepzhi.com';
+// COMFY_URL: same-origin /comfy/ proxy (nginx) to avoid CORS/CSP issues
+let COMFY_URL = null;
 async function probeComfy() {
-  const host = window.location.hostname;
-  const origin = window.location.origin;
+  // Always use same-origin proxy — no CORS/CSP issues
   const candidates = [
-    'https://img-yzai.yepzhi.com',
-    `http://${host}:8188`,
-    'http://yzai.local:8188',
-    'http://192.168.1.222:8188',
-    'http://127.0.0.1:8188'
+    '',                              // same origin /comfy/... (via Nginx proxy)
+    'https://img-yzai.yepzhi.com',   // direct tunnel fallback
   ];
-  for (const url of candidates) {
+  for (const base of candidates) {
     try {
       const c = new AbortController();
-      const t = setTimeout(() => c.abort(), 1000);
-      const r = await fetch(`${url}/system_stats`, { signal: c.signal });
+      const t = setTimeout(() => c.abort(), 2000);
+      const r = await fetch(`${base}/comfy/system_stats`, { signal: c.signal });
       clearTimeout(t);
-      if (r.ok) { COMFY_URL = url; return; }
+      if (r.ok && (r.headers.get('content-type') || '').includes('application/json')) {
+        COMFY_URL = base; return;
+      }
     } catch(e) {}
   }
 }
@@ -1899,17 +1898,17 @@ async function generateImage(promptText) {
     }
   };
 
-  if (!COMFY_URL) {
+  if (COMFY_URL === null) {
     await probeComfy();
   }
-  if (!COMFY_URL) {
+  if (COMFY_URL === null) {
     bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} 🔴 No se encontró el servidor de imágenes (ComfyUI) en la red local. Verifica que la MiniPC esté encendida.</span>`;
     resetInputUI();
     return;
   }
 
   try {
-    const res = await fetch(`${COMFY_URL}/prompt`, {
+    const res = await fetch(`${COMFY_URL}/comfy/prompt`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: workflow })
@@ -1922,7 +1921,7 @@ async function generateImage(promptText) {
     // Polling ComfyUI history for completion
     const pollInterval = setInterval(async () => {
       try {
-        const histRes = await fetch(`${COMFY_URL}/history/${promptId}`);
+        const histRes = await fetch(`${COMFY_URL}/comfy/history/${promptId}`);
         const histData = await histRes.json();
         if (histData[promptId]) {
           clearInterval(pollInterval);
@@ -1930,7 +1929,7 @@ async function generateImage(promptText) {
           const node = Object.keys(outputs)[0]; // node 9
           const filename = outputs[node].images[0].filename;
           
-          bubble.innerHTML = `<img src="${COMFY_URL}/view?filename=${filename}&type=output" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
+          bubble.innerHTML = `<img src="${COMFY_URL}/comfy/view?filename=${filename}&type=output" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
           scrollBottom();
           resetInputUI();
         }
