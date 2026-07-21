@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#030305">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; connect-src * 'unsafe-inline' blob: data: http: https: ws: wss:;">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -333,8 +333,8 @@ body {
 .msg.user .msg-col { align-items: flex-end; }
 
 .bubble {
-  padding: 14px 18px; border-radius: 20px;
-  font-size: 15px; line-height: 1.6; word-break: break-word; overflow-wrap: anywhere;
+  padding: 14px 18px;
+  font-size: 13px; line-height: 1.5; word-break: break-word; overflow-wrap: anywhere;
   color: var(--text); min-width: 0; max-width: 100%;
 }
 .msg.ai .bubble { 
@@ -351,9 +351,9 @@ body {
 .bubble p { margin-bottom: 12px; }
 .bubble p:last-child { margin-bottom: 0; }
 .bubble h1, .bubble h2, .bubble h3 { font-family: var(--font-display); font-weight: 700; margin: 24px 0 12px; color: #fff; }
-.bubble h1 { font-size: 20px; }
-.bubble h2 { font-size: 18px; }
-.bubble h3 { font-size: 16px; }
+.bubble h1 { font-size: 16px; }
+.bubble h2 { font-size: 15px; }
+.bubble h3 { font-size: 13.5px; }
 .bubble ul, .bubble ol { padding-left: 20px; margin-bottom: 12px; }
 .bubble li { margin-bottom: 6px; }
 .bubble li::marker { color: var(--primary); }
@@ -363,7 +363,7 @@ body {
 .bubble a:hover { color: #fff; text-decoration: underline; }
 .bubble hr { border: none; border-top: 1px solid var(--border-light); margin: 20px 0; }
 .bubble blockquote { border-left: 4px solid var(--primary); padding-left: 16px; color: var(--text-dim); font-style: italic; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 0 12px 12px 0; margin: 12px 0; }
-.bubble table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 16px 0; overflow-x: auto; display: block; border-radius: 8px; }
+.bubble table { border-collapse: collapse; width: 100%; font-size: 12px; margin: 16px 0; overflow-x: auto; display: block; border-radius: 8px; }
 .bubble th { background: rgba(255,255,255,0.05); padding: 10px 14px; border: 1px solid var(--border-light); font-weight: 600; text-align: left; }
 .bubble td { padding: 10px 14px; border: 1px solid var(--border-light); }
 
@@ -388,7 +388,7 @@ body {
 }
 .copy-btn:hover { background: rgba(255,255,255,0.1); }
 .copy-btn.copied { color: var(--green); border-color: var(--green); background: rgba(16,185,129,0.1); }
-.bubble pre { margin: 0; padding: 16px; overflow-x: auto; max-width: 100%; white-space: pre-wrap; word-break: break-all; background: #0d0d12 !important; font-family: var(--font-mono); font-size: 14px; line-height: 1.6; }
+.bubble pre { margin: 0; padding: 14px; overflow-x: auto; max-width: 100%; white-space: pre-wrap; word-break: break-all; background: #0d0d12 !important; font-family: var(--font-mono); font-size: 12px; line-height: 1.5; }
 .bubble pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; white-space: pre-wrap; word-break: break-all; }
 
 think { 
@@ -425,7 +425,7 @@ think::before {
 .think-details summary:hover { background: rgba(255,255,255,0.05); color: var(--text-dim); border-color: var(--border-light); }
 .think-details .chev { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 .think-details[open] .chev { transform: rotate(90deg); }
-.think-body { margin-top: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-light); border-radius: 12px; padding: 16px; font-size: 13.5px; color: var(--text-dim); line-height: 1.6; white-space: pre-wrap; font-style: italic; }
+.think-body { margin-top: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; font-size: 11.5px; color: var(--text-dim); line-height: 1.5; white-space: pre-wrap; font-style: italic; }
 
 .cursor { display: inline-block; width: 6px; height: 16px; background: var(--primary); animation: blink 1s step-end infinite; vertical-align: text-bottom; margin-left: 4px; border-radius: 2px; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
@@ -463,7 +463,7 @@ think::before {
 .msg-img { max-width: 100%; border-radius: 12px; margin-bottom: 12px; display: block; border: 1px solid rgba(255,255,255,0.1); }
 #prompt {
   flex: 1; background: none; border: none; outline: none;
-  color: #fff; font-size: 16px; font-family: var(--font-body);
+  color: #fff; font-size: 13px; font-family: var(--font-body);
   resize: none; max-height: 150px; line-height: 1.5; min-height: 24px;
   padding: 8px 0; scrollbar-width: none;
 }
@@ -571,7 +571,7 @@ think::before {
   .modal { border-radius: 24px; max-width: 500px; margin: 0 20px; transform: scale(0.95); }
   .modal-overlay.open .modal { transform: scale(1); }
   .messages { padding: 40px 24px 140px; gap: 32px; }
-  .bubble { font-size: 15px; }
+  .bubble { font-size: 13px; }
   .input-wrapper { padding: 0 24px 32px; }
   .top-bar { padding: 16px 24px; }
   .menu-btn { display: none; }
@@ -706,6 +706,9 @@ think::before {
       <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.py,.sh,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r" style="display:none" onchange="handleFileSelect(event)">
       <button class="attach-btn" onclick="document.getElementById('fileInput').click()" aria-label="Attach">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+      </button>
+      <button class="attach-btn" id="imagineBtn" onclick="toggleImagineMode()" aria-label="Imagine" title="Generar Imagen" style="color:var(--text-muted); transition: color 0.2s;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
       </button>
       <textarea id="prompt" rows="1" placeholder="Type a message..." oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
       <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send">
@@ -888,6 +891,9 @@ async function discoverEndpoint() {
   const candidates = [
     'https://api-yzai.yepzhi.com',
     `http://${host}:11434`,
+    'http://yzai.local:11434',
+    'http://192.168.1.222:11434',
+    'http://192.168.1.86:11434',
     'http://192.168.1.72:11434',
     'http://127.0.0.1:11434',
     origin
@@ -896,7 +902,7 @@ async function discoverEndpoint() {
     try {
       const c = new AbortController();
       const t = setTimeout(() => c.abort(), 2000);
-      const r = await fetch(`${url}/api/tags`, { signal: c.signal });
+      const r = await fetch(`${url}/api/tags?clave=secreta123`, { signal: c.signal });
       clearTimeout(t);
       if (!r.ok) continue;
       // Validate it's real Ollama JSON — not an HTML page (Cloudflare Pages
@@ -909,9 +915,31 @@ async function discoverEndpoint() {
   }
 }
 
+let COMFY_URL = 'https://img-yzai.yepzhi.com';
+async function probeComfy() {
+  const host = window.location.hostname;
+  const origin = window.location.origin;
+  const candidates = [
+    'https://img-yzai.yepzhi.com',
+    `http://${host}:8188`,
+    'http://yzai.local:8188',
+    'http://192.168.1.222:8188',
+    'http://127.0.0.1:8188'
+  ];
+  for (const url of candidates) {
+    try {
+      const c = new AbortController();
+      const t = setTimeout(() => c.abort(), 1000);
+      const r = await fetch(`${url}/system_stats`, { signal: c.signal });
+      clearTimeout(t);
+      if (r.ok) { COMFY_URL = url; return; }
+    } catch(e) {}
+  }
+}
+
 async function init() {
   loadConversations();
-  await discoverEndpoint();
+  await Promise.all([discoverEndpoint(), probeComfy()]);
   await loadModels();
 }
 
@@ -919,13 +947,13 @@ let lastOnlineTimestamp = Date.now();
 
 async function loadModels() {
   try {
-    const res = await fetch(`${OLLAMA_URL}/api/tags`);
+    const res = await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123`);
     if (!res.ok) {
       await discoverEndpoint();
-      const retry = await fetch(`${OLLAMA_URL}/api/tags`);
+      const retry = await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123`);
       if (!retry.ok) throw new Error('HTTP ' + retry.status);
     }
-    const { models = [] } = await (res.ok ? res : await fetch(`${OLLAMA_URL}/api/tags`)).json();
+    const { models = [] } = await (res.ok ? res : await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123`)).json();
     allModels = models;
 
     if (models.length) {
@@ -1221,10 +1249,16 @@ function extractSearchQuery(text) {
 }
 
 // ── CHAT ───────────────────────────────────────────────────
+let isImagineMode = false;
+
 async function sendMessage() {
   const input = document.getElementById('prompt');
   const text  = input.value.trim();
   if (!text || isStreaming) return;
+  if (isImagineMode) {
+    generateImage(text);
+    return;
+  }
   if (!selectedModel) selectedModel = 'gemma4-26b-MoE:latest';
   if (!checkRateLimit()) return;
 
@@ -1254,7 +1288,7 @@ async function sendMessage() {
   const aiEl = createMsg('ai', '', true);
   container.appendChild(aiEl);
   const bubble = aiEl.querySelector('.bubble');
-  scrollBottom();
+  scrollBottom(true);
 
   // ── Proactive Web Search Injection ──
   // If user seems to want a search, run it and inject results BEFORE calling Ollama
@@ -1270,9 +1304,10 @@ async function sendMessage() {
           `${i+1}. **${r.title}**\n   URL: ${r.url}\n   ${r.snippet}`
         ).join('\n\n');
         // Inject results as a system context message before the user message
+        const todayStr = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         const searchContext = {
           role: 'system',
-          content: `[Búsqueda web en tiempo real para: "${searchQuery}"]\n\n${resultsText}\n\nUsa esta información para responder. Current Date: ${new Date().toISOString().split('T')[0]}`
+          content: `[INFORMACIÓN WEB EN TIEMPO REAL - HOY ES ${todayStr.toUpperCase()}]\nResultados para "${searchQuery}":\n\n${resultsText}\n\nCRÍTICO: Ignora tu corte de conocimiento o años futuros como 2206. Usa ÚNICAMENTE la información anterior para responder con precisión sobre eventos recientes.`
         };
         // Insert before the last user message
         payload.splice(payload.length - 1, 0, searchContext);
@@ -1351,7 +1386,7 @@ async function sendMessage() {
   async function checkModelAndMaybeShowLoading() {
     if (firstTokenReceived) return;
     try {
-      const psRes = await fetch(`${OLLAMA_URL}/api/ps`);
+      const psRes = await fetch(`${OLLAMA_URL}/api/ps?clave=secreta123`);
       if (!psRes.ok || firstTokenReceived) return;
       const data = await psRes.json();
       const model = data.models.find(m => m.name === selectedModel);
@@ -1389,7 +1424,7 @@ async function sendMessage() {
   let retryCount = 0;
   async function attemptFetch() {
     try {
-      const res = await fetch(`${OLLAMA_URL}/api/chat`, {
+      const res = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         signal: abortCtrl.signal,
@@ -1434,6 +1469,7 @@ async function sendMessage() {
     const decoder = new TextDecoder();
     let buf = '';
 
+    let ollamaDone = false;
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
@@ -1483,6 +1519,7 @@ async function sendMessage() {
           }
 
           if (d.done && d.eval_count) {
+            ollamaDone = true;
             clearInterval(liveTimer);
             const tps = d.eval_duration ? (d.eval_count / (d.eval_duration/1e9)).toFixed(1) : null;
             const loadTime = d.load_duration ? (d.load_duration/1e9).toFixed(1) : 0;
@@ -1491,6 +1528,10 @@ async function sendMessage() {
           }
         } catch(e) {}
       }
+    }
+
+    if (!ollamaDone && targetText) {
+      targetText += '\n\n*(⚠️ La respuesta se interrumpió por un tiempo de espera en la red o desconexión del servidor)*';
     }
 
     // ── Execute tool calls if model requested web_search ──
@@ -1530,7 +1571,7 @@ async function sendMessage() {
             document.getElementById('token-count').textContent = 'Generando respuesta...';
             bubble.innerHTML = '<span class="cursor"></span>';
             // Second Ollama call with tool results
-            const res2 = await fetch(`${OLLAMA_URL}/api/chat`, {
+            const res2 = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               signal: abortCtrl.signal,
@@ -1590,7 +1631,20 @@ async function sendMessage() {
     if (liveTimer) clearInterval(liveTimer);
   } catch(e) {
     if (e.name !== 'AbortError') {
-      bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${esc(e.message)}</span>`;
+      const isOfflineErr = e.message.includes('Failed to fetch') || e.message.includes('502') || e.message.includes('521') || e.message.includes('522') || e.message.includes('523') || e.message.includes('524');
+      const errorMsg = isOfflineErr 
+        ? '🔴 El servidor de IA (MiniPC) está apagado o no responde. Por favor enciéndelo.'
+        : `⚠️ Error de conexión: ${esc(e.message)}`;
+
+      if (targetText.trim()) {
+        targetText += `\n\n*(${errorMsg})*`;
+        renderMd(bubble, targetText, targetThinking);
+        messages.push({ role:'ai', content:targetText });
+        saveCurrentConv();
+      } else {
+        bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${errorMsg}</span>`;
+      }
+      document.getElementById('token-count').textContent = isOfflineErr ? 'Servidor apagado / desconectado' : 'Error de respuesta';
     }
     clearTimeout(loadPollStart);
     if (loadInterval) clearInterval(loadInterval);
@@ -1615,7 +1669,14 @@ function setStreaming(on) {
 // ── HELPERS ────────────────────────────────────────────────
 function handleKey(e) { if (e.key==='Enter' && !e.shiftKey && window.innerWidth>=768) { e.preventDefault(); sendMessage(); } }
 function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,150)+'px'; }
-function scrollBottom()  { const m=document.getElementById('messages-wrapper'); m.scrollTop=m.scrollHeight; }
+function scrollBottom(force = false)  { 
+  const m=document.getElementById('messages-wrapper'); 
+  if (!m) return;
+  const isNearBottom = m.scrollHeight - m.scrollTop - m.clientHeight < 100;
+  if (force || isNearBottom) {
+    m.scrollTop = m.scrollHeight;
+  }
+}
 function clearChat()     { if (messages.length && !confirm('Clear this conversation?')) return; messages=[]; currentConvId=Date.now().toString(); renderMessages(); pickModel(selectedModel, true); }
 function sendSuggestion(btn) { document.getElementById('prompt').value=btn.textContent; sendMessage(); }
 function openSystemModal()  { document.getElementById('systemPromptInput').value=systemPrompt; document.getElementById('systemModal').classList.add('open'); }
@@ -1678,6 +1739,219 @@ if (window.visualViewport) {
   };
   document.head.appendChild(s1);
 })();
+function toggleImagineMode() {
+  isImagineMode = !isImagineMode;
+  const btn = document.getElementById('imagineBtn');
+  const input = document.getElementById('prompt');
+  if (isImagineMode) {
+    btn.style.color = 'var(--primary)';
+    input.placeholder = 'Describe an image to generate...';
+  } else {
+    btn.style.color = 'var(--text-muted)';
+    input.placeholder = 'Type a message...';
+  }
+}
+
+async function generateImage(promptText) {
+  const input = document.getElementById('prompt');
+  input.value = ''; autoResize(input);
+  document.getElementById('welcome')?.remove();
+  
+  const container = document.getElementById('messages');
+  container.appendChild(createMsg('user', promptText));
+  const aiEl = createMsg('ai', '', false);
+  container.appendChild(aiEl);
+  const bubble = aiEl.querySelector('.bubble');
+  bubble.innerHTML = '<div style="color:var(--text-muted);font-style:italic;">🎨 Generando imagen con FLUX2... esto puede tomar un momento.</div>';
+  scrollBottom();
+  
+  isStreaming = true;
+  document.getElementById('sendBtn').style.display = 'none';
+  document.getElementById('stopBtn').style.display = 'block';
+
+  // Basic ComfyUI workflow JSON for FLUX
+  const workflow = {
+    "3": {
+      "inputs": {
+        "seed": Math.floor(Math.random() * 1000000000000000),
+        "steps": 20,
+        "cfg": 1,
+        "sampler_name": "euler",
+        "scheduler": "simple",
+        "denoise": 1,
+        "model": [
+          "11",
+          0
+        ],
+        "positive": [
+          "6",
+          0
+        ],
+        "negative": [
+          "7",
+          0
+        ],
+        "latent_image": [
+          "5",
+          0
+        ]
+      },
+      "class_type": "KSampler",
+      "_meta": {
+        "title": "KSampler"
+      }
+    },
+    "5": {
+      "inputs": {
+        "width": 1024,
+        "height": 1024,
+        "batch_size": 1
+      },
+      "class_type": "EmptyLatentImage",
+      "_meta": {
+        "title": "Empty Latent Image"
+      }
+    },
+    "6": {
+      "inputs": {
+        "text": promptText,
+        "clip": [
+          "12",
+          0
+        ]
+      },
+      "class_type": "CLIPTextEncode",
+      "_meta": {
+        "title": "CLIP Text Encode (Prompt)"
+      }
+    },
+    "7": {
+      "inputs": {
+        "text": "",
+        "clip": [
+          "12",
+          0
+        ]
+      },
+      "class_type": "CLIPTextEncode",
+      "_meta": {
+        "title": "CLIP Text Encode (Prompt)"
+      }
+    },
+    "8": {
+      "inputs": {
+        "samples": [
+          "3",
+          0
+        ],
+        "vae": [
+          "13",
+          0
+        ]
+      },
+      "class_type": "VAEDecode",
+      "_meta": {
+        "title": "VAE Decode"
+      }
+    },
+    "9": {
+      "inputs": {
+        "filename_prefix": "yzai_flux",
+        "images": [
+          "8",
+          0
+        ]
+      },
+      "class_type": "SaveImage",
+      "_meta": {
+        "title": "Save Image"
+      }
+    },
+    "11": {
+      "inputs": {
+        "unet_name": "Flux2-Klein-9B-True-v2-Q4_K.gguf",
+        "weight_dtype": "default"
+      },
+      "class_type": "UnetLoaderGGUF",
+      "_meta": {
+        "title": "Unet Loader (GGUF)"
+      }
+    },
+    "12": {
+      "inputs": {
+        "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
+        "clip_name2": "clip_l.safetensors",
+        "type": "flux"
+      },
+      "class_type": "DualCLIPLoader",
+      "_meta": {
+        "title": "DualCLIPLoader"
+      }
+    },
+    "13": {
+      "inputs": {
+        "vae_name": "ae.safetensors"
+      },
+      "class_type": "VAELoader",
+      "_meta": {
+        "title": "Load VAE"
+      }
+    }
+  };
+
+  if (!COMFY_URL) {
+    await probeComfy();
+  }
+  if (!COMFY_URL) {
+    bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} 🔴 No se encontró el servidor de imágenes (ComfyUI) en la red local. Verifica que la MiniPC esté encendida.</span>`;
+    resetInputUI();
+    return;
+  }
+
+  try {
+    const res = await fetch(`${COMFY_URL}/prompt`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ prompt: workflow })
+    });
+    
+    if (!res.ok) throw new Error("ComfyUI no está respondiendo o faltan modelos.");
+    const data = await res.json();
+    const promptId = data.prompt_id;
+    
+    // Polling ComfyUI history for completion
+    const pollInterval = setInterval(async () => {
+      try {
+        const histRes = await fetch(`${COMFY_URL}/history/${promptId}`);
+        const histData = await histRes.json();
+        if (histData[promptId]) {
+          clearInterval(pollInterval);
+          const outputs = histData[promptId].outputs;
+          const node = Object.keys(outputs)[0]; // node 9
+          const filename = outputs[node].images[0].filename;
+          
+          bubble.innerHTML = `<img src="${COMFY_URL}/view?filename=${filename}&type=output" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
+          scrollBottom();
+          resetInputUI();
+        }
+      } catch(e) {}
+    }, 2000);
+    
+  } catch (err) {
+    const isConnErr = err.message.includes('Failed to fetch') || err.message.includes('Content Security Policy') || err.message.includes('violates');
+    const msg = isConnErr 
+      ? '🔴 No se pudo conectar con ComfyUI. Verifica que la MiniPC esté encendida y conectada a la red local.'
+      : `Error generando imagen: ${esc(err.message)}`;
+    bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${msg}</span>`;
+    resetInputUI();
+  }
+}
+
+function resetInputUI() {
+  isStreaming = false;
+  document.getElementById('sendBtn').style.display = 'block';
+  document.getElementById('stopBtn').style.display = 'none';
+}
 </script>
 </body>
 </html>
