@@ -333,8 +333,8 @@ body {
 .msg.user .msg-col { align-items: flex-end; }
 
 .bubble {
-  padding: 14px 18px; border-radius: 20px;
-  font-size: 15px; line-height: 1.6; word-break: break-word; overflow-wrap: anywhere;
+  padding: 14px 18px;
+  font-size: 13px; line-height: 1.5; word-break: break-word; overflow-wrap: anywhere;
   color: var(--text); min-width: 0; max-width: 100%;
 }
 .msg.ai .bubble { 
@@ -351,9 +351,9 @@ body {
 .bubble p { margin-bottom: 12px; }
 .bubble p:last-child { margin-bottom: 0; }
 .bubble h1, .bubble h2, .bubble h3 { font-family: var(--font-display); font-weight: 700; margin: 24px 0 12px; color: #fff; }
-.bubble h1 { font-size: 20px; }
-.bubble h2 { font-size: 18px; }
-.bubble h3 { font-size: 16px; }
+.bubble h1 { font-size: 16px; }
+.bubble h2 { font-size: 15px; }
+.bubble h3 { font-size: 13.5px; }
 .bubble ul, .bubble ol { padding-left: 20px; margin-bottom: 12px; }
 .bubble li { margin-bottom: 6px; }
 .bubble li::marker { color: var(--primary); }
@@ -363,7 +363,7 @@ body {
 .bubble a:hover { color: #fff; text-decoration: underline; }
 .bubble hr { border: none; border-top: 1px solid var(--border-light); margin: 20px 0; }
 .bubble blockquote { border-left: 4px solid var(--primary); padding-left: 16px; color: var(--text-dim); font-style: italic; background: rgba(255,255,255,0.02); padding: 12px 16px; border-radius: 0 12px 12px 0; margin: 12px 0; }
-.bubble table { border-collapse: collapse; width: 100%; font-size: 14px; margin: 16px 0; overflow-x: auto; display: block; border-radius: 8px; }
+.bubble table { border-collapse: collapse; width: 100%; font-size: 12px; margin: 16px 0; overflow-x: auto; display: block; border-radius: 8px; }
 .bubble th { background: rgba(255,255,255,0.05); padding: 10px 14px; border: 1px solid var(--border-light); font-weight: 600; text-align: left; }
 .bubble td { padding: 10px 14px; border: 1px solid var(--border-light); }
 
@@ -388,7 +388,7 @@ body {
 }
 .copy-btn:hover { background: rgba(255,255,255,0.1); }
 .copy-btn.copied { color: var(--green); border-color: var(--green); background: rgba(16,185,129,0.1); }
-.bubble pre { margin: 0; padding: 16px; overflow-x: auto; max-width: 100%; white-space: pre-wrap; word-break: break-all; background: #0d0d12 !important; font-family: var(--font-mono); font-size: 14px; line-height: 1.6; }
+.bubble pre { margin: 0; padding: 14px; overflow-x: auto; max-width: 100%; white-space: pre-wrap; word-break: break-all; background: #0d0d12 !important; font-family: var(--font-mono); font-size: 12px; line-height: 1.5; }
 .bubble pre code { background: none; border: none; padding: 0; color: inherit; font-size: inherit; white-space: pre-wrap; word-break: break-all; }
 
 think { 
@@ -425,7 +425,7 @@ think::before {
 .think-details summary:hover { background: rgba(255,255,255,0.05); color: var(--text-dim); border-color: var(--border-light); }
 .think-details .chev { transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
 .think-details[open] .chev { transform: rotate(90deg); }
-.think-body { margin-top: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-light); border-radius: 12px; padding: 16px; font-size: 13.5px; color: var(--text-dim); line-height: 1.6; white-space: pre-wrap; font-style: italic; }
+.think-body { margin-top: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; font-size: 11.5px; color: var(--text-dim); line-height: 1.5; white-space: pre-wrap; font-style: italic; }
 
 .cursor { display: inline-block; width: 6px; height: 16px; background: var(--primary); animation: blink 1s step-end infinite; vertical-align: text-bottom; margin-left: 4px; border-radius: 2px; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
@@ -463,7 +463,7 @@ think::before {
 .msg-img { max-width: 100%; border-radius: 12px; margin-bottom: 12px; display: block; border: 1px solid rgba(255,255,255,0.1); }
 #prompt {
   flex: 1; background: none; border: none; outline: none;
-  color: #fff; font-size: 16px; font-family: var(--font-body);
+  color: #fff; font-size: 13px; font-family: var(--font-body);
   resize: none; max-height: 150px; line-height: 1.5; min-height: 24px;
   padding: 8px 0; scrollbar-width: none;
 }
@@ -571,7 +571,7 @@ think::before {
   .modal { border-radius: 24px; max-width: 500px; margin: 0 20px; transform: scale(0.95); }
   .modal-overlay.open .modal { transform: scale(1); }
   .messages { padding: 40px 24px 140px; gap: 32px; }
-  .bubble { font-size: 15px; }
+  .bubble { font-size: 13px; }
   .input-wrapper { padding: 0 24px 32px; }
   .top-bar { padding: 16px 24px; }
   .menu-btn { display: none; }
@@ -1282,7 +1282,7 @@ async function sendMessage() {
   const aiEl = createMsg('ai', '', true);
   container.appendChild(aiEl);
   const bubble = aiEl.querySelector('.bubble');
-  scrollBottom();
+  scrollBottom(true);
 
   // ── Proactive Web Search Injection ──
   // If user seems to want a search, run it and inject results BEFORE calling Ollama
@@ -1643,7 +1643,14 @@ function setStreaming(on) {
 // ── HELPERS ────────────────────────────────────────────────
 function handleKey(e) { if (e.key==='Enter' && !e.shiftKey && window.innerWidth>=768) { e.preventDefault(); sendMessage(); } }
 function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,150)+'px'; }
-function scrollBottom()  { const m=document.getElementById('messages-wrapper'); m.scrollTop=m.scrollHeight; }
+function scrollBottom(force = false)  { 
+  const m=document.getElementById('messages-wrapper'); 
+  if (!m) return;
+  const isNearBottom = m.scrollHeight - m.scrollTop - m.clientHeight < 100;
+  if (force || isNearBottom) {
+    m.scrollTop = m.scrollHeight;
+  }
+}
 function clearChat()     { if (messages.length && !confirm('Clear this conversation?')) return; messages=[]; currentConvId=Date.now().toString(); renderMessages(); pickModel(selectedModel, true); }
 function sendSuggestion(btn) { document.getElementById('prompt').value=btn.textContent; sendMessage(); }
 function openSystemModal()  { document.getElementById('systemPromptInput').value=systemPrompt; document.getElementById('systemModal').classList.add('open'); }
