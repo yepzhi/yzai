@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#030305">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; connect-src * 'unsafe-inline' blob: data: http: https: ws: wss:;">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1301,9 +1301,10 @@ async function sendMessage() {
           `${i+1}. **${r.title}**\n   URL: ${r.url}\n   ${r.snippet}`
         ).join('\n\n');
         // Inject results as a system context message before the user message
+        const todayStr = new Date().toLocaleDateString('es-ES', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
         const searchContext = {
           role: 'system',
-          content: `[Búsqueda web en tiempo real para: "${searchQuery}"]\n\n${resultsText}\n\nUsa esta información para responder. Current Date: ${new Date().toISOString().split('T')[0]}`
+          content: `[INFORMACIÓN WEB EN TIEMPO REAL - HOY ES ${todayStr.toUpperCase()}]\nResultados para "${searchQuery}":\n\n${resultsText}\n\nCRÍTICO: Ignora tu corte de conocimiento o años futuros como 2206. Usa ÚNICAMENTE la información anterior para responder con precisión sobre eventos recientes.`
         };
         // Insert before the last user message
         payload.splice(payload.length - 1, 0, searchContext);
