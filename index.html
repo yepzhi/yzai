@@ -915,16 +915,15 @@ async function discoverEndpoint() {
   }
 }
 
-let COMFY_URL = null;
+let COMFY_URL = 'https://img-yzai.yepzhi.com';
 async function probeComfy() {
   const host = window.location.hostname;
   const origin = window.location.origin;
   const candidates = [
+    'https://img-yzai.yepzhi.com',
     `http://${host}:8188`,
     'http://yzai.local:8188',
     'http://192.168.1.222:8188',
-    'http://192.168.1.86:8188',
-    'http://192.168.1.72:8188',
     'http://127.0.0.1:8188'
   ];
   for (const url of candidates) {
