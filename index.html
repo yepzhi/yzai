@@ -1651,16 +1651,6 @@ async function sendMessage() {
   let retryCount = 0;
   async function attemptFetch() {
     try {
-      // Free ComfyUI memory before generating text to prevent Ollama GPU OOM crashes
-      try {
-        await fetch(getComfyEndpoint('/free'), {
-          method: 'POST',
-          body: JSON.stringify({ unload_models: true, free_memory: true })
-        });
-      } catch (e) {
-        // Ignore errors if ComfyUI is offline
-      }
-
       const res = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -2258,17 +2248,17 @@ async function generateImage(promptText) {
       "_meta": { "title": "Save Image" }
     },
     "11": {
-      "inputs": { "unet_name": "flux1-schnell-Q4_0.gguf", "weight_dtype": "default" },
+      "inputs": { "unet_name": "flux-2-klein-4b-Q4_K_M.gguf", "weight_dtype": "default" },
       "class_type": "UnetLoaderGGUF",
       "_meta": { "title": "Unet Loader (GGUF)" }
     },
     "12": {
-      "inputs": { "clip_name1": "t5xxl_fp8_e4m3fn.safetensors", "clip_name2": "clip_l.safetensors", "type": "flux" },
-      "class_type": "DualCLIPLoader",
-      "_meta": { "title": "DualCLIPLoader" }
+      "inputs": { "clip_name": "qwen_3_8b_fp8mixed.safetensors", "type": "flux2" },
+      "class_type": "CLIPLoader",
+      "_meta": { "title": "Load CLIP" }
     },
     "13": {
-      "inputs": { "vae_name": "ae.safetensors" },
+      "inputs": { "vae_name": "flux2-vae.safetensors" },
       "class_type": "VAELoader",
       "_meta": { "title": "Load VAE" }
     }
