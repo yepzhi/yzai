@@ -2048,7 +2048,7 @@ async function generateImage(promptText) {
     "3": {
       "inputs": {
         "seed": Math.floor(Math.random() * 1000000000000000),
-        "steps": 20,
+        "steps": 4,
         "cfg": 1,
         "sampler_name": "euler",
         "scheduler": "simple",
@@ -2062,7 +2062,7 @@ async function generateImage(promptText) {
       "_meta": { "title": "KSampler" }
     },
     "5": {
-      "inputs": { "width": 1024, "height": 1024, "batch_size": 1 },
+      "inputs": { "width": 512, "height": 512, "batch_size": 1 },
       "class_type": "EmptyLatentImage",
       "_meta": { "title": "Empty Latent Image" }
     },
@@ -2117,13 +2117,13 @@ async function generateImage(promptText) {
   let isDone = false;
 
   const nodeNames = {
-    "11": "Cargando modelo UNet FLUX.2 (GGUF)...",
+    "11": "Cargando modelo UNet FLUX.1 Schnell (GGUF)...",
     "12": "Cargando encoders de texto (CLIP & T5)...",
     "13": "Cargando VAE...",
     "5": "Inicializando espacio latente...",
     "6": "Codificando prompt positivo...",
     "7": "Codificando prompt negativo...",
-    "3": "Muestreando difusión (KSampler 20 pasos)...",
+    "3": "Muestreando difusión (KSampler 4 pasos CPU)...",
     "8": "Decodificando imagen latente (VAE)...",
     "9": "Guardando imagen final..."
   };
@@ -2205,10 +2205,10 @@ async function generateImage(promptText) {
       body: JSON.stringify({ prompt: workflow, client_id: clientId })
     });
     
-    if (!res.ok) throw new Error("ComfyUI no está respondiendo o faltan modelos.");
     const data = await res.json();
     const promptId = data.prompt_id;
     appendFluxLog(cardId, `Prompt registrado en ComfyUI (ID: ${promptId.substring(0,8)}...)`);
+    resetInputUI(); // Unlock chat UI so user can chat with Gemma 4 during image generation
     
     let startTime = Date.now();
     let pollCount = 0;
