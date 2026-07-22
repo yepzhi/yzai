@@ -999,7 +999,10 @@ function removeImage() {
 
 // ── INIT ───────────────────────────────────────────────────
 async function discoverEndpoint() {
-  const origin = window.location.origin;
+  if (location.hostname.includes('yepzhi.com')) {
+    OLLAMA_URL = 'https://api-yzai.yepzhi.com';
+    return;
+  }
   const host = window.location.hostname || '127.0.0.1';
   // api-yzai.yepzhi.com first — prevents Cloudflare Pages (which returns 200
   // for everything via _redirects) from being mistaken as an Ollama endpoint.
@@ -1035,10 +1038,13 @@ let COMFY_URL = null;
 let COMFY_IS_DIRECT = false;
 
 async function probeComfy() {
+  if (location.hostname.includes('yepzhi.com')) {
+    COMFY_URL = '';
+    COMFY_IS_DIRECT = false;
+    return;
+  }
   const candidates = [
     { base: '', direct: false },                          // same origin /comfy/... (Nginx proxy)
-    { base: 'https://img-yzai.yepzhi.com', direct: true }, // direct tunnel without /comfy
-    { base: 'https://img-yzai.yepzhi.com', direct: false },// direct tunnel with /comfy
     { base: 'http://127.0.0.1:8188', direct: true },       // local direct
   ];
   for (const c of candidates) {
@@ -1058,13 +1064,17 @@ async function probeComfy() {
 }
 
 function getComfyEndpoint(path) {
-  if (COMFY_URL === null) return path;
   const cleanPath = path.startsWith('/') ? path : '/' + path;
+  if (location.hostname.includes('yepzhi.com') || location.hostname === 'localhost') {
+    return `/comfy${cleanPath}`;
+  }
+  if (COMFY_URL === null || COMFY_URL === '') {
+    return `/comfy${cleanPath}`;
+  }
   if (COMFY_IS_DIRECT) {
     return `${COMFY_URL}${cleanPath}`;
-  } else {
-    return `${COMFY_URL}/comfy${cleanPath}`;
   }
+  return `${COMFY_URL}/comfy${cleanPath}`;
 }
 
 async function init() {
@@ -2067,10 +2077,15 @@ async function generateImage(promptText) {
 
   try {
     let wsUrl = '';
-    const wsHttpUrl = getComfyEndpoint('/ws');
-    const wsProto = wsHttpUrl.startsWith('https') ? 'wss:' : (wsHttpUrl.startsWith('http') ? 'ws:' : (location.protocol === 'https:' ? 'wss:' : 'ws:'));
-    const wsHostPath = wsHttpUrl.replace(/^https?:\/\//, '').replace(/^http:\/\//, '');
-    wsUrl = `${wsProto}//${wsHostPath}?clientId=${clientId}`;
+    if (location.hostname.includes('yepzhi.com')) {
+      const wsProto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      wsUrl = `${wsProto}//${location.host}/comfy/ws?clientId=${clientId}`;
+    } else {
+      const wsHttpUrl = getComfyEndpoint('/ws');
+      const wsProto = wsHttpUrl.startsWith('https') ? 'wss:' : (wsHttpUrl.startsWith('http') ? 'ws:' : (location.protocol === 'https:' ? 'wss:' : 'ws:'));
+      const wsHostPath = wsHttpUrl.replace(/^https?:\/\//, '').replace(/^http:\/\//, '');
+      wsUrl = `${wsProto}//${wsHostPath}?clientId=${clientId}`;
+    }
 
     ws = new WebSocket(wsUrl);
 
