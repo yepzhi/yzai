@@ -1027,24 +1027,40 @@ async function discoverEndpoint() {
   }
 }
 
-// COMFY_URL: same-origin /comfy/ proxy (nginx) to avoid CORS/CSP issues
+// COMFY_URL: same-origin /comfy/ proxy (nginx) or direct tunnel fallback
 let COMFY_URL = null;
+let COMFY_IS_DIRECT = false;
+
 async function probeComfy() {
-  // Always use same-origin proxy — no CORS/CSP issues
   const candidates = [
-    '',                              // same origin /comfy/... (via Nginx proxy)
-    'https://img-yzai.yepzhi.com',   // direct tunnel fallback
+    { base: '', direct: false },                          // same origin /comfy/... (Nginx proxy)
+    { base: 'https://img-yzai.yepzhi.com', direct: true }, // direct tunnel without /comfy
+    { base: 'https://img-yzai.yepzhi.com', direct: false },// direct tunnel with /comfy
+    { base: 'http://127.0.0.1:8188', direct: true },       // local direct
   ];
-  for (const base of candidates) {
+  for (const c of candidates) {
     try {
-      const c = new AbortController();
-      const t = setTimeout(() => c.abort(), 2000);
-      const r = await fetch(`${base}/comfy/system_stats`, { signal: c.signal });
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 2000);
+      const url = c.direct ? `${c.base}/system_stats` : `${c.base}/comfy/system_stats`;
+      const r = await fetch(url, { signal: ctrl.signal });
       clearTimeout(t);
       if (r.ok && (r.headers.get('content-type') || '').includes('application/json')) {
-        COMFY_URL = base; return;
+        COMFY_URL = c.base;
+        COMFY_IS_DIRECT = c.direct;
+        return;
       }
     } catch(e) {}
+  }
+}
+
+function getComfyEndpoint(path) {
+  if (COMFY_URL === null) return path;
+  const cleanPath = path.startsWith('/') ? path : '/' + path;
+  if (COMFY_IS_DIRECT) {
+    return `${COMFY_URL}${cleanPath}`;
+  } else {
+    return `${COMFY_URL}/comfy${cleanPath}`;
   }
 }
 
@@ -2036,16 +2052,17 @@ async function generateImage(promptText) {
 
   try {
     let wsUrl = '';
-    if (COMFY_URL === '') {
-      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
-      wsUrl = `${proto}//${location.host}/comfy/ws?clientId=${clientId}`;
-    } else {
-      const proto = COMFY_URL.startsWith('https') ? 'wss:' : 'ws:';
-      const host = COMFY_URL.replace(/^https?:\/\//, '');
-      wsUrl = `${proto}//${host}/comfy/ws?clientId=${clientId}`;
-    }
+    const wsHttpUrl = getComfyEndpoint('/ws');
+    const wsProto = wsHttpUrl.startsWith('https') ? 'wss:' : (wsHttpUrl.startsWith('http') ? 'ws:' : (location.protocol === 'https:' ? 'wss:' : 'ws:'));
+    const wsHostPath = wsHttpUrl.replace(/^https?:\/\//, '').replace(/^http:\/\//, '');
+    wsUrl = `${wsProto}//${wsHostPath}?clientId=${clientId}`;
 
     ws = new WebSocket(wsUrl);
+
+    ws.onerror = (err) => {
+      console.warn('[ComfyUI WS warning]', err);
+      appendFluxLog(cardId, "WebSocket no disponible (bloqueado por CSP o red), usando polling HTTP.");
+    };
 
     ws.onopen = () => {
       appendFluxLog(cardId, `Canal WebSocket activo (client_id: ${clientId}).`);
@@ -2089,7 +2106,8 @@ async function generateImage(promptText) {
             updateFluxProgress(cardId, 100, "¡Imagen completada!", "Renderizado finalizado con éxito.");
             setTimeout(() => {
               if (ws) ws.close();
-              bubble.innerHTML = `<img src="${COMFY_URL}/comfy/view?filename=${filename}&type=output" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
+              const viewUrl = getComfyEndpoint(`/view?filename=${filename}&type=output`);
+              bubble.innerHTML = `<img src="${viewUrl}" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
               scrollBottom();
               resetInputUI();
             }, 400);
@@ -2098,12 +2116,13 @@ async function generateImage(promptText) {
       } catch(e) {}
     };
   } catch(e) {
-    appendFluxLog(cardId, "WebSocket no disponible, usando polling HTTP.");
+    appendFluxLog(cardId, "WebSocket deshabilitado por el navegador, ejecutando vía HTTP.");
   }
 
   try {
-    updateFluxProgress(cardId, 10, "Enviando workflow FLUX.2...", "POST /comfy/prompt");
-    const res = await fetch(`${COMFY_URL}/comfy/prompt`, {
+    updateFluxProgress(cardId, 10, "Enviando workflow FLUX.2...", "POST /prompt");
+    const promptUrl = getComfyEndpoint('/prompt');
+    const res = await fetch(promptUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ prompt: workflow, client_id: clientId })
@@ -2137,7 +2156,8 @@ async function generateImage(promptText) {
       }
 
       try {
-        const histRes = await fetch(`${COMFY_URL}/comfy/history/${promptId}`);
+        const histUrl = getComfyEndpoint(`/history/${promptId}`);
+        const histRes = await fetch(histUrl);
         const histData = await histRes.json();
         if (histData[promptId]) {
           const item = histData[promptId];
@@ -2170,7 +2190,8 @@ async function generateImage(promptText) {
             
             updateFluxProgress(cardId, 100, "¡Imagen completada!", `Proceso finalizado con éxito (${elapsedSec}s).`);
             setTimeout(() => {
-              bubble.innerHTML = `<img src="${COMFY_URL}/comfy/view?filename=${filename}&type=output" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
+              const viewUrl = getComfyEndpoint(`/view?filename=${filename}&type=output`);
+              bubble.innerHTML = `<img src="${viewUrl}" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
               scrollBottom();
               resetInputUI();
             }, 300);
@@ -2185,7 +2206,8 @@ async function generateImage(promptText) {
 
         // Check ComfyUI queue for pending/running status
         try {
-          const qRes = await fetch(`${COMFY_URL}/comfy/queue`);
+          const queueUrl = getComfyEndpoint('/queue');
+          const qRes = await fetch(queueUrl);
           const qData = await qRes.json();
           const pending = qData.queue_pending || [];
           if (pending.some(item => item[1] === promptId)) {
