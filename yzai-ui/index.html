@@ -432,6 +432,112 @@ think::before {
 
 .msg-time { font-size: 11px; color: var(--muted); margin-top: 6px; padding: 0 4px; font-family: var(--font-mono); }
 
+/* FLUX2 Generation Progress & Visor Card */
+.flux-progress-card {
+  background: var(--surface2, rgba(255, 255, 255, 0.03));
+  border: 1px solid var(--border-light, rgba(255, 255, 255, 0.1));
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-family: var(--font-sans);
+}
+.flux-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.flux-card-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--text);
+}
+.flux-card-title svg {
+  color: var(--primary, #8b5cf6);
+}
+.flux-visor-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-dim, #a1a1aa);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.flux-visor-toggle:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--text);
+}
+.flux-status-legend {
+  font-size: 12.5px;
+  color: var(--cyan, #06b6d4);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 20px;
+}
+.flux-progress-track {
+  width: 100%;
+  height: 8px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+.flux-progress-bar {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #3b82f6, #8b5cf6, #ec4899);
+  border-radius: 4px;
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.flux-progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  color: var(--muted, #71717a);
+  font-family: var(--font-mono);
+}
+.flux-visor-log {
+  background: #090a0f;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: #a1a1aa;
+  max-height: 140px;
+  overflow-y: auto;
+  margin-top: 4px;
+  line-height: 1.6;
+}
+.flux-visor-log .log-line {
+  display: flex;
+  gap: 8px;
+  word-break: break-all;
+}
+.flux-visor-log .log-time {
+  color: var(--text-muted, #71717a);
+  user-select: none;
+  flex-shrink: 0;
+}
+.flux-visor-log .log-msg {
+  color: var(--text-dim, #d4d4d8);
+}
+
 /* ─── FLOATING INPUT BAR ─────────────────────────── */
 .input-wrapper {
   position: absolute; bottom: 0; left: 0; right: 0;
@@ -697,8 +803,8 @@ think::before {
     <div id="imgPreviewContainer" style="display:none;padding:6px 12px;">
       <div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:8px;padding:6px 10px;width:fit-content;">
         <img id="imgPreview" style="height:40px;width:40px;object-fit:cover;border-radius:6px;">
-        <span style="font-size:12px;color:var(--text-secondary);">📎 Imagen adjunta</span>
-        <button onclick="removeImage()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px 4px;font-size:14px;">✕</button>
+        <span style="font-size:12px;color:var(--text-secondary);display:inline-flex;align-items:center;gap:4px;">${ICONS.clip} Imagen adjunta</span>
+        <button onclick="removeImage()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px 4px;display:inline-flex;align-items:center;">${ICONS.close}</button>
       </div>
     </div>
     <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Contexto: 32K · Listo para generar</div>
@@ -746,6 +852,12 @@ const ICONS = {
   warn: `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
   chev: `<svg class="chev" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>`,
   check:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  spark:`<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m12 3-1.9 5.8a2 2 0 0 1-1.3 1.3L3 12l5.8 1.9a2 2 0 0 1 1.3 1.3L12 21l1.9-5.8a2 2 0 0 1 1.3-1.3L21 12l-5.8-1.9a2 2 0 0 1-1.3-1.3L12 3z"/><path d="m5 3 1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2z"/></svg>`,
+  clip: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m21.44 11.05-9.19 9.19a6 6 0 0 1-8.49-8.49l8.57-8.57a4 4 0 1 1 5.66 5.66l-8.59 8.58a2 2 0 0 1-2.83-2.83l7.88-7.88"/></svg>`,
+  file: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/></svg>`,
+  close:`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  terminal:`<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>`,
+  spin: `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>`
 };
 
 const MODEL_META = {
@@ -842,11 +954,11 @@ function handleFileSelect(e) {
       autoResize(promptEl);
       const pages = Math.min(pdf.numPages, truncated ? '40+' : pdf.numPages);
       document.getElementById('token-count').innerHTML =
-        `<span style="color:var(--cyan);">📄 PDF "${file.name}" — ${pages} págs, ${(allText.length/1000).toFixed(0)}K chars${truncated?' ⚠️ truncado':''}</span>`;
+        `<span style="color:var(--cyan);display:inline-flex;align-items:center;gap:6px;">${ICONS.file} PDF "${file.name}" — ${pages} págs, ${(allText.length/1000).toFixed(0)}K chars${truncated ? ` <span style="display:inline-flex;align-items:center;gap:2px;">${ICONS.warn} truncado</span>` : ''}</span>`;
     }).catch(err => {
       URL.revokeObjectURL(fileURL);
       document.getElementById('token-count').innerHTML =
-        `<span style="color:var(--red);">⚠️ Error leyendo PDF: ${err.message}</span>`;
+        `<span style="color:var(--red);display:inline-flex;align-items:center;gap:6px;">${ICONS.warn} Error leyendo PDF: ${err.message}</span>`;
     });
     return;
   }
@@ -856,12 +968,12 @@ function handleFileSelect(e) {
   const isTextExt  = TEXT_EXTENSIONS.includes(ext);
   if (!isTextMime && !isTextExt) {
     document.getElementById('token-count').innerHTML =
-      `<span style="color:var(--red);font-weight:600;">⚠️ "${file.name}": formato no soportado. Usa imágenes, PDF o archivos de texto.</span>`;
+      `<span style="color:var(--red);font-weight:600;display:inline-flex;align-items:center;gap:6px;">${ICONS.warn} "${file.name}": formato no soportado. Usa imágenes, PDF o archivos de texto.</span>`;
     return;
   }
   if (file.size > 500_000) {
     document.getElementById('token-count').innerHTML =
-      `<span style="color:var(--red);font-weight:600;">⚠️ Archivo demasiado grande (${(file.size/1024).toFixed(0)}KB). Máximo 500KB.</span>`;
+      `<span style="color:var(--red);font-weight:600;display:inline-flex;align-items:center;gap:6px;">${ICONS.warn} Archivo demasiado grande (${(file.size/1024).toFixed(0)}KB). Máximo 500KB.</span>`;
     return;
   }
   const reader = new FileReader();
@@ -1530,7 +1642,7 @@ async function sendMessage() {
     }
 
     if (!ollamaDone && targetText) {
-      targetText += '\n\n*(⚠️ La respuesta se interrumpió por un tiempo de espera en la red o desconexión del servidor)*';
+      targetText += '\n\n*(La respuesta se interrumpió por un tiempo de espera en la red o desconexión del servidor)*';
     }
 
     // ── Execute tool calls if model requested web_search ──
@@ -1632,8 +1744,8 @@ async function sendMessage() {
     if (e.name !== 'AbortError') {
       const isOfflineErr = e.message.includes('Failed to fetch') || e.message.includes('502') || e.message.includes('521') || e.message.includes('522') || e.message.includes('523') || e.message.includes('524');
       const errorMsg = isOfflineErr 
-        ? '🔴 El servidor de IA (MiniPC) está apagado o no responde. Por favor enciéndelo.'
-        : `⚠️ Error de conexión: ${esc(e.message)}`;
+        ? 'El servidor de IA (MiniPC) está apagado o no responde. Por favor enciéndelo.'
+        : `Error de conexión: ${esc(e.message)}`;
 
       if (targetText.trim()) {
         targetText += `\n\n*(${errorMsg})*`;
@@ -1751,6 +1863,43 @@ function toggleImagineMode() {
   }
 }
 
+function toggleFluxVisor(promptId) {
+  const visor = document.getElementById(`flux-visor-${promptId}`);
+  if (visor) {
+    const isHidden = visor.style.display === 'none';
+    visor.style.display = isHidden ? 'block' : 'none';
+  }
+}
+
+function appendFluxLog(promptId, text) {
+  const visor = document.getElementById(`flux-visor-${promptId}`);
+  if (!visor) return;
+  const timeStr = new Date().toLocaleTimeString('es-ES', { hour12: false });
+  const line = document.createElement('div');
+  line.className = 'log-line';
+  line.innerHTML = `<span class="log-time">[${timeStr}]</span><span class="log-msg">${esc(text)}</span>`;
+  visor.appendChild(line);
+  visor.scrollTop = visor.scrollHeight;
+}
+
+function updateFluxProgress(promptId, pct, legendText, logText = null) {
+  const bar = document.getElementById(`flux-bar-${promptId}`);
+  const pctEl = document.getElementById(`flux-pct-${promptId}`);
+  const legend = document.getElementById(`flux-legend-${promptId}`);
+
+  if (bar && pct !== null) {
+    const safePct = Math.min(100, Math.max(0, pct));
+    bar.style.width = `${safePct}%`;
+    if (pctEl) pctEl.innerText = `${safePct}%`;
+  }
+  if (legend && legendText) {
+    legend.innerHTML = `${ICONS.spin} <span>${esc(legendText)}</span>`;
+  }
+  if (logText) {
+    appendFluxLog(promptId, logText);
+  }
+}
+
 async function generateImage(promptText) {
   const input = document.getElementById('prompt');
   input.value = ''; autoResize(input);
@@ -1761,14 +1910,46 @@ async function generateImage(promptText) {
   const aiEl = createMsg('ai', '', false);
   container.appendChild(aiEl);
   const bubble = aiEl.querySelector('.bubble');
-  bubble.innerHTML = '<div style="color:var(--text-muted);font-style:italic;">🎨 Generando imagen con FLUX2... esto puede tomar un momento.</div>';
+
+  const cardId = 'flux_' + Math.random().toString(36).substring(2, 9);
+
+  bubble.innerHTML = `
+    <div class="flux-progress-card">
+      <div class="flux-card-header">
+        <div class="flux-card-title">
+          ${ICONS.spark}
+          <span>Generando imagen con FLUX.2</span>
+        </div>
+        <button class="flux-visor-toggle" onclick="toggleFluxVisor('${cardId}')">
+          ${ICONS.terminal}
+          <span>Visor</span>
+        </button>
+      </div>
+      
+      <div class="flux-status-legend" id="flux-legend-${cardId}">
+        ${ICONS.spin} <span>Conectando con el servidor de imágenes...</span>
+      </div>
+
+      <div class="flux-progress-track">
+        <div class="flux-progress-bar" id="flux-bar-${cardId}" style="width: 5%;"></div>
+      </div>
+      <div class="flux-progress-info">
+        <span>Avance de proceso</span>
+        <span class="flux-pct" id="flux-pct-${cardId}">5%</span>
+      </div>
+
+      <div class="flux-visor-log" id="flux-visor-${cardId}" style="display:none;">
+      </div>
+    </div>
+  `;
   scrollBottom();
+
+  appendFluxLog(cardId, `Petición iniciada. Prompt: "${promptText.substring(0, 40)}${promptText.length > 40 ? '...' : ''}"`);
   
   isStreaming = true;
   document.getElementById('sendBtn').style.display = 'none';
   document.getElementById('stopBtn').style.display = 'block';
 
-  // Basic ComfyUI workflow JSON for FLUX
   const workflow = {
     "3": {
       "inputs": {
@@ -1778,123 +1959,53 @@ async function generateImage(promptText) {
         "sampler_name": "euler",
         "scheduler": "simple",
         "denoise": 1,
-        "model": [
-          "11",
-          0
-        ],
-        "positive": [
-          "6",
-          0
-        ],
-        "negative": [
-          "7",
-          0
-        ],
-        "latent_image": [
-          "5",
-          0
-        ]
+        "model": ["11", 0],
+        "positive": ["6", 0],
+        "negative": ["7", 0],
+        "latent_image": ["5", 0]
       },
       "class_type": "KSampler",
-      "_meta": {
-        "title": "KSampler"
-      }
+      "_meta": { "title": "KSampler" }
     },
     "5": {
-      "inputs": {
-        "width": 1024,
-        "height": 1024,
-        "batch_size": 1
-      },
+      "inputs": { "width": 1024, "height": 1024, "batch_size": 1 },
       "class_type": "EmptyLatentImage",
-      "_meta": {
-        "title": "Empty Latent Image"
-      }
+      "_meta": { "title": "Empty Latent Image" }
     },
     "6": {
-      "inputs": {
-        "text": promptText,
-        "clip": [
-          "12",
-          0
-        ]
-      },
+      "inputs": { "text": promptText, "clip": ["12", 0] },
       "class_type": "CLIPTextEncode",
-      "_meta": {
-        "title": "CLIP Text Encode (Prompt)"
-      }
+      "_meta": { "title": "CLIP Text Encode (Prompt)" }
     },
     "7": {
-      "inputs": {
-        "text": "",
-        "clip": [
-          "12",
-          0
-        ]
-      },
+      "inputs": { "text": "", "clip": ["12", 0] },
       "class_type": "CLIPTextEncode",
-      "_meta": {
-        "title": "CLIP Text Encode (Prompt)"
-      }
+      "_meta": { "title": "CLIP Text Encode (Prompt)" }
     },
     "8": {
-      "inputs": {
-        "samples": [
-          "3",
-          0
-        ],
-        "vae": [
-          "13",
-          0
-        ]
-      },
+      "inputs": { "samples": ["3", 0], "vae": ["13", 0] },
       "class_type": "VAEDecode",
-      "_meta": {
-        "title": "VAE Decode"
-      }
+      "_meta": { "title": "VAE Decode" }
     },
     "9": {
-      "inputs": {
-        "filename_prefix": "yzai_flux",
-        "images": [
-          "8",
-          0
-        ]
-      },
+      "inputs": { "filename_prefix": "yzai_flux", "images": ["8", 0] },
       "class_type": "SaveImage",
-      "_meta": {
-        "title": "Save Image"
-      }
+      "_meta": { "title": "Save Image" }
     },
     "11": {
-      "inputs": {
-        "unet_name": "Flux2-Klein-9B-True-v2-Q4_K.gguf",
-        "weight_dtype": "default"
-      },
+      "inputs": { "unet_name": "Flux2-Klein-9B-True-v2-Q4_K.gguf", "weight_dtype": "default" },
       "class_type": "UnetLoaderGGUF",
-      "_meta": {
-        "title": "Unet Loader (GGUF)"
-      }
+      "_meta": { "title": "Unet Loader (GGUF)" }
     },
     "12": {
-      "inputs": {
-        "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
-        "clip_name2": "clip_l.safetensors",
-        "type": "flux"
-      },
+      "inputs": { "clip_name1": "t5xxl_fp8_e4m3fn.safetensors", "clip_name2": "clip_l.safetensors", "type": "flux" },
       "class_type": "DualCLIPLoader",
-      "_meta": {
-        "title": "DualCLIPLoader"
-      }
+      "_meta": { "title": "DualCLIPLoader" }
     },
     "13": {
-      "inputs": {
-        "vae_name": "ae.safetensors"
-      },
+      "inputs": { "vae_name": "ae.safetensors" },
       "class_type": "VAELoader",
-      "_meta": {
-        "title": "Load VAE"
-      }
+      "_meta": { "title": "Load VAE" }
     }
   };
 
@@ -1902,44 +2013,136 @@ async function generateImage(promptText) {
     await probeComfy();
   }
   if (COMFY_URL === null) {
-    bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} 🔴 No se encontró el servidor de imágenes (ComfyUI) en la red local. Verifica que la MiniPC esté encendida.</span>`;
+    bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} No se encontró el servidor de imágenes (ComfyUI) en la red local. Verifica que la MiniPC esté encendida.</span>`;
     resetInputUI();
     return;
   }
 
+  const clientId = Math.random().toString(36).substring(2, 11);
+  let ws = null;
+  let isDone = false;
+
+  const nodeNames = {
+    "11": "Cargando modelo UNet FLUX.2 (GGUF)...",
+    "12": "Cargando encoders de texto (CLIP & T5)...",
+    "13": "Cargando VAE...",
+    "5": "Inicializando espacio latente...",
+    "6": "Codificando prompt positivo...",
+    "7": "Codificando prompt negativo...",
+    "3": "Muestreando difusión (KSampler 20 pasos)...",
+    "8": "Decodificando imagen latente (VAE)...",
+    "9": "Guardando imagen final..."
+  };
+
   try {
+    let wsUrl = '';
+    if (COMFY_URL === '') {
+      const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+      wsUrl = `${proto}//${location.host}/comfy/ws?clientId=${clientId}`;
+    } else {
+      const proto = COMFY_URL.startsWith('https') ? 'wss:' : 'ws:';
+      const host = COMFY_URL.replace(/^https?:\/\//, '');
+      wsUrl = `${proto}//${host}/comfy/ws?clientId=${clientId}`;
+    }
+
+    ws = new WebSocket(wsUrl);
+
+    ws.onopen = () => {
+      appendFluxLog(cardId, `Canal WebSocket activo (client_id: ${clientId}).`);
+    };
+
+    ws.onmessage = (event) => {
+      if (typeof event.data !== 'string') return;
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'execution_start') {
+          updateFluxProgress(cardId, 10, "Iniciando flujo en ComfyUI...", "Ejecución de flujo iniciada en servidor.");
+        } else if (msg.type === 'executing') {
+          const nodeId = String(msg.data.node);
+          if (nodeId && nodeNames[nodeId]) {
+            const stepName = nodeNames[nodeId];
+            let basePct = 15;
+            if (nodeId === "11" || nodeId === "12") basePct = 20;
+            else if (nodeId === "6") basePct = 30;
+            else if (nodeId === "3") basePct = 40;
+            else if (nodeId === "8") basePct = 90;
+            else if (nodeId === "9") basePct = 95;
+            updateFluxProgress(cardId, basePct, stepName, `Nodo activo: [${nodeId}] ${stepName}`);
+          }
+        } else if (msg.type === 'progress') {
+          const val = msg.data.value;
+          const max = msg.data.max;
+          const pct = Math.round(35 + (val / max) * 53);
+          updateFluxProgress(cardId, pct, `Generando difusión... Paso ${val} de ${max} (${Math.round((val/max)*100)}%)`, `Progreso de muestreo: paso ${val}/${max} (${Math.round((val/max)*100)}%)`);
+        } else if (msg.type === 'executed' && msg.data.node === '9') {
+          isDone = true;
+          const images = msg.data.output.images;
+          if (images && images.length > 0) {
+            const filename = images[0].filename;
+            updateFluxProgress(cardId, 100, "¡Imagen completada!", "Renderizado finalizado con éxito.");
+            setTimeout(() => {
+              if (ws) ws.close();
+              bubble.innerHTML = `<img src="${COMFY_URL}/comfy/view?filename=${filename}&type=output" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
+              scrollBottom();
+              resetInputUI();
+            }, 400);
+          }
+        }
+      } catch(e) {}
+    };
+  } catch(e) {
+    appendFluxLog(cardId, "WebSocket no disponible, usando polling HTTP.");
+  }
+
+  try {
+    updateFluxProgress(cardId, 10, "Enviando workflow FLUX.2...", "POST /comfy/prompt");
     const res = await fetch(`${COMFY_URL}/comfy/prompt`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: workflow })
+      body: JSON.stringify({ prompt: workflow, client_id: clientId })
     });
     
     if (!res.ok) throw new Error("ComfyUI no está respondiendo o faltan modelos.");
     const data = await res.json();
     const promptId = data.prompt_id;
+    appendFluxLog(cardId, `Prompt registrado en ComfyUI (ID: ${promptId.substring(0,8)}...)`);
     
-    // Polling ComfyUI history for completion
+    let pollCount = 0;
     const pollInterval = setInterval(async () => {
+      if (isDone) {
+        clearInterval(pollInterval);
+        return;
+      }
+      pollCount++;
       try {
         const histRes = await fetch(`${COMFY_URL}/comfy/history/${promptId}`);
         const histData = await histRes.json();
         if (histData[promptId]) {
+          isDone = true;
           clearInterval(pollInterval);
+          if (ws) ws.close();
           const outputs = histData[promptId].outputs;
           const node = Object.keys(outputs)[0]; // node 9
           const filename = outputs[node].images[0].filename;
           
-          bubble.innerHTML = `<img src="${COMFY_URL}/comfy/view?filename=${filename}&type=output" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
-          scrollBottom();
-          resetInputUI();
+          updateFluxProgress(cardId, 100, "¡Imagen completada!", "Imagen recuperada del historial.");
+          setTimeout(() => {
+            bubble.innerHTML = `<img src="${COMFY_URL}/comfy/view?filename=${filename}&type=output" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
+            scrollBottom();
+            resetInputUI();
+          }, 300);
+        } else if (!ws || ws.readyState !== WebSocket.OPEN) {
+          const simulatedPct = Math.min(90, 15 + pollCount * 5);
+          updateFluxProgress(cardId, simulatedPct, `Generando imagen con FLUX.2 (${simulatedPct}%)...`, `Verificando estado (intento ${pollCount})...`);
         }
       } catch(e) {}
-    }, 2000);
+    }, 1500);
     
   } catch (err) {
+    if (ws) ws.close();
     const isConnErr = err.message.includes('Failed to fetch') || err.message.includes('Content Security Policy') || err.message.includes('violates');
     const msg = isConnErr 
-      ? '🔴 No se pudo conectar con ComfyUI. Verifica que la MiniPC esté encendida y conectada a la red local.'
+      ? 'No se pudo conectar con ComfyUI. Verifica que la MiniPC esté encendida y conectada a la red local.'
       : `Error generando imagen: ${esc(err.message)}`;
     bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${msg}</span>`;
     resetInputUI();
