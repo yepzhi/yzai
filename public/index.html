@@ -2074,6 +2074,13 @@ async function generateImage(promptText) {
           const max = msg.data.max;
           const pct = Math.round(35 + (val / max) * 53);
           updateFluxProgress(cardId, pct, `Generando difusión... Paso ${val} de ${max} (${Math.round((val/max)*100)}%)`, `Progreso de muestreo: paso ${val}/${max} (${Math.round((val/max)*100)}%)`);
+        } else if (msg.type === 'execution_error') {
+          isDone = true;
+          if (ws) ws.close();
+          const errMsg = msg.data.exception_message || `Error en nodo [${msg.data.node_type || ''}]`;
+          appendFluxLog(cardId, `FALLO COMFYUI: ${errMsg}`);
+          bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} Error en ComfyUI: ${esc(errMsg)}</span>`;
+          resetInputUI();
         } else if (msg.type === 'executed' && msg.data.node === '9') {
           isDone = true;
           const images = msg.data.output.images;
@@ -2119,24 +2126,56 @@ async function generateImage(promptText) {
       pollCount++;
       const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
 
+      // Timeout after 4 minutes
+      if (elapsedSec > 240) {
+        isDone = true;
+        clearInterval(pollInterval);
+        if (ws) ws.close();
+        bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} Tiempo de espera agotado (4 min). Revisa que el modelo FLUX.2 esté disponible en ComfyUI.</span>`;
+        resetInputUI();
+        return;
+      }
+
       try {
         const histRes = await fetch(`${COMFY_URL}/comfy/history/${promptId}`);
         const histData = await histRes.json();
         if (histData[promptId]) {
-          isDone = true;
-          clearInterval(pollInterval);
-          if (ws) ws.close();
-          const outputs = histData[promptId].outputs;
-          const node = Object.keys(outputs)[0]; // node 9
-          const filename = outputs[node].images[0].filename;
-          
-          updateFluxProgress(cardId, 100, "¡Imagen completada!", `Proceso finalizado con éxito (${elapsedSec}s).`);
-          setTimeout(() => {
-            bubble.innerHTML = `<img src="${COMFY_URL}/comfy/view?filename=${filename}&type=output" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
-            scrollBottom();
+          const item = histData[promptId];
+
+          // Catch ComfyUI execution failure
+          if (item.status && item.status.status_str === 'error') {
+            isDone = true;
+            clearInterval(pollInterval);
+            if (ws) ws.close();
+            
+            let errMsg = "Error en servidor ComfyUI ejecutando el flujo de imagen.";
+            if (item.status.messages && item.status.messages.length > 0) {
+              const msgData = item.status.messages[0][1];
+              if (msgData && msgData.exception_message) {
+                errMsg = `ComfyUI error en nodo [${msgData.node_type || ''}]: ${msgData.exception_message}`;
+              }
+            }
+            appendFluxLog(cardId, `FALLO: ${errMsg}`);
+            bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${esc(errMsg)}</span>`;
             resetInputUI();
-          }, 300);
-          return;
+            return;
+          }
+
+          if (item.outputs && Object.keys(item.outputs).length > 0) {
+            isDone = true;
+            clearInterval(pollInterval);
+            if (ws) ws.close();
+            const node = Object.keys(item.outputs)[0]; // node 9
+            const filename = item.outputs[node].images[0].filename;
+            
+            updateFluxProgress(cardId, 100, "¡Imagen completada!", `Proceso finalizado con éxito (${elapsedSec}s).`);
+            setTimeout(() => {
+              bubble.innerHTML = `<img src="${COMFY_URL}/comfy/view?filename=${filename}&type=output" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
+              scrollBottom();
+              resetInputUI();
+            }, 300);
+            return;
+          }
         }
 
         // If WebSocket is active, let WS events handle progress display
