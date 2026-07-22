@@ -835,9 +835,22 @@ think::before {
       <button class="attach-btn" onclick="document.getElementById('fileInput').click()" aria-label="Attach">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
       </button>
-      <button class="attach-btn" id="imagineBtn" onclick="toggleImagineMode()" aria-label="Imagine" title="Generar Imagen" style="color:var(--text-muted); transition: color 0.2s;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      </button>
+      <div class="imagine-menu-wrapper" style="position:relative; display:flex; align-items:center;">
+        <button class="attach-btn" id="imagineBtn" onclick="toggleImagineMenu()" aria-label="Imagine" title="Opciones de Imagen" style="color:var(--text-muted); transition: color 0.2s;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </button>
+        <div class="imagine-menu" id="imagineMenu" style="display:none; position:absolute; bottom:100%; left:0; margin-bottom:8px; background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; padding:6px; box-shadow:0 8px 24px rgba(0,0,0,0.5); z-index:100; flex-direction:column; gap:4px; min-width:260px;">
+          <button class="menu-item" onclick="selectImagineMode('text2img')" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='transparent'" style="display:flex; align-items:center; gap:8px; width:100%; padding:10px 12px; background:transparent; border:none; color:var(--text); text-align:left; border-radius:8px; cursor:pointer; font-size:14px; transition:background 0.2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Generar Imagen solo escribe lo que quieres
+          </button>
+          <button class="menu-item" onclick="selectImagineMode('img2img')" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='transparent'" style="display:flex; align-items:center; gap:8px; width:100%; padding:10px 12px; background:transparent; border:none; color:var(--text); text-align:left; border-radius:8px; cursor:pointer; font-size:14px; transition:background 0.2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Modificar una imagen con IA
+          </button>
+        </div>
+      </div>
+      <input type="file" id="fluxFileInput" accept="image/*" style="display:none" onchange="handleFluxFileSelect(event)">
       <textarea id="prompt" rows="1" placeholder="Type a message..." oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
       <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -1944,6 +1957,83 @@ if (window.visualViewport) {
   };
   document.head.appendChild(s1);
 })();
+let fluxImageBase64 = null;
+
+function toggleImagineMenu() {
+  const menu = document.getElementById('imagineMenu');
+  if (!menu) return;
+  menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+}
+
+function selectImagineMode(mode) {
+  toggleImagineMenu();
+  isImagineMode = true;
+  const btn = document.getElementById('imagineBtn');
+  const input = document.getElementById('prompt');
+  
+  if (mode === 'text2img') {
+    fluxImageBase64 = null;
+    btn.style.color = 'var(--primary)';
+    input.placeholder = 'Describe la imagen que quieres generar...';
+    document.getElementById('imgPreviewContainer').style.display = 'none';
+    document.getElementById('token-count').textContent = 'Generando de texto a imagen...';
+    input.focus();
+  } else if (mode === 'img2img') {
+    document.getElementById('fluxFileInput').click();
+  }
+}
+
+function handleFluxFileSelect(e) {
+  const file = e.target.files[0];
+  if (!file) {
+    isImagineMode = false;
+    document.getElementById('imagineBtn').style.color = 'var(--text-muted)';
+    document.getElementById('prompt').placeholder = 'Type a message...';
+    return;
+  }
+  document.getElementById('fluxFileInput').value = '';
+
+  if (file.type.startsWith('image/')) {
+    document.getElementById('token-count').textContent = 'Procesando imagen base para FLUX...';
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if (w > IMG_MAX_PX || h > IMG_MAX_PX) {
+          const ratio = Math.min(IMG_MAX_PX/w, IMG_MAX_PX/h);
+          w = Math.round(w * ratio); h = Math.round(h * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        fluxImageBase64 = canvas.toDataURL('image/jpeg', 0.82).split(',')[1];
+        
+        document.getElementById('imgPreview').src = canvas.toDataURL('image/jpeg', 0.82);
+        document.getElementById('imgPreviewContainer').style.display = 'block';
+        
+        const btn = document.getElementById('imagineBtn');
+        const input = document.getElementById('prompt');
+        btn.style.color = 'var(--primary)';
+        input.placeholder = 'Describe los cambios para la imagen...';
+        const kb = Math.round(fluxImageBase64.length * 0.75 / 1024);
+        document.getElementById('token-count').textContent = `Imagen base FLUX lista (${w}x${h}px, ~${kb}KB)`;
+        input.focus();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+document.addEventListener('click', function(event) {
+  const menu = document.getElementById('imagineMenu');
+  const btn = document.getElementById('imagineBtn');
+  if (menu && menu.style.display !== 'none' && !menu.contains(event.target) && (!btn || !btn.contains(event.target))) {
+    menu.style.display = 'none';
+  }
+});
+
 function toggleImagineMode() {
   isImagineMode = !isImagineMode;
   const btn = document.getElementById('imagineBtn');
@@ -1954,6 +2044,8 @@ function toggleImagineMode() {
   } else {
     btn.style.color = 'var(--text-muted)';
     input.placeholder = 'Type a message...';
+    fluxImageBase64 = null;
+    document.getElementById('imgPreviewContainer').style.display = 'none';
   }
 }
 
@@ -2045,10 +2137,10 @@ async function generateImage(promptText) {
   document.getElementById('stopBtn').style.display = 'block';
 
   let uploadedFileName = null;
-  if (currentImageBase64) {
+  if (fluxImageBase64) {
     updateFluxProgress(cardId, 5, "Subiendo imagen base a ComfyUI...", "POST /upload/image");
     try {
-      const byteString = atob(currentImageBase64);
+      const byteString = atob(fluxImageBase64);
       const ab = new ArrayBuffer(byteString.length);
       const ia = new Uint8Array(ab);
       for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
@@ -2070,7 +2162,7 @@ async function generateImage(promptText) {
     }
     
     // Limpiar UI de imagen adjunta
-    currentImageBase64 = null;
+    fluxImageBase64 = null;
     document.getElementById('imgPreviewContainer').style.display = 'none';
     document.getElementById('imgPreview').src = '';
     document.getElementById('token-count').textContent = 'Generando Img2Img con FLUX...';
