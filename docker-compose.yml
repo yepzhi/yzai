@@ -53,7 +53,7 @@ services:
       - /home/yepzhi/ComfyUI:/app
     working_dir: /app
     command: >
-      /bin/bash -c "pip install -r requirements.txt && python3 main.py --listen 0.0.0.0"
+      /bin/bash -c "pip install -r requirements.txt && python3 main.py --listen 0.0.0.0 --cpu"
 
   yzai-ui:
     image: nginx:alpine

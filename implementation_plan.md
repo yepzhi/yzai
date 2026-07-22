@@ -228,7 +228,7 @@ After=network.target
 Type=simple
 User=yepzhi
 WorkingDirectory=/home/yepzhi/ComfyUI
-ExecStart=/home/yepzhi/ComfyUI/venv/bin/python main.py --listen 0.0.0.0 --port 8188
+ExecStart=/home/yepzhi/ComfyUI/venv/bin/python main.py --listen 0.0.0.0 --port 8188 --cpu
 Restart=always
 
 [Install]

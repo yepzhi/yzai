@@ -2159,16 +2159,16 @@ async function generateImage(promptText) {
           }
         } catch(e) {}
 
-        // Smooth time-based progress calculation for FLUX.2 Klein (~60-90s on GPU)
+        // Smooth time-based progress calculation for FLUX.2 Klein (~60-90s on CPU)
         let simulatedPct = 15;
         let legendMsg = '';
 
         if (elapsedSec < 15) {
           simulatedPct = Math.min(30, 15 + Math.floor((elapsedSec / 15) * 15));
-          legendMsg = `Cargando pesos FLUX.2 en VRAM (${elapsedSec}s)...`;
+          legendMsg = `Cargando pesos FLUX.2 en RAM CPU (${elapsedSec}s)...`;
           if (lastStage !== 'loading') {
             lastStage = 'loading';
-            appendFluxLog(cardId, "Cargando modelo UNet FLUX.2 (GGUF Q4) y encoders en GPU...");
+            appendFluxLog(cardId, "Cargando modelo UNet FLUX.2 (GGUF Q4) y encoders en CPU (RAM)...");
           }
         } else if (elapsedSec < 75) {
           const sampleRatio = (elapsedSec - 15) / 60;
