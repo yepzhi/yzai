@@ -2222,12 +2222,12 @@ async function generateImage(promptText) {
       pollCount++;
       const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
 
-      // Timeout after 4 minutes
-      if (elapsedSec > 240) {
+      // Timeout after 10 minutes
+      if (elapsedSec > 600) {
         isDone = true;
         clearInterval(pollInterval);
         if (ws) ws.close();
-        bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} Tiempo de espera agotado (4 min). Revisa que el modelo FLUX.2 esté disponible en ComfyUI.</span>`;
+        bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} Tiempo de espera agotado (10 min). Revisa que el modelo FLUX.2 esté disponible en ComfyUI.</span>`;
         resetInputUI();
         return;
       }
