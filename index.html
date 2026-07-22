@@ -2311,11 +2311,11 @@ async function generateImage(promptText) {
         } else if (elapsedSec < 75) {
           const sampleRatio = (elapsedSec - 15) / 60;
           simulatedPct = Math.min(88, Math.floor(30 + sampleRatio * 58));
-          const estStep = Math.min(20, Math.max(1, Math.floor(sampleRatio * 20)));
-          legendMsg = `Generando difusión... Paso ~${estStep}/20 (${elapsedSec}s / ~75s)`;
+          const estStep = Math.min(4, Math.max(1, Math.floor(sampleRatio * 4)));
+          legendMsg = `Generando difusión... Paso ~${estStep}/4 (${elapsedSec}s / ~75s)`;
           if (lastStage !== 'sampling') {
             lastStage = 'sampling';
-            appendFluxLog(cardId, "Muestreo KSampler (20 pasos) en progreso...");
+            appendFluxLog(cardId, "Muestreo KSampler (4 pasos) en progreso...");
           }
         } else {
           simulatedPct = Math.min(95, 88 + Math.floor(((elapsedSec - 75) / 30) * 7));
