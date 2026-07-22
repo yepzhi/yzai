@@ -833,9 +833,21 @@ think::before {
     <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Contexto: 32K · Listo para generar</div>
     <div class="input-container">
       <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.py,.sh,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r" style="display:none" onchange="handleFileSelect(event)">
-      <button class="attach-btn" onclick="document.getElementById('fileInput').click()" aria-label="Attach">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-      </button>
+      <div class="attach-menu-wrapper" style="position:relative; display:flex; align-items:center;">
+        <button class="attach-btn" id="attachBtn" onclick="toggleAttachMenu()" aria-label="Attach" title="Adjuntar Archivo" style="color:var(--text-muted); transition: color 0.2s;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <div class="imagine-menu" id="attachMenu" style="display:none; position:absolute; bottom:100%; left:0; margin-bottom:8px; background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; padding:6px; box-shadow:0 8px 24px rgba(0,0,0,0.5); z-index:100; flex-direction:column; gap:4px; min-width:260px;">
+          <button class="menu-item" onclick="triggerFileInput('.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.py,.sh,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r')" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='transparent'" style="display:flex; align-items:center; gap:8px; width:100%; padding:10px 12px; background:transparent; border:none; color:var(--text); text-align:left; border-radius:8px; cursor:pointer; font-size:14px; transition:background 0.2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Subir Documentos (PDF, Código, TXT...)
+          </button>
+          <button class="menu-item" onclick="triggerFileInput('image/*')" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='transparent'" style="display:flex; align-items:center; gap:8px; width:100%; padding:10px 12px; background:transparent; border:none; color:var(--text); text-align:left; border-radius:8px; cursor:pointer; font-size:14px; transition:background 0.2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Subir una Foto (JPG, PNG...)
+          </button>
+        </div>
+      </div>
       <div class="imagine-menu-wrapper" style="position:relative; display:flex; align-items:center;">
         <button class="attach-btn" id="imagineBtn" onclick="toggleImagineMenu()" aria-label="Imagine" title="Opciones de Imagen" style="color:var(--text-muted); transition: color 0.2s;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -2042,7 +2054,36 @@ document.addEventListener('click', function(event) {
   if (menu && menu.style.display !== 'none' && !menu.contains(event.target) && (!btn || !btn.contains(event.target))) {
     menu.style.display = 'none';
   }
+  
+  const attachMenu = document.getElementById('attachMenu');
+  const attachBtn = document.getElementById('attachBtn');
+  if (attachMenu && attachMenu.style.display !== 'none' && !attachMenu.contains(event.target) && (!attachBtn || !attachBtn.contains(event.target))) {
+    attachMenu.style.display = 'none';
+    if (attachBtn) attachBtn.style.color = 'var(--text-muted)';
+  }
 });
+
+function toggleAttachMenu() {
+  const menu = document.getElementById('attachMenu');
+  const btn = document.getElementById('attachBtn');
+  const imagineMenu = document.getElementById('imagineMenu');
+  
+  if (menu.style.display === 'none' || menu.style.display === '') {
+    menu.style.display = 'flex';
+    btn.style.color = 'var(--text)';
+    if (imagineMenu) imagineMenu.style.display = 'none';
+  } else {
+    menu.style.display = 'none';
+    btn.style.color = 'var(--text-muted)';
+  }
+}
+
+function triggerFileInput(acceptString) {
+  toggleAttachMenu();
+  const input = document.getElementById('fileInput');
+  input.accept = acceptString;
+  input.click();
+}
 
 function toggleImagineMode() {
   isImagineMode = !isImagineMode;
