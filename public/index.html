@@ -1072,10 +1072,47 @@ function getComfyEndpoint(path) {
   return `${base}/comfy${cleanPath}`;
 }
 
+async function checkServicesHealth() {
+  let ollamaOk = false, comfyOk = false;
+  try {
+    const res = await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123`);
+    if (res.ok) ollamaOk = true;
+  } catch(e) {}
+
+  try {
+    const res = await fetch(getComfyEndpoint('/system_stats'));
+    if (res.ok) comfyOk = true;
+  } catch(e) {}
+
+  const topDot = document.getElementById('topStatusDot');
+  const activeSub = document.getElementById('activeSub');
+  const drawerDot = document.getElementById('statusDot');
+  const drawerText = document.getElementById('statusText');
+
+  if (ollamaOk && comfyOk) {
+    if (topDot) { topDot.style.background = '#3FB950'; topDot.title = 'Ollama y ComfyUI Operando y Listos'; }
+    if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">🟢 Ollama &amp; ComfyUI: Listos</span>';
+    if (drawerDot) drawerDot.style.background = '#3FB950';
+    if (drawerText) drawerText.innerHTML = 'Servicios locales <strong style="color:#3FB950">operando y listos</strong>';
+  } else if (ollamaOk) {
+    if (topDot) { topDot.style.background = '#e3b341'; topDot.title = 'Ollama Listo, ComfyUI Offline'; }
+    if (activeSub) activeSub.innerHTML = '<span style="color:#e3b341;">🟡 Ollama Listo (ComfyUI Off)</span>';
+    if (drawerDot) drawerDot.style.background = '#e3b341';
+    if (drawerText) drawerText.innerHTML = 'Ollama <strong style="color:#3FB950">listo</strong> (ComfyUI offline)';
+  } else {
+    if (topDot) { topDot.style.background = '#F85149'; topDot.title = 'Desconectado'; }
+    if (activeSub) activeSub.innerHTML = '<span style="color:#F85149;">🔴 Servidor Offline</span>';
+    if (drawerDot) drawerDot.style.background = '#F85149';
+    if (drawerText) drawerText.innerHTML = 'Servidor <strong style="color:#F85149">desconectado</strong>';
+  }
+}
+
 async function init() {
   loadConversations();
   await Promise.all([discoverEndpoint(), probeComfy()]);
   await loadModels();
+  checkServicesHealth();
+  setInterval(checkServicesHealth, 30000);
 }
 
 let lastOnlineTimestamp = Date.now();
