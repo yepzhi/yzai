@@ -1401,11 +1401,13 @@ let isImagineMode = false;
 async function sendMessage() {
   const input = document.getElementById('prompt');
   const text  = input.value.trim();
-  if (!text || isStreaming) return;
+  if (!text) return;
   if (isImagineMode) {
+    toggleImagineMode(); // Reset to normal text chat mode for subsequent messages
     generateImage(text);
     return;
   }
+  if (isStreaming) return;
   if (!selectedModel) selectedModel = 'gemma4-26b-MoE:latest';
   if (!checkRateLimit()) return;
 
