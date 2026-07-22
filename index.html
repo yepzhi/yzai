@@ -1642,6 +1642,16 @@ async function sendMessage() {
   let retryCount = 0;
   async function attemptFetch() {
     try {
+      // Free ComfyUI memory before generating text to prevent Ollama GPU OOM crashes
+      try {
+        await fetch(getComfyEndpoint('/free'), {
+          method: 'POST',
+          body: JSON.stringify({ unload_models: true, free_memory: true })
+        });
+      } catch (e) {
+        // Ignore errors if ComfyUI is offline
+      }
+
       const res = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -2238,7 +2248,7 @@ async function generateImage(promptText) {
       "_meta": { "title": "VAE Encode" }
     };
     workflow["3"]["inputs"]["latent_image"] = ["15", 0];
-    workflow["3"]["inputs"]["denoise"] = 0.75;
+    workflow["3"]["inputs"]["denoise"] = 0.35;
   }
 
   if (COMFY_URL === null) {
@@ -2275,7 +2285,7 @@ async function generateImage(promptText) {
     ws = new WebSocket(wsUrl);
 
     ws.onerror = (err) => {
-      appendFluxLog(cardId, `Usando polling HTTP de alta estabilidad.`);
+      // appendFluxLog(cardId, `Usando polling HTTP de alta estabilidad.`);
     };
 
     ws.onopen = () => {
@@ -2296,7 +2306,7 @@ async function generateImage(promptText) {
             if (nodeId === "11" || nodeId === "12") basePct = 20;
             else if (nodeId === "6") basePct = 30;
             else if (nodeId === "3") basePct = 40;
-            else if (nodeId === "8") basePct = 90;
+            else if (nodeId === "8") basePct = 60;
             else if (nodeId === "9") basePct = 95;
             updateFluxProgress(cardId, basePct, stepName, `Nodo activo: [${nodeId}] ${stepName}`);
           }
