@@ -2107,13 +2107,18 @@ async function generateImage(promptText) {
     const promptId = data.prompt_id;
     appendFluxLog(cardId, `Prompt registrado en ComfyUI (ID: ${promptId.substring(0,8)}...)`);
     
+    let startTime = Date.now();
     let pollCount = 0;
+    let lastStage = '';
+
     const pollInterval = setInterval(async () => {
       if (isDone) {
         clearInterval(pollInterval);
         return;
       }
       pollCount++;
+      const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
+
       try {
         const histRes = await fetch(`${COMFY_URL}/comfy/history/${promptId}`);
         const histData = await histRes.json();
@@ -2125,16 +2130,65 @@ async function generateImage(promptText) {
           const node = Object.keys(outputs)[0]; // node 9
           const filename = outputs[node].images[0].filename;
           
-          updateFluxProgress(cardId, 100, "¡Imagen completada!", "Imagen recuperada del historial.");
+          updateFluxProgress(cardId, 100, "¡Imagen completada!", `Proceso finalizado con éxito (${elapsedSec}s).`);
           setTimeout(() => {
             bubble.innerHTML = `<img src="${COMFY_URL}/comfy/view?filename=${filename}&type=output" style="max-width:100%; border-radius:12px; margin-top:10px;">`;
             scrollBottom();
             resetInputUI();
           }, 300);
-        } else if (!ws || ws.readyState !== WebSocket.OPEN) {
-          const simulatedPct = Math.min(90, 15 + pollCount * 5);
-          updateFluxProgress(cardId, simulatedPct, `Generando imagen con FLUX.2 (${simulatedPct}%)...`, `Verificando estado (intento ${pollCount})...`);
+          return;
         }
+
+        // If WebSocket is active, let WS events handle progress display
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          return;
+        }
+
+        // Check ComfyUI queue for pending/running status
+        try {
+          const qRes = await fetch(`${COMFY_URL}/comfy/queue`);
+          const qData = await qRes.json();
+          const pending = qData.queue_pending || [];
+          if (pending.some(item => item[1] === promptId)) {
+            if (lastStage !== 'queued') {
+              lastStage = 'queued';
+              appendFluxLog(cardId, "En cola de espera en ComfyUI...");
+            }
+            updateFluxProgress(cardId, 12, "En cola de espera en el servidor...", null);
+            return;
+          }
+        } catch(e) {}
+
+        // Smooth time-based progress calculation for FLUX.2 Klein (~60-90s on GPU)
+        let simulatedPct = 15;
+        let legendMsg = '';
+
+        if (elapsedSec < 15) {
+          simulatedPct = Math.min(30, 15 + Math.floor((elapsedSec / 15) * 15));
+          legendMsg = `Cargando pesos FLUX.2 en VRAM (${elapsedSec}s)...`;
+          if (lastStage !== 'loading') {
+            lastStage = 'loading';
+            appendFluxLog(cardId, "Cargando modelo UNet FLUX.2 (GGUF Q4) y encoders en GPU...");
+          }
+        } else if (elapsedSec < 75) {
+          const sampleRatio = (elapsedSec - 15) / 60;
+          simulatedPct = Math.min(88, Math.floor(30 + sampleRatio * 58));
+          const estStep = Math.min(20, Math.max(1, Math.floor(sampleRatio * 20)));
+          legendMsg = `Generando difusión... Paso ~${estStep}/20 (${elapsedSec}s / ~75s)`;
+          if (lastStage !== 'sampling') {
+            lastStage = 'sampling';
+            appendFluxLog(cardId, "Muestreo KSampler (20 pasos) en progreso...");
+          }
+        } else {
+          simulatedPct = Math.min(95, 88 + Math.floor(((elapsedSec - 75) / 30) * 7));
+          legendMsg = `Decodificando VAE y procesando imagen (${elapsedSec}s)...`;
+          if (lastStage !== 'vae') {
+            lastStage = 'vae';
+            appendFluxLog(cardId, "Decodificando mapa latente con VAE...");
+          }
+        }
+
+        updateFluxProgress(cardId, simulatedPct, legendMsg, null);
       } catch(e) {}
     }, 1500);
     
