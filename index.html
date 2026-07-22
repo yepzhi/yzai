@@ -1110,10 +1110,7 @@ async function probeComfy() {
 function getComfyEndpoint(path) {
   const cleanPath = path.startsWith('/') ? path : '/' + path;
   const base = (COMFY_URL !== null && COMFY_URL !== '') ? COMFY_URL : 'https://img-yzai.yepzhi.com';
-  if (COMFY_IS_DIRECT) {
-    return `${base}${cleanPath}`;
-  }
-  return `${base}/comfy${cleanPath}`;
+  return `${base}${cleanPath}`;
 }
 
 async function checkServicesHealth() {
