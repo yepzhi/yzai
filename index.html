@@ -2044,7 +2044,39 @@ async function generateImage(promptText) {
   document.getElementById('sendBtn').style.display = 'none';
   document.getElementById('stopBtn').style.display = 'block';
 
-  const workflow = {
+  let uploadedFileName = null;
+  if (currentImageBase64) {
+    updateFluxProgress(cardId, 5, "Subiendo imagen base a ComfyUI...", "POST /upload/image");
+    try {
+      const byteString = atob(currentImageBase64);
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+      const blob = new Blob([ab], { type: 'image/jpeg' });
+      
+      const formData = new FormData();
+      formData.append('image', blob, 'flux_base_image.jpg');
+      formData.append('overwrite', 'true');
+      
+      const uploadUrl = getComfyEndpoint('/upload/image');
+      const uploadRes = await fetch(uploadUrl, { method: 'POST', body: formData });
+      const uploadData = await uploadRes.json();
+      if (uploadData && uploadData.name) {
+        uploadedFileName = uploadData.name;
+        appendFluxLog(cardId, `Imagen base subida exitosamente: ${uploadedFileName}`);
+      }
+    } catch(err) {
+      appendFluxLog(cardId, `Error subiendo imagen base: ${err.message}`);
+    }
+    
+    // Limpiar UI de imagen adjunta
+    currentImageBase64 = null;
+    document.getElementById('imgPreviewContainer').style.display = 'none';
+    document.getElementById('imgPreview').src = '';
+    document.getElementById('token-count').textContent = 'Generando Img2Img con FLUX...';
+  }
+
+  let workflow = {
     "3": {
       "inputs": {
         "seed": Math.floor(Math.random() * 1000000000000000),
@@ -2102,6 +2134,23 @@ async function generateImage(promptText) {
       "_meta": { "title": "Load VAE" }
     }
   };
+
+  // Inject Img2Img nodes if an image was uploaded
+  if (uploadedFileName) {
+    workflow["14"] = {
+      "inputs": { "image": uploadedFileName, "upload": "image" },
+      "class_type": "LoadImage",
+      "_meta": { "title": "Load Image" }
+    };
+    workflow["15"] = {
+      "inputs": { "pixels": ["14", 0], "vae": ["13", 0] },
+      "class_type": "VAEEncode",
+      "_meta": { "title": "VAE Encode" }
+    };
+    // Reemplazar la entrada de la imagen latente y cambiar el denoise
+    workflow["3"]["inputs"]["latent_image"] = ["15", 0];
+    workflow["3"]["inputs"]["denoise"] = 0.75;
+  }
 
   if (COMFY_URL === null) {
     await probeComfy();
