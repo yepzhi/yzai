@@ -825,8 +825,9 @@ think::before {
     <div id="imgPreviewContainer" style="display:none;padding:6px 12px;">
       <div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:8px;padding:6px 10px;width:fit-content;">
         <img id="imgPreview" style="height:40px;width:40px;object-fit:cover;border-radius:6px;">
-        <span style="font-size:12px;color:var(--text-secondary);display:inline-flex;align-items:center;gap:4px;">${ICONS.clip} Imagen adjunta</span>
-        <button onclick="removeImage()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px 4px;display:inline-flex;align-items:center;">${ICONS.close}</button>
+        <button onclick="removeImage()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px;display:flex;align-items:center;" title="Eliminar imagen">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
     </div>
     <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Contexto: 32K · Listo para generar</div>
@@ -966,7 +967,7 @@ function handleFileSelect(e) {
   // ── 2. PDF → read as ArrayBuffer (avoids blob: CSP issue), extract via PDF.js ──
   if (ext === 'pdf' || file.type === 'application/pdf') {
     if (!window.pdfjsLib) {
-      document.getElementById('token-count').textContent = 'PDF.js no listo, espera un momento e intenta de nuevo';
+      document.getElementById('token-count').textContent = 'Listo';
       return;
     }
     document.getElementById('token-count').textContent = 'Extrayendo texto del PDF...';
@@ -991,7 +992,6 @@ function handleFileSelect(e) {
       document.getElementById('token-count').innerHTML =
         `<span style="color:var(--cyan);display:inline-flex;align-items:center;gap:6px;">${ICONS.file} PDF "${file.name}" — ${pages} págs, ${(allText.length/1000).toFixed(0)}K chars${truncated ? ` <span style="display:inline-flex;align-items:center;gap:2px;">${ICONS.warn} truncado</span>` : ''}</span>`;
     }).catch(err => {
-      URL.revokeObjectURL(fileURL);
       document.getElementById('token-count').innerHTML =
         `<span style="color:var(--red);display:inline-flex;align-items:center;gap:6px;">${ICONS.warn} Error leyendo PDF: ${err.message}</span>`;
     });
@@ -1818,7 +1818,7 @@ async function sendMessage() {
               if (done) break;
               buf2 += decoder2.decode(value, { stream: true });
               const lines2 = buf2.split('\n'); buf2 = lines2.pop();
-              for (const line2 of lines2) {
+              for (const line2 in lines2) {
                 if (!line2.trim()) continue;
                 try {
                   const d2 = JSON.parse(line2);
@@ -2086,6 +2086,15 @@ function updateFluxProgress(promptId, pct, legendText, logText = null) {
   }
 }
 
+function resetInputUI() {
+  isImagineMode = false;
+  document.getElementById('imagineBtn').style.color = 'var(--text-muted)';
+  document.getElementById('prompt').placeholder = 'Type a message...';
+  fluxImageBase64 = null;
+  document.getElementById('imgPreviewContainer').style.display = 'none';
+  document.getElementById('imgPreview').src = '';
+}
+
 async function generateImage(promptText) {
   const input = document.getElementById('prompt');
   input.value = ''; autoResize(input);
@@ -2131,10 +2140,6 @@ async function generateImage(promptText) {
   scrollBottom();
 
   appendFluxLog(cardId, `Petición iniciada. Prompt: "${promptText.substring(0, 40)}${promptText.length > 40 ? '...' : ''}"`);
-  
-  isStreaming = true;
-  document.getElementById('sendBtn').style.display = 'none';
-  document.getElementById('stopBtn').style.display = 'block';
 
   let uploadedFileName = null;
   if (fluxImageBase64) {
@@ -2160,12 +2165,6 @@ async function generateImage(promptText) {
     } catch(err) {
       appendFluxLog(cardId, `Error subiendo imagen base: ${err.message}`);
     }
-    
-    // Limpiar UI de imagen adjunta
-    fluxImageBase64 = null;
-    document.getElementById('imgPreviewContainer').style.display = 'none';
-    document.getElementById('imgPreview').src = '';
-    document.getElementById('token-count').textContent = 'Generando Img2Img con FLUX...';
   }
 
   let workflow = {
@@ -2227,7 +2226,6 @@ async function generateImage(promptText) {
     }
   };
 
-  // Inject Img2Img nodes if an image was uploaded
   if (uploadedFileName) {
     workflow["14"] = {
       "inputs": { "image": uploadedFileName, "upload": "image" },
@@ -2239,7 +2237,6 @@ async function generateImage(promptText) {
       "class_type": "VAEEncode",
       "_meta": { "title": "VAE Encode" }
     };
-    // Reemplazar la entrada de la imagen latente y cambiar el denoise
     workflow["3"]["inputs"]["latent_image"] = ["15", 0];
     workflow["3"]["inputs"]["denoise"] = 0.75;
   }
@@ -2278,8 +2275,7 @@ async function generateImage(promptText) {
     ws = new WebSocket(wsUrl);
 
     ws.onerror = (err) => {
-      console.warn('[ComfyUI WS warning]', err);
-      appendFluxLog(cardId, "WebSocket no disponible (bloqueado por CSP o red), usando polling HTTP.");
+      appendFluxLog(cardId, `Usando polling HTTP de alta estabilidad.`);
     };
 
     ws.onopen = () => {
@@ -2442,28 +2438,28 @@ async function generateImage(promptText) {
         let simulatedPct = 15;
         let legendMsg = '';
 
-        if (elapsedSec < 15) {
-          simulatedPct = Math.min(30, 15 + Math.floor((elapsedSec / 15) * 15));
+        if (elapsedSec < 20) {
+          simulatedPct = Math.min(20, 5 + Math.floor((elapsedSec / 20) * 15));
           legendMsg = `Cargando pesos FLUX.2 en RAM CPU (${elapsedSec}s)...`;
           if (lastStage !== 'loading') {
             lastStage = 'loading';
             appendFluxLog(cardId, "Cargando modelo UNet FLUX.2 (GGUF Q4) y encoders en CPU (RAM)...");
           }
-        } else if (elapsedSec < 75) {
-          const sampleRatio = (elapsedSec - 15) / 60;
-          simulatedPct = Math.min(88, Math.floor(30 + sampleRatio * 58));
-          const estStep = Math.min(4, Math.max(1, Math.floor(sampleRatio * 4)));
-          legendMsg = `Generando difusión... Paso ~${estStep}/4 (${elapsedSec}s / ~75s)`;
+        } else if (elapsedSec < 90) {
+          const sampleRatio = (elapsedSec - 20) / 70;
+          simulatedPct = Math.floor(20 + sampleRatio * 40);
+          const estStep = Math.min(4, Math.max(1, Math.floor(sampleRatio * 4) + 1));
+          legendMsg = `Generando difusión... Paso ~${estStep}/4 (${elapsedSec}s)`;
           if (lastStage !== 'sampling') {
             lastStage = 'sampling';
             appendFluxLog(cardId, "Muestreo KSampler (4 pasos) en progreso...");
           }
         } else {
-          simulatedPct = Math.min(95, 88 + Math.floor(((elapsedSec - 75) / 30) * 7));
+          simulatedPct = Math.min(96, 60 + Math.floor(((elapsedSec - 90) / 150) * 36));
           legendMsg = `Decodificando VAE y procesando imagen (${elapsedSec}s)...`;
           if (lastStage !== 'vae') {
             lastStage = 'vae';
-            appendFluxLog(cardId, "Decodificando mapa latente con VAE...");
+            appendFluxLog(cardId, "Decodificando mapa latente con VAE... Este paso es el más intensivo para el CPU.");
           }
         }
 
