@@ -2310,17 +2310,22 @@ async function generateImage(promptText) {
     const wsHostPath = wsHttpUrl.replace(/^https?:\/\//, '').replace(/^http:\/\//, '');
     const wsUrl = `${wsProto}//${wsHostPath}?clientId=${clientId}`;
 
-    ws = new WebSocket(wsUrl);
+    try {
+      ws = new WebSocket(wsUrl);
+    } catch(wsErr) {
+      appendFluxLog(cardId, `Modo HTTP: Usando polling para el progreso de la imagen.`);
+    }
 
-    ws.onerror = (err) => {
-      // appendFluxLog(cardId, `Usando polling HTTP de alta estabilidad.`);
-    };
+    if (ws) {
+      ws.onerror = (err) => {
+        // Fallback silently to HTTP polling
+      };
 
-    ws.onopen = () => {
-      appendFluxLog(cardId, `Canal WebSocket activo (client_id: ${clientId}).`);
-    };
+      ws.onopen = () => {
+        appendFluxLog(cardId, `Canal WebSocket activo (client_id: ${clientId}).`);
+      };
 
-    ws.onmessage = (event) => {
+      ws.onmessage = (event) => {
       if (typeof event.data !== 'string') return;
       try {
         const msg = JSON.parse(event.data);
