@@ -2254,12 +2254,11 @@ async function generateImage(promptText) {
     },
     "12": {
       "inputs": {
-        "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
-        "clip_name2": "clip_l.safetensors",
-        "type": "flux"
+        "clip_name": "qwen_3_8b_fp8mixed.safetensors",
+        "type": "qwen_image"
       },
-      "class_type": "DualCLIPLoader",
-      "_meta": { "title": "DualCLIPLoader" }
+      "class_type": "CLIPLoader",
+      "_meta": { "title": "CLIPLoader" }
     },
     "13": {
       "inputs": { "vae_name": "flux2-vae.safetensors" },
@@ -2297,13 +2296,13 @@ async function generateImage(promptText) {
   let isDone = false;
 
   const nodeNames = {
-    "11": "Cargando modelo UNet FLUX.1 Schnell (GGUF)...",
-    "12": "Cargando encoders de texto (CLIP & T5)...",
-    "13": "Cargando VAE...",
+    "11": "Cargando modelo UNet FLUX.2 Klein (GGUF)...",
+    "12": "Cargando encoder de texto Qwen 3 8B...",
+    "13": "Cargando VAE FLUX.2...",
     "5": "Inicializando espacio latente...",
     "6": "Codificando prompt positivo...",
     "7": "Codificando prompt negativo...",
-    "3": "Muestreando difusión (KSampler 4 pasos CPU)...",
+    "3": "Muestreando difusión FLUX.2 (KSampler 4 pasos CPU)...",
     "8": "Decodificando imagen latente (VAE)...",
     "9": "Guardando imagen final..."
   };

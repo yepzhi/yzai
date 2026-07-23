@@ -825,19 +825,45 @@ think::before {
     <div id="imgPreviewContainer" style="display:none;padding:6px 12px;">
       <div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:8px;padding:6px 10px;width:fit-content;">
         <img id="imgPreview" style="height:40px;width:40px;object-fit:cover;border-radius:6px;">
-        <span style="font-size:12px;color:var(--text-secondary);display:inline-flex;align-items:center;gap:4px;">${ICONS.clip} Imagen adjunta</span>
-        <button onclick="removeImage()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px 4px;display:inline-flex;align-items:center;">${ICONS.close}</button>
+        <button onclick="removeImage()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px;display:flex;align-items:center;" title="Eliminar imagen">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
       </div>
     </div>
     <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Contexto: 32K · Listo para generar</div>
     <div class="input-container">
       <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.py,.sh,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r" style="display:none" onchange="handleFileSelect(event)">
-      <button class="attach-btn" onclick="document.getElementById('fileInput').click()" aria-label="Attach">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-      </button>
-      <button class="attach-btn" id="imagineBtn" onclick="toggleImagineMode()" aria-label="Imagine" title="Generar Imagen" style="color:var(--text-muted); transition: color 0.2s;">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      </button>
+      <div class="attach-menu-wrapper" style="position:relative; display:flex; align-items:center;">
+        <button class="attach-btn" id="attachBtn" onclick="toggleAttachMenu()" aria-label="Attach" title="Adjuntar Archivo" style="color:var(--text-muted); transition: color 0.2s;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <div class="imagine-menu" id="attachMenu" style="display:none; position:absolute; bottom:100%; left:0; margin-bottom:8px; background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; padding:6px; box-shadow:0 8px 24px rgba(0,0,0,0.5); z-index:100; flex-direction:column; gap:4px; min-width:260px;">
+          <button class="menu-item" onclick="triggerFileInput('.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.py,.sh,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r')" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='transparent'" style="display:flex; align-items:center; gap:8px; width:100%; padding:10px 12px; background:transparent; border:none; color:var(--text); text-align:left; border-radius:8px; cursor:pointer; font-size:14px; transition:background 0.2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            Subir Documentos (PDF, Código, TXT...)
+          </button>
+          <button class="menu-item" onclick="triggerFileInput('image/*')" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='transparent'" style="display:flex; align-items:center; gap:8px; width:100%; padding:10px 12px; background:transparent; border:none; color:var(--text); text-align:left; border-radius:8px; cursor:pointer; font-size:14px; transition:background 0.2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Subir una Foto (JPG, PNG...)
+          </button>
+        </div>
+      </div>
+      <div class="imagine-menu-wrapper" style="position:relative; display:flex; align-items:center;">
+        <button class="attach-btn" id="imagineBtn" onclick="toggleImagineMenu()" aria-label="Imagine" title="Opciones de Imagen" style="color:var(--text-muted); transition: color 0.2s;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+        </button>
+        <div class="imagine-menu" id="imagineMenu" style="display:none; position:absolute; bottom:100%; left:0; margin-bottom:8px; background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; padding:6px; box-shadow:0 8px 24px rgba(0,0,0,0.5); z-index:100; flex-direction:column; gap:4px; min-width:260px;">
+          <button class="menu-item" onclick="selectImagineMode('text2img')" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='transparent'" style="display:flex; align-items:center; gap:8px; width:100%; padding:10px 12px; background:transparent; border:none; color:var(--text); text-align:left; border-radius:8px; cursor:pointer; font-size:14px; transition:background 0.2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+            Generar Imagen solo escribe lo que quieres
+          </button>
+          <button class="menu-item" onclick="selectImagineMode('img2img')" onmouseover="this.style.background='var(--border)'" onmouseout="this.style.background='transparent'" style="display:flex; align-items:center; gap:8px; width:100%; padding:10px 12px; background:transparent; border:none; color:var(--text); text-align:left; border-radius:8px; cursor:pointer; font-size:14px; transition:background 0.2s;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            Modificar una imagen con IA
+          </button>
+        </div>
+      </div>
+      <input type="file" id="fluxFileInput" accept="image/*" style="display:none" onchange="handleFluxFileSelect(event)">
       <textarea id="prompt" rows="1" placeholder="Type a message..." oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
       <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -953,7 +979,7 @@ function handleFileSelect(e) {
   // ── 2. PDF → read as ArrayBuffer (avoids blob: CSP issue), extract via PDF.js ──
   if (ext === 'pdf' || file.type === 'application/pdf') {
     if (!window.pdfjsLib) {
-      document.getElementById('token-count').textContent = 'PDF.js no listo, espera un momento e intenta de nuevo';
+      document.getElementById('token-count').textContent = 'Listo';
       return;
     }
     document.getElementById('token-count').textContent = 'Extrayendo texto del PDF...';
@@ -978,7 +1004,6 @@ function handleFileSelect(e) {
       document.getElementById('token-count').innerHTML =
         `<span style="color:var(--cyan);display:inline-flex;align-items:center;gap:6px;">${ICONS.file} PDF "${file.name}" — ${pages} págs, ${(allText.length/1000).toFixed(0)}K chars${truncated ? ` <span style="display:inline-flex;align-items:center;gap:2px;">${ICONS.warn} truncado</span>` : ''}</span>`;
     }).catch(err => {
-      URL.revokeObjectURL(fileURL);
       document.getElementById('token-count').innerHTML =
         `<span style="color:var(--red);display:inline-flex;align-items:center;gap:6px;">${ICONS.warn} Error leyendo PDF: ${err.message}</span>`;
     });
@@ -1059,11 +1084,11 @@ let COMFY_IS_DIRECT = false;
 async function probeComfy() {
   if (location.hostname.includes('yepzhi.com')) {
     COMFY_URL = 'https://img-yzai.yepzhi.com';
-    COMFY_IS_DIRECT = false;
+    COMFY_IS_DIRECT = true;
     return;
   }
   const candidates = [
-    { base: 'https://img-yzai.yepzhi.com', direct: false },
+    { base: 'https://img-yzai.yepzhi.com', direct: true },
     { base: 'http://127.0.0.1:8188', direct: true }
   ];
   for (const c of candidates) {
@@ -1085,10 +1110,7 @@ async function probeComfy() {
 function getComfyEndpoint(path) {
   const cleanPath = path.startsWith('/') ? path : '/' + path;
   const base = (COMFY_URL !== null && COMFY_URL !== '') ? COMFY_URL : 'https://img-yzai.yepzhi.com';
-  if (COMFY_IS_DIRECT) {
-    return `${base}${cleanPath}`;
-  }
-  return `${base}/comfy${cleanPath}`;
+  return `${base}${cleanPath}`;
 }
 
 async function checkServicesHealth() {
@@ -1597,18 +1619,15 @@ async function sendMessage() {
       const model = data.models.find(m => m.name === selectedModel);
       const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
       if (model) {
-        // Model is in /api/ps = already loaded & running (even if partial VRAM offload).
-        // Only show a message if the request is taking unexpectedly long (>2s)
-        if (loadTime >= 2) {
-          const eta = Math.max(1, Math.round(15 - loadTime));
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} En cola · ETA ~${eta}s</span>`;
+        // Model is in /api/ps = already loaded in VRAM
+        if (loadTime >= 1) {
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generando...</span>`;
           loadingIndicatorActive = true;
         }
       } else {
         // Model not in ps yet = first cold load
-        if (loadTime >= 1.5) {
-          const eta = Math.max(1, Math.round(20 - loadTime));
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Iniciando modelo · ETA ~${eta}s</span>`;
+        if (loadTime >= 1) {
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Cargando modelo en VRAM...</span>`;
           loadingIndicatorActive = true;
         }
       }
@@ -1629,20 +1648,23 @@ async function sendMessage() {
   let retryCount = 0;
   async function attemptFetch() {
     try {
+      const chatBody = { 
+        model: selectedModel, 
+        messages: payload,
+        options: { 
+          num_ctx: 32768
+        },
+        think: false,
+        stream: true 
+      };
+      if (typeof needsWebSearch === 'function' && needsWebSearch(text)) {
+        chatBody.tools = [WEB_SEARCH_TOOL];
+      }
       const res = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         signal: abortCtrl.signal,
-        body: JSON.stringify({ 
-          model: selectedModel, 
-          messages: payload,
-          tools: [WEB_SEARCH_TOOL],
-          options: { 
-            num_ctx: 32768
-          },
-          think: false,
-          stream: true 
-        })
+        body: JSON.stringify(chatBody)
       });
       if (!res.ok) {
         if ((res.status === 502 || res.status === 504 || res.status === 524) && !firstTokenReceived && retryCount < 5) {
@@ -1805,7 +1827,7 @@ async function sendMessage() {
               if (done) break;
               buf2 += decoder2.decode(value, { stream: true });
               const lines2 = buf2.split('\n'); buf2 = lines2.pop();
-              for (const line2 of lines2) {
+              for (const line2 in lines2) {
                 if (!line2.trim()) continue;
                 try {
                   const d2 = JSON.parse(line2);
@@ -1944,6 +1966,112 @@ if (window.visualViewport) {
   };
   document.head.appendChild(s1);
 })();
+let fluxImageBase64 = null;
+
+function toggleImagineMenu() {
+  const menu = document.getElementById('imagineMenu');
+  if (!menu) return;
+  menu.style.display = menu.style.display === 'none' ? 'flex' : 'none';
+}
+
+function selectImagineMode(mode) {
+  toggleImagineMenu();
+  isImagineMode = true;
+  const btn = document.getElementById('imagineBtn');
+  const input = document.getElementById('prompt');
+  
+  if (mode === 'text2img') {
+    fluxImageBase64 = null;
+    btn.style.color = 'var(--primary)';
+    input.placeholder = 'Describe la imagen que quieres generar...';
+    document.getElementById('imgPreviewContainer').style.display = 'none';
+    document.getElementById('token-count').textContent = 'Generando de texto a imagen...';
+    input.focus();
+  } else if (mode === 'img2img') {
+    document.getElementById('fluxFileInput').click();
+  }
+}
+
+function handleFluxFileSelect(e) {
+  const file = e.target.files[0];
+  if (!file) {
+    isImagineMode = false;
+    document.getElementById('imagineBtn').style.color = 'var(--text-muted)';
+    document.getElementById('prompt').placeholder = 'Type a message...';
+    return;
+  }
+  document.getElementById('fluxFileInput').value = '';
+
+  if (file.type.startsWith('image/')) {
+    document.getElementById('token-count').textContent = 'Procesando imagen base para FLUX...';
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.naturalWidth, h = img.naturalHeight;
+        if (w > IMG_MAX_PX || h > IMG_MAX_PX) {
+          const ratio = Math.min(IMG_MAX_PX/w, IMG_MAX_PX/h);
+          w = Math.round(w * ratio); h = Math.round(h * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        fluxImageBase64 = canvas.toDataURL('image/jpeg', 0.82).split(',')[1];
+        
+        document.getElementById('imgPreview').src = canvas.toDataURL('image/jpeg', 0.82);
+        document.getElementById('imgPreviewContainer').style.display = 'block';
+        
+        const btn = document.getElementById('imagineBtn');
+        const input = document.getElementById('prompt');
+        btn.style.color = 'var(--primary)';
+        input.placeholder = 'Describe los cambios para la imagen...';
+        const kb = Math.round(fluxImageBase64.length * 0.75 / 1024);
+        document.getElementById('token-count').textContent = `Imagen base FLUX lista (${w}x${h}px, ~${kb}KB)`;
+        input.focus();
+      };
+      img.src = ev.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+document.addEventListener('click', function(event) {
+  const menu = document.getElementById('imagineMenu');
+  const btn = document.getElementById('imagineBtn');
+  if (menu && menu.style.display !== 'none' && !menu.contains(event.target) && (!btn || !btn.contains(event.target))) {
+    menu.style.display = 'none';
+  }
+  
+  const attachMenu = document.getElementById('attachMenu');
+  const attachBtn = document.getElementById('attachBtn');
+  if (attachMenu && attachMenu.style.display !== 'none' && !attachMenu.contains(event.target) && (!attachBtn || !attachBtn.contains(event.target))) {
+    attachMenu.style.display = 'none';
+    if (attachBtn) attachBtn.style.color = 'var(--text-muted)';
+  }
+});
+
+function toggleAttachMenu() {
+  const menu = document.getElementById('attachMenu');
+  const btn = document.getElementById('attachBtn');
+  const imagineMenu = document.getElementById('imagineMenu');
+  
+  if (menu.style.display === 'none' || menu.style.display === '') {
+    menu.style.display = 'flex';
+    btn.style.color = 'var(--text)';
+    if (imagineMenu) imagineMenu.style.display = 'none';
+  } else {
+    menu.style.display = 'none';
+    btn.style.color = 'var(--text-muted)';
+  }
+}
+
+function triggerFileInput(acceptString) {
+  toggleAttachMenu();
+  const input = document.getElementById('fileInput');
+  input.accept = acceptString;
+  input.click();
+}
+
 function toggleImagineMode() {
   isImagineMode = !isImagineMode;
   const btn = document.getElementById('imagineBtn');
@@ -1954,6 +2082,8 @@ function toggleImagineMode() {
   } else {
     btn.style.color = 'var(--text-muted)';
     input.placeholder = 'Type a message...';
+    fluxImageBase64 = null;
+    document.getElementById('imgPreviewContainer').style.display = 'none';
   }
 }
 
@@ -1992,6 +2122,15 @@ function updateFluxProgress(promptId, pct, legendText, logText = null) {
   if (logText) {
     appendFluxLog(promptId, logText);
   }
+}
+
+function resetInputUI() {
+  isImagineMode = false;
+  document.getElementById('imagineBtn').style.color = 'var(--text-muted)';
+  document.getElementById('prompt').placeholder = 'Type a message...';
+  fluxImageBase64 = null;
+  document.getElementById('imgPreviewContainer').style.display = 'none';
+  document.getElementById('imgPreview').src = '';
 }
 
 async function generateImage(promptText) {
@@ -2039,12 +2178,34 @@ async function generateImage(promptText) {
   scrollBottom();
 
   appendFluxLog(cardId, `Petición iniciada. Prompt: "${promptText.substring(0, 40)}${promptText.length > 40 ? '...' : ''}"`);
-  
-  isStreaming = true;
-  document.getElementById('sendBtn').style.display = 'none';
-  document.getElementById('stopBtn').style.display = 'block';
 
-  const workflow = {
+  let uploadedFileName = null;
+  if (fluxImageBase64) {
+    updateFluxProgress(cardId, 5, "Subiendo imagen base a ComfyUI...", "POST /upload/image");
+    try {
+      const byteString = atob(fluxImageBase64);
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) ia[i] = byteString.charCodeAt(i);
+      const blob = new Blob([ab], { type: 'image/jpeg' });
+      
+      const formData = new FormData();
+      formData.append('image', blob, 'flux_base_image.jpg');
+      formData.append('overwrite', 'true');
+      
+      const uploadUrl = getComfyEndpoint('/upload/image');
+      const uploadRes = await fetch(uploadUrl, { method: 'POST', body: formData });
+      const uploadData = await uploadRes.json();
+      if (uploadData && uploadData.name) {
+        uploadedFileName = uploadData.name;
+        appendFluxLog(cardId, `Imagen base subida exitosamente: ${uploadedFileName}`);
+      }
+    } catch(err) {
+      appendFluxLog(cardId, `Error subiendo imagen base: ${err.message}`);
+    }
+  }
+
+  let workflow = {
     "3": {
       "inputs": {
         "seed": Math.floor(Math.random() * 1000000000000000),
@@ -2087,21 +2248,39 @@ async function generateImage(promptText) {
       "_meta": { "title": "Save Image" }
     },
     "11": {
-      "inputs": { "unet_name": "flux1-schnell-Q4_0.gguf", "weight_dtype": "default" },
+      "inputs": { "unet_name": "flux-2-klein-4b-Q4_K_M.gguf", "weight_dtype": "default" },
       "class_type": "UnetLoaderGGUF",
       "_meta": { "title": "Unet Loader (GGUF)" }
     },
     "12": {
-      "inputs": { "clip_name1": "t5xxl_fp8_e4m3fn.safetensors", "clip_name2": "clip_l.safetensors", "type": "flux" },
-      "class_type": "DualCLIPLoader",
-      "_meta": { "title": "DualCLIPLoader" }
+      "inputs": {
+        "clip_name": "qwen_3_8b_fp8mixed.safetensors",
+        "type": "qwen_image"
+      },
+      "class_type": "CLIPLoader",
+      "_meta": { "title": "CLIPLoader" }
     },
     "13": {
-      "inputs": { "vae_name": "ae.safetensors" },
+      "inputs": { "vae_name": "flux2-vae.safetensors" },
       "class_type": "VAELoader",
       "_meta": { "title": "Load VAE" }
     }
   };
+
+  if (uploadedFileName) {
+    workflow["14"] = {
+      "inputs": { "image": uploadedFileName, "upload": "image" },
+      "class_type": "LoadImage",
+      "_meta": { "title": "Load Image" }
+    };
+    workflow["15"] = {
+      "inputs": { "pixels": ["14", 0], "vae": ["13", 0] },
+      "class_type": "VAEEncode",
+      "_meta": { "title": "VAE Encode" }
+    };
+    workflow["3"]["inputs"]["latent_image"] = ["15", 0];
+    workflow["3"]["inputs"]["denoise"] = 0.35;
+  }
 
   if (COMFY_URL === null) {
     await probeComfy();
@@ -2117,35 +2296,41 @@ async function generateImage(promptText) {
   let isDone = false;
 
   const nodeNames = {
-    "11": "Cargando modelo UNet FLUX.1 Schnell (GGUF)...",
-    "12": "Cargando encoders de texto (CLIP & T5)...",
-    "13": "Cargando VAE...",
+    "11": "Cargando modelo UNet FLUX.2 Klein (GGUF)...",
+    "12": "Cargando encoder de texto Qwen 3 8B...",
+    "13": "Cargando VAE FLUX.2...",
     "5": "Inicializando espacio latente...",
     "6": "Codificando prompt positivo...",
     "7": "Codificando prompt negativo...",
-    "3": "Muestreando difusión (KSampler 4 pasos CPU)...",
+    "3": "Muestreando difusión FLUX.2 (KSampler 4 pasos CPU)...",
     "8": "Decodificando imagen latente (VAE)...",
     "9": "Guardando imagen final..."
   };
 
   try {
-    const wsHttpUrl = getComfyEndpoint('/ws');
-    const wsProto = wsHttpUrl.startsWith('https') ? 'wss:' : (wsHttpUrl.startsWith('http') ? 'ws:' : (location.protocol === 'https:' ? 'wss:' : 'ws:'));
-    const wsHostPath = wsHttpUrl.replace(/^https?:\/\//, '').replace(/^http:\/\//, '');
-    const wsUrl = `${wsProto}//${wsHostPath}?clientId=${clientId}`;
+    const isLocalHost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if (isLocalHost) {
+      const wsHttpUrl = getComfyEndpoint('/ws');
+      const wsProto = wsHttpUrl.startsWith('https') ? 'wss:' : 'ws:';
+      const wsHostPath = wsHttpUrl.replace(/^https?:\/\//, '');
+      const wsUrl = `${wsProto}//${wsHostPath}?clientId=${clientId}`;
+      try {
+        ws = new WebSocket(wsUrl);
+      } catch(wsErr) {}
+    } else {
+      appendFluxLog(cardId, `Canal HTTP activo (HTTPS Polling).`);
+    }
 
-    ws = new WebSocket(wsUrl);
+    if (ws) {
+      ws.onerror = (err) => {
+        // Fallback silently
+      };
 
-    ws.onerror = (err) => {
-      console.warn('[ComfyUI WS warning]', err);
-      appendFluxLog(cardId, "WebSocket no disponible (bloqueado por CSP o red), usando polling HTTP.");
-    };
+      ws.onopen = () => {
+        appendFluxLog(cardId, `Canal WebSocket activo (client_id: ${clientId}).`);
+      };
 
-    ws.onopen = () => {
-      appendFluxLog(cardId, `Canal WebSocket activo (client_id: ${clientId}).`);
-    };
-
-    ws.onmessage = (event) => {
+      ws.onmessage = (event) => {
       if (typeof event.data !== 'string') return;
       try {
         const msg = JSON.parse(event.data);
@@ -2159,7 +2344,7 @@ async function generateImage(promptText) {
             if (nodeId === "11" || nodeId === "12") basePct = 20;
             else if (nodeId === "6") basePct = 30;
             else if (nodeId === "3") basePct = 40;
-            else if (nodeId === "8") basePct = 90;
+            else if (nodeId === "8") basePct = 60;
             else if (nodeId === "9") basePct = 95;
             updateFluxProgress(cardId, basePct, stepName, `Nodo activo: [${nodeId}] ${stepName}`);
           }
@@ -2192,9 +2377,10 @@ async function generateImage(promptText) {
         }
       } catch(e) {}
     };
-  } catch(e) {
-    appendFluxLog(cardId, "WebSocket deshabilitado por el navegador, ejecutando vía HTTP.");
   }
+} catch(e) {
+  appendFluxLog(cardId, "WebSocket deshabilitado por el navegador, ejecutando vía HTTP.");
+}
 
   try {
     updateFluxProgress(cardId, 10, "Enviando workflow FLUX.2...", "POST /prompt");
@@ -2222,12 +2408,12 @@ async function generateImage(promptText) {
       pollCount++;
       const elapsedSec = Math.floor((Date.now() - startTime) / 1000);
 
-      // Timeout after 4 minutes
-      if (elapsedSec > 240) {
+      // Timeout after 10 minutes
+      if (elapsedSec > 600) {
         isDone = true;
         clearInterval(pollInterval);
         if (ws) ws.close();
-        bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} Tiempo de espera agotado (4 min). Revisa que el modelo FLUX.2 esté disponible en ComfyUI.</span>`;
+        bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} Tiempo de espera agotado (10 min). Revisa que el modelo FLUX.2 esté disponible en ComfyUI.</span>`;
         resetInputUI();
         return;
       }
@@ -2301,28 +2487,28 @@ async function generateImage(promptText) {
         let simulatedPct = 15;
         let legendMsg = '';
 
-        if (elapsedSec < 15) {
-          simulatedPct = Math.min(30, 15 + Math.floor((elapsedSec / 15) * 15));
+        if (elapsedSec < 20) {
+          simulatedPct = Math.min(20, 5 + Math.floor((elapsedSec / 20) * 15));
           legendMsg = `Cargando pesos FLUX.2 en RAM CPU (${elapsedSec}s)...`;
           if (lastStage !== 'loading') {
             lastStage = 'loading';
             appendFluxLog(cardId, "Cargando modelo UNet FLUX.2 (GGUF Q4) y encoders en CPU (RAM)...");
           }
-        } else if (elapsedSec < 75) {
-          const sampleRatio = (elapsedSec - 15) / 60;
-          simulatedPct = Math.min(88, Math.floor(30 + sampleRatio * 58));
-          const estStep = Math.min(20, Math.max(1, Math.floor(sampleRatio * 20)));
-          legendMsg = `Generando difusión... Paso ~${estStep}/20 (${elapsedSec}s / ~75s)`;
+        } else if (elapsedSec < 90) {
+          const sampleRatio = (elapsedSec - 20) / 70;
+          simulatedPct = Math.floor(20 + sampleRatio * 40);
+          const estStep = Math.min(4, Math.max(1, Math.floor(sampleRatio * 4) + 1));
+          legendMsg = `Generando difusión... Paso ~${estStep}/4 (${elapsedSec}s)`;
           if (lastStage !== 'sampling') {
             lastStage = 'sampling';
-            appendFluxLog(cardId, "Muestreo KSampler (20 pasos) en progreso...");
+            appendFluxLog(cardId, "Muestreo KSampler (4 pasos) en progreso...");
           }
         } else {
-          simulatedPct = Math.min(95, 88 + Math.floor(((elapsedSec - 75) / 30) * 7));
+          simulatedPct = Math.min(96, 60 + Math.floor(((elapsedSec - 90) / 150) * 36));
           legendMsg = `Decodificando VAE y procesando imagen (${elapsedSec}s)...`;
           if (lastStage !== 'vae') {
             lastStage = 'vae';
-            appendFluxLog(cardId, "Decodificando mapa latente con VAE...");
+            appendFluxLog(cardId, "Decodificando mapa latente con VAE... Este paso es el más intensivo para el CPU.");
           }
         }
 
