@@ -2372,9 +2372,10 @@ async function generateImage(promptText) {
         }
       } catch(e) {}
     };
-  } catch(e) {
-    appendFluxLog(cardId, "WebSocket deshabilitado por el navegador, ejecutando vía HTTP.");
   }
+} catch(e) {
+  appendFluxLog(cardId, "WebSocket deshabilitado por el navegador, ejecutando vía HTTP.");
+}
 
   try {
     updateFluxProgress(cardId, 10, "Enviando workflow FLUX.2...", "POST /prompt");
