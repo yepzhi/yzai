@@ -2253,9 +2253,13 @@ async function generateImage(promptText) {
       "_meta": { "title": "Unet Loader (GGUF)" }
     },
     "12": {
-      "inputs": { "clip_name": "qwen_3_8b_fp8mixed.safetensors", "type": "flux2" },
-      "class_type": "CLIPLoader",
-      "_meta": { "title": "Load CLIP" }
+      "inputs": {
+        "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
+        "clip_name2": "clip_l.safetensors",
+        "type": "flux"
+      },
+      "class_type": "DualCLIPLoader",
+      "_meta": { "title": "DualCLIPLoader" }
     },
     "13": {
       "inputs": { "vae_name": "flux2-vae.safetensors" },
