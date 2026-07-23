@@ -2309,20 +2309,22 @@ async function generateImage(promptText) {
   };
 
   try {
-    const wsHttpUrl = getComfyEndpoint('/ws');
-    const wsProto = wsHttpUrl.startsWith('https') ? 'wss:' : (wsHttpUrl.startsWith('http') ? 'ws:' : (location.protocol === 'https:' ? 'wss:' : 'ws:'));
-    const wsHostPath = wsHttpUrl.replace(/^https?:\/\//, '').replace(/^http:\/\//, '');
-    const wsUrl = `${wsProto}//${wsHostPath}?clientId=${clientId}`;
-
-    try {
-      ws = new WebSocket(wsUrl);
-    } catch(wsErr) {
-      appendFluxLog(cardId, `Modo HTTP: Usando polling para el progreso de la imagen.`);
+    const isLocalHost = location.hostname === 'localhost' || location.hostname === '127.0.0.1';
+    if (isLocalHost) {
+      const wsHttpUrl = getComfyEndpoint('/ws');
+      const wsProto = wsHttpUrl.startsWith('https') ? 'wss:' : 'ws:';
+      const wsHostPath = wsHttpUrl.replace(/^https?:\/\//, '');
+      const wsUrl = `${wsProto}//${wsHostPath}?clientId=${clientId}`;
+      try {
+        ws = new WebSocket(wsUrl);
+      } catch(wsErr) {}
+    } else {
+      appendFluxLog(cardId, `Canal HTTP activo (HTTPS Polling).`);
     }
 
     if (ws) {
       ws.onerror = (err) => {
-        // Fallback silently to HTTP polling
+        // Fallback silently
       };
 
       ws.onopen = () => {
