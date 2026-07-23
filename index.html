@@ -1084,11 +1084,11 @@ let COMFY_IS_DIRECT = false;
 async function probeComfy() {
   if (location.hostname.includes('yepzhi.com')) {
     COMFY_URL = 'https://img-yzai.yepzhi.com';
-    COMFY_IS_DIRECT = false;
+    COMFY_IS_DIRECT = true;
     return;
   }
   const candidates = [
-    { base: 'https://img-yzai.yepzhi.com', direct: false },
+    { base: 'https://img-yzai.yepzhi.com', direct: true },
     { base: 'http://127.0.0.1:8188', direct: true }
   ];
   for (const c of candidates) {
