@@ -1619,18 +1619,15 @@ async function sendMessage() {
       const model = data.models.find(m => m.name === selectedModel);
       const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
       if (model) {
-        // Model is in /api/ps = already loaded & running (even if partial VRAM offload).
-        // Only show a message if the request is taking unexpectedly long (>2s)
-        if (loadTime >= 2) {
-          const eta = Math.max(1, Math.round(15 - loadTime));
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} En cola · ETA ~${eta}s</span>`;
+        // Model is in /api/ps = already loaded in VRAM
+        if (loadTime >= 1) {
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generando...</span>`;
           loadingIndicatorActive = true;
         }
       } else {
         // Model not in ps yet = first cold load
-        if (loadTime >= 1.5) {
-          const eta = Math.max(1, Math.round(20 - loadTime));
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Iniciando modelo · ETA ~${eta}s</span>`;
+        if (loadTime >= 1) {
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Cargando modelo en VRAM...</span>`;
           loadingIndicatorActive = true;
         }
       }
@@ -1651,20 +1648,23 @@ async function sendMessage() {
   let retryCount = 0;
   async function attemptFetch() {
     try {
+      const chatBody = { 
+        model: selectedModel, 
+        messages: payload,
+        options: { 
+          num_ctx: 32768
+        },
+        think: false,
+        stream: true 
+      };
+      if (typeof needsWebSearch === 'function' && needsWebSearch(text)) {
+        chatBody.tools = [WEB_SEARCH_TOOL];
+      }
       const res = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         signal: abortCtrl.signal,
-        body: JSON.stringify({ 
-          model: selectedModel, 
-          messages: payload,
-          tools: [WEB_SEARCH_TOOL],
-          options: { 
-            num_ctx: 32768
-          },
-          think: false,
-          stream: true 
-        })
+        body: JSON.stringify(chatBody)
       });
       if (!res.ok) {
         if ((res.status === 502 || res.status === 504 || res.status === 524) && !firstTokenReceived && retryCount < 5) {
