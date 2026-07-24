@@ -2209,12 +2209,12 @@ async function generateImage(promptText) {
     "3": {
       "inputs": {
         "seed": Math.floor(Math.random() * 1000000000000000),
-        "steps": 4,
-        "cfg": 1,
-        "sampler_name": "euler",
-        "scheduler": "simple",
+        "steps": 15,
+        "cfg": 7,
+        "sampler_name": "euler_ancestral",
+        "scheduler": "normal",
         "denoise": 1,
-        "model": ["11", 0],
+        "model": ["4", 0],
         "positive": ["6", 0],
         "negative": ["7", 0],
         "latent_image": ["5", 0]
@@ -2222,48 +2222,35 @@ async function generateImage(promptText) {
       "class_type": "KSampler",
       "_meta": { "title": "KSampler" }
     },
+    "4": {
+      "inputs": { "ckpt_name": "dreamshaper_8.safetensors" },
+      "class_type": "CheckpointLoaderSimple",
+      "_meta": { "title": "Load Checkpoint" }
+    },
     "5": {
       "inputs": { "width": 512, "height": 512, "batch_size": 1 },
       "class_type": "EmptyLatentImage",
       "_meta": { "title": "Empty Latent Image" }
     },
     "6": {
-      "inputs": { "text": promptText, "clip": ["12", 0] },
+      "inputs": { "text": promptText, "clip": ["4", 1] },
       "class_type": "CLIPTextEncode",
       "_meta": { "title": "CLIP Text Encode (Prompt)" }
     },
     "7": {
-      "inputs": { "text": "", "clip": ["12", 0] },
+      "inputs": { "text": "blurry, low quality, bad anatomy, deformed, ugly, distorted", "clip": ["4", 1] },
       "class_type": "CLIPTextEncode",
-      "_meta": { "title": "CLIP Text Encode (Prompt)" }
+      "_meta": { "title": "CLIP Text Encode (Negative)" }
     },
     "8": {
-      "inputs": { "samples": ["3", 0], "vae": ["13", 0] },
+      "inputs": { "samples": ["3", 0], "vae": ["4", 2] },
       "class_type": "VAEDecode",
       "_meta": { "title": "VAE Decode" }
     },
     "9": {
-      "inputs": { "filename_prefix": "yzai_flux", "images": ["8", 0] },
+      "inputs": { "filename_prefix": "yzai_fast", "images": ["8", 0] },
       "class_type": "SaveImage",
       "_meta": { "title": "Save Image" }
-    },
-    "11": {
-      "inputs": { "unet_name": "flux-2-klein-4b-Q4_K_M.gguf", "weight_dtype": "default" },
-      "class_type": "UnetLoaderGGUF",
-      "_meta": { "title": "Unet Loader (GGUF)" }
-    },
-    "12": {
-      "inputs": {
-        "clip_name": "qwen_3_8b_fp8mixed.safetensors",
-        "type": "qwen_image"
-      },
-      "class_type": "CLIPLoader",
-      "_meta": { "title": "CLIPLoader" }
-    },
-    "13": {
-      "inputs": { "vae_name": "flux2-vae.safetensors" },
-      "class_type": "VAELoader",
-      "_meta": { "title": "Load VAE" }
     }
   };
 
@@ -2274,7 +2261,7 @@ async function generateImage(promptText) {
       "_meta": { "title": "Load Image" }
     };
     workflow["15"] = {
-      "inputs": { "pixels": ["14", 0], "vae": ["13", 0] },
+      "inputs": { "pixels": ["14", 0], "vae": ["4", 2] },
       "class_type": "VAEEncode",
       "_meta": { "title": "VAE Encode" }
     };
@@ -2296,14 +2283,12 @@ async function generateImage(promptText) {
   let isDone = false;
 
   const nodeNames = {
-    "11": "Cargando modelo UNet FLUX.2 Klein (GGUF)...",
-    "12": "Cargando encoder de texto Qwen 3 8B...",
-    "13": "Cargando VAE FLUX.2...",
+    "4": "Cargando modelo ultra rápido (DreamShaper 8 SD 1.5)...",
     "5": "Inicializando espacio latente...",
     "6": "Codificando prompt positivo...",
     "7": "Codificando prompt negativo...",
-    "3": "Muestreando difusión FLUX.2 (KSampler 4 pasos CPU)...",
-    "8": "Decodificando imagen latente (VAE)...",
+    "3": "Muestreando difusión ultra rápida (15 pasos CPU)...",
+    "8": "Decodificando imagen final (VAE)...",
     "9": "Guardando imagen final..."
   };
 
