@@ -909,16 +909,18 @@ const ICONS = {
 };
 
 const MODEL_META = {
-  'gemma4-26b-MoE:latest': { badge:'Pro', cls:'badge-purple', desc:'Modelo Gemma 4 26B MoE de Google.', speed:'~30 t/s' }
+  'gemma2:2b': { badge:'Rápido', cls:'badge-green', desc:'Gemma 2 2B ultra rápido (0.6s respuesta).', speed:'~160 t/s' },
+  'llama3.2:3b': { badge:'Balance', cls:'badge-blue', desc:'Llama 3.2 3B rápido y preciso.', speed:'~140 t/s' },
+  'gemma4-26b-MoE:latest': { badge:'Pro (Lento)', cls:'badge-purple', desc:'Modelo Gemma 4 26B MoE de Google (26B Parámetros).', speed:'~10 t/s' }
 };
 
 // ── CONFIG & STATE ─────────────────────────────────────────
 let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
-let selectedModel = 'gemma4-26b-MoE:latest';
+let selectedModel = 'gemma2:2b';
 const FIXED_CTX   = 32768; // 32K Context Only
-let selectedModelDesc = 'Gemma 4 26B MoE (32K Ctx)';
+let selectedModelDesc = 'Gemma 2 2B (0.6s respuesta)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -1170,17 +1172,14 @@ async function loadModels() {
     allModels = models;
 
     if (models.length) {
-      const gemmaModel = models.find(m => {
-        const lower = m.name.toLowerCase();
-        return lower.includes('gemma') && (lower.includes('26b') || lower.includes('moe'));
-      }) || models.find(m => m.name.toLowerCase().includes('gemma'));
-      if (gemmaModel) {
-        selectedModel = gemmaModel.name;
+      const fastModel = models.find(m => m.name.includes('gemma2:2b')) || models.find(m => m.name.includes('llama3.2:3b')) || models[0];
+      if (fastModel) {
+        selectedModel = fastModel.name;
       }
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Mini PC Conectada · Gemma 4 26B MoE (32K)`);
+    setStatus(true, `Mini PC Conectada · Modelo Rápido Activo`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
