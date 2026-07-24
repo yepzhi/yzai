@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; connect-src * 'unsafe-inline' blob: data: http: https: ws: wss:;">
@@ -345,7 +345,7 @@ body {
 
 .bubble {
   padding: 16px 20px;
-  font-size: 14px; line-height: 1.6; word-break: break-word; overflow-wrap: anywhere;
+  font-size: 12px; line-height: 1.6; word-break: break-word; overflow-wrap: anywhere;
   color: var(--text); min-width: 0; max-width: 100%;
   border-radius: 22px;
   position: relative;
@@ -591,7 +591,7 @@ think::before {
 .msg-img { max-width: 100%; border-radius: 12px; margin-bottom: 12px; display: block; border: 1px solid rgba(255,255,255,0.1); }
 #prompt {
   flex: 1; background: none; border: none; outline: none;
-  color: #fff; font-size: 13px; font-family: var(--font-body);
+  color: #fff; font-size: 11px; font-family: var(--font-body);
   resize: none; max-height: 150px; line-height: 1.5; min-height: 24px;
   padding: 8px 0; scrollbar-width: none;
 }
@@ -1180,7 +1180,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Mini PC Conectada · Gemma 4 26B MoE (GPU 8K)`);
+    setStatus(true, `Mini PC Conectada · Gemma 4 26B MoE (32K) FORCE ONLY GPU`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -2255,11 +2255,11 @@ async function generateImage(promptText) {
     },
     "12": {
       "inputs": {
-        "clip_name": "qwen_3_8b_fp8mixed.safetensors",
-        "type": "qwen_image"
+        "clip_name": "qwen3-4b-abl-q4_0.gguf",
+        "type": "flux2"
       },
-      "class_type": "CLIPLoader",
-      "_meta": { "title": "CLIPLoader" }
+      "class_type": "CLIPLoaderGGUF",
+      "_meta": { "title": "CLIPLoaderGGUF" }
     },
     "13": {
       "inputs": { "vae_name": "flux2-vae.safetensors" },
@@ -2298,7 +2298,7 @@ async function generateImage(promptText) {
 
   const nodeNames = {
     "11": "Cargando modelo UNet FLUX.2 Klein (GGUF)...",
-    "12": "Cargando encoder de texto Qwen 3 8B...",
+    "12": "Cargando encoder de texto Qwen 3 4B (GGUF)...",
     "13": "Cargando VAE FLUX.2...",
     "5": "Inicializando espacio latente...",
     "6": "Codificando prompt positivo...",
@@ -2393,6 +2393,13 @@ async function generateImage(promptText) {
     });
     
     const data = await res.json();
+    if (!res.ok || !data.prompt_id) {
+      const errDetail = data?.error?.message || JSON.stringify(data).substring(0,200);
+      appendFluxLog(cardId, `ERROR ComfyUI rechazó el workflow: ${errDetail}`);
+      bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} Error al enviar workflow: ${esc(errDetail)}</span>`;
+      resetInputUI();
+      return;
+    }
     const promptId = data.prompt_id;
     appendFluxLog(cardId, `Prompt registrado en ComfyUI (ID: ${promptId.substring(0,8)}...)`);
     resetInputUI(); // Unlock chat UI so user can chat with Gemma 4 during image generation
