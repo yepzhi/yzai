@@ -1180,7 +1180,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Mini PC Conectada · Gemma 4 26B MoE (32K)`);
+    setStatus(true, `Mini PC Conectada · Gemma 4 26B MoE (GPU 8K)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -1652,7 +1652,8 @@ async function sendMessage() {
         model: selectedModel, 
         messages: payload,
         options: { 
-          num_ctx: FIXED_CTX
+          num_ctx: FIXED_CTX,
+          num_gpu: 999
         },
         think: false,
         stream: true 
@@ -1806,7 +1807,7 @@ async function sendMessage() {
                 model: selectedModel,
                 messages: payload,
                 tools: [WEB_SEARCH_TOOL],
-                options: { num_ctx: FIXED_CTX },
+                options: { num_ctx: FIXED_CTX, num_gpu: 999 },
                 think: false,
                 stream: true
               })
