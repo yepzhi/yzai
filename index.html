@@ -917,8 +917,8 @@ let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
 let selectedModel = 'gemma4-26b-MoE:latest';
-const FIXED_CTX   = 32768; // 32K Context Only
-let selectedModelDesc = 'Gemma 4 26B MoE (32K Ctx)';
+const FIXED_CTX   = 8192; // 8K GPU VRAM Optimized
+let selectedModelDesc = 'Gemma 4 26B MoE (GPU 8K Ctx)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -1547,7 +1547,7 @@ async function sendMessage() {
     bubble.innerHTML = '<span class="cursor"></span>';
   }
 
-  const ctxSize = 32768; // 32K Context – matches FIXED_CTX for max t/s
+  const ctxSize = FIXED_CTX; // 8K GPU VRAM Optimized
 
   setStreaming(true);
   abortCtrl = new AbortController();
@@ -1652,7 +1652,7 @@ async function sendMessage() {
         model: selectedModel, 
         messages: payload,
         options: { 
-          num_ctx: 32768
+          num_ctx: FIXED_CTX
         },
         think: false,
         stream: true 
@@ -1806,7 +1806,7 @@ async function sendMessage() {
                 model: selectedModel,
                 messages: payload,
                 tools: [WEB_SEARCH_TOOL],
-                options: { num_ctx: 32768 },
+                options: { num_ctx: FIXED_CTX },
                 think: false,
                 stream: true
               })
