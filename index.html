@@ -1370,7 +1370,7 @@ const WEB_SEARCH_TOOL = {
 
 async function executeWebSearch(query) {
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 3500);
+  const timeoutId = setTimeout(() => controller.abort(), 6500);
   try {
     const res = await fetch(`${SEARCH_URL}/search?q=${encodeURIComponent(query)}&n=6`, { signal: controller.signal });
     clearTimeout(timeoutId);
@@ -1385,7 +1385,7 @@ async function executeWebSearch(query) {
   // Fallback to DuckDuckGo Instant API
   try {
     const ddgController = new AbortController();
-    const ddgTimeout = setTimeout(() => ddgController.abort(), 3500);
+    const ddgTimeout = setTimeout(() => ddgController.abort(), 5000);
     const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`, { signal: ddgController.signal });
     clearTimeout(ddgTimeout);
     if (ddgRes.ok) {
