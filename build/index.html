@@ -1693,6 +1693,7 @@ async function sendMessage() {
         options: { 
           num_ctx: FIXED_CTX
         },
+        keep_alive: -1,
         stream: true 
       };
       const res = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
