@@ -1546,7 +1546,9 @@ async function sendMessage() {
         currentThinking += targetThinking.substr(currentThinking.length, step);
         hasChanges = true;
       } else if (pendingText > 0) {
-        const step = Math.min(pendingText, Math.ceil(pendingText / 3) || 1);
+        const step = pendingText > 12
+          ? pendingText
+          : Math.min(pendingText, Math.ceil(pendingText / 2) || 1);
         currentText += targetText.substr(currentText.length, step);
         hasChanges = true;
       }
