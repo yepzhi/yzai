@@ -1652,15 +1652,10 @@ async function sendMessage() {
         model: selectedModel, 
         messages: payload,
         options: { 
-          num_ctx: FIXED_CTX,
-          num_gpu: 999
+          num_ctx: FIXED_CTX
         },
-        think: false,
         stream: true 
       };
-      if (typeof needsWebSearch === 'function' && needsWebSearch(text)) {
-        chatBody.tools = [WEB_SEARCH_TOOL];
-      }
       const res = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
