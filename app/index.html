@@ -1755,14 +1755,14 @@ async function sendMessage() {
             const tps = d.eval_duration ? (d.eval_count / (d.eval_duration/1e9)).toFixed(1) : null;
             const loadTime = d.load_duration ? (d.load_duration/1e9).toFixed(1) : 0;
             document.getElementById('token-count').textContent =
-              `${d.eval_count} tokens · ${tps ? tps+' t/s' : ''} (Tiempo carga: ${loadTime}s)`;
+              `${d.eval_count} tokens · ${tps ? tps+' t/s' : ''} (Load time: ${loadTime}s)`;
           }
         } catch(e) {}
       }
     }
 
     if (!ollamaDone && targetText) {
-      targetText += '\n\n*(La respuesta se interrumpió por un tiempo de espera en la red o desconexión del servidor)*';
+      targetText += '\n\n*(Response interrupted by network timeout or server disconnection)*';
     }
 
     // ── Execute tool calls if model requested web_search ──
@@ -1773,8 +1773,8 @@ async function sendMessage() {
           const q = tc.function.arguments?.query || tc.function.arguments?.q || '';
           if (!q) continue;
           // Show searching indicator in bubble
-          bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Buscando: <em>${esc(q)}</em>…</span>`;
-          document.getElementById('token-count').textContent = 'Buscando en DuckDuckGo...';
+          bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Searching web for: <em>${esc(q)}</em>…</span>`;
+          document.getElementById('token-count').textContent = 'Searching the web...';
           try {
             const results = await executeWebSearch(q);
             // Build tool result text
@@ -1799,7 +1799,7 @@ async function sendMessage() {
             firstTokenReceived = false;
             tokenCount = 0;
             startTime = Date.now();
-            document.getElementById('token-count').textContent = 'Generando respuesta...';
+            document.getElementById('token-count').textContent = 'Generating response...';
             bubble.innerHTML = '<span class="cursor"></span>';
             // Second Ollama call with tool results
             const res2 = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
@@ -1809,9 +1809,8 @@ async function sendMessage() {
               body: JSON.stringify({
                 model: selectedModel,
                 messages: payload,
-                tools: [WEB_SEARCH_TOOL],
-                options: { num_ctx: FIXED_CTX, num_gpu: 999 },
-                think: false,
+                options: { num_ctx: FIXED_CTX },
+                keep_alive: -1,
                 stream: true
               })
             });
@@ -1823,7 +1822,7 @@ async function sendMessage() {
               const elapsed = (Date.now() - startTime) / 1000;
               if (elapsed > 0 && tokenCount > 0) {
                 const tps2 = (tokenCount / elapsed).toFixed(1);
-                document.getElementById('token-count').textContent = `Generando... ~${tps2} t/s`;
+                document.getElementById('token-count').textContent = `Generating... ~${tps2} t/s`;
               }
             }, 500);
             while (true) {
