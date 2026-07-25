@@ -1627,14 +1627,13 @@ async function sendMessage() {
       const model = data.models.find(m => m.name === selectedModel);
       const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
       if (model) {
-        // Model is in /api/ps = already loaded in VRAM
         if (loadTime >= 1) {
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generando...</span>`;
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generating...</span>`;
           loadingIndicatorActive = true;
         }
       } else {
         if (loadTime >= 1) {
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generando...</span>`;
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generating...</span>`;
           loadingIndicatorActive = true;
         }
       }
@@ -1717,14 +1716,14 @@ async function sendMessage() {
               if (loadInterval) { clearInterval(loadInterval); loadInterval = null; }
               // Only reset the label if we had shown a loading indicator
               if (loadingIndicatorActive) {
-                document.getElementById('token-count').textContent = 'Generando...';
+                document.getElementById('token-count').textContent = 'Generating...';
               }
               startTime = Date.now();
               liveTimer = setInterval(() => {
                 const elapsed = (Date.now() - startTime) / 1000;
                 if (elapsed > 0 && tokenCount > 0) {
                   const tps = (tokenCount / elapsed).toFixed(1);
-                  document.getElementById('token-count').textContent = `Generando... ~${tps} t/s`;
+                  document.getElementById('token-count').textContent = `Generating... ~${tps} t/s`;
                 }
               }, 500);
             }
@@ -1863,8 +1862,8 @@ async function sendMessage() {
     if (e.name !== 'AbortError') {
       const isOfflineErr = e.message.includes('Failed to fetch') || e.message.includes('502') || e.message.includes('521') || e.message.includes('522') || e.message.includes('523') || e.message.includes('524');
       const errorMsg = isOfflineErr 
-        ? 'El servidor de IA (MiniPC) está apagado o no responde. Por favor enciéndelo.'
-        : `Error de conexión: ${esc(e.message)}`;
+        ? 'AI Server (MiniPC) is offline or unresponsive. Please make sure it is powered on.'
+        : `Connection error: ${esc(e.message)}`;
 
       if (targetText.trim()) {
         targetText += `\n\n*(${errorMsg})*`;
@@ -1874,7 +1873,7 @@ async function sendMessage() {
       } else {
         bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${errorMsg}</span>`;
       }
-      document.getElementById('token-count').textContent = isOfflineErr ? 'Servidor apagado / desconectado' : 'Error de respuesta';
+      document.getElementById('token-count').textContent = isOfflineErr ? 'Server offline / disconnected' : 'Response error';
     }
     clearTimeout(loadPollStart);
     if (loadInterval) clearInterval(loadInterval);
