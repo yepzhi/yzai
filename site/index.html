@@ -1441,10 +1441,49 @@ const WEB_SEARCH_TOOL = {
 };
 
 async function executeWebSearch(query) {
-  const res = await fetch(`${SEARCH_URL}/search?q=${encodeURIComponent(query)}&n=6`);
-  if (!res.ok) throw new Error(`Search proxy error: ${res.status}`);
-  const data = await res.json();
-  return data.results || [];
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 3500);
+  try {
+    const res = await fetch(`${SEARCH_URL}/search?q=${encodeURIComponent(query)}&n=6`, { signal: controller.signal });
+    clearTimeout(timeoutId);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.results && data.results.length > 0) return data.results;
+    }
+  } catch (err) {
+    console.warn('[search-primary-failed]', err.message);
+  }
+
+  // Fallback to DuckDuckGo Instant API
+  try {
+    const ddgController = new AbortController();
+    const ddgTimeout = setTimeout(() => ddgController.abort(), 3500);
+    const ddgRes = await fetch(`https://api.duckduckgo.com/?q=${encodeURIComponent(query)}&format=json&no_html=1&skip_disambig=1`, { signal: ddgController.signal });
+    clearTimeout(ddgTimeout);
+    if (ddgRes.ok) {
+      const ddgData = await ddgRes.json();
+      const results = [];
+      if (ddgData.AbstractText) {
+        results.push({
+          title: ddgData.Heading || query,
+          url: ddgData.AbstractURL || 'https://duckduckgo.com',
+          snippet: ddgData.AbstractText
+        });
+      }
+      if (ddgData.RelatedTopics && Array.isArray(ddgData.RelatedTopics)) {
+        ddgData.RelatedTopics.forEach(t => {
+          if (t.Text && t.FirstURL) {
+            results.push({ title: t.Text.slice(0, 60), url: t.FirstURL, snippet: t.Text });
+          }
+        });
+      }
+      if (results.length > 0) return results.slice(0, 6);
+    }
+  } catch (err) {
+    console.warn('[search-ddg-fallback-failed]', err.message);
+  }
+
+  return [];
 }
 
 // Detects if the user wants a web search (keywords in Spanish & English)
