@@ -1657,6 +1657,7 @@ async function sendMessage() {
       const chatBody = { 
         model: selectedModel, 
         messages: payload,
+        think: false,
         options: { 
           num_ctx: FIXED_CTX
         },
@@ -1808,6 +1809,7 @@ async function sendMessage() {
               body: JSON.stringify({
                 model: selectedModel,
                 messages: payload,
+                think: false,
                 options: { num_ctx: FIXED_CTX },
                 keep_alive: -1,
                 stream: true
