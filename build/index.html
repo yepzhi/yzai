@@ -790,7 +790,7 @@ think::before {
       </div>
       <div class="model-pill-info">
         <div class="model-pill-name" id="activeName">GEMMA 4 (26B MOE)</div>
-        <div class="model-pill-sub" id="activeSub">Context: 4K · Ready</div>
+        <div class="model-pill-sub" id="activeSub">Context: 8K · Ready</div>
       </div>
       <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
     </div>
@@ -830,7 +830,7 @@ think::before {
         </button>
       </div>
     </div>
-    <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Context: 4K · Ready to generate</div>
+    <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Context: 8K · Ready to generate</div>
     <div class="input-container">
       <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.py,.sh,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r" style="display:none" onchange="handleFileSelect(event)">
       <div class="attach-menu-wrapper" style="position:relative; display:flex; align-items:center;">
@@ -891,8 +891,8 @@ let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
 let selectedModel = 'gemma4-26b-MoE:latest';
-const FIXED_CTX   = 4096; // 4K GPU VRAM Optimized
-let selectedModelDesc = 'Gemma 4 26B MoE (GPU 4K Ctx)';
+const FIXED_CTX   = 8192; // 8K GPU VRAM Optimized
+let selectedModelDesc = 'Gemma 4 26B MoE (GPU 8K Ctx)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -1108,7 +1108,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · Gemma 4 26B MoE (4K)`);
+    setStatus(true, `Server Live · Gemma 4 26B MoE (8K)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -1143,10 +1143,10 @@ function updateModelHeader() {
   const activeName = document.getElementById('activeName');
   if (activeName) activeName.textContent = 'GEMMA 4 (26B MOE)';
   const activeSub = document.getElementById('activeSub');
-  if (activeSub) activeSub.textContent = 'Context: 4K · Ready';
+  if (activeSub) activeSub.textContent = 'Context: 8K · Ready';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 4K · Ready to generate';
+    tokenCount.textContent = 'Context: 8K · Ready to generate';
   }
 }
 
