@@ -790,7 +790,7 @@ think::before {
       </div>
       <div class="model-pill-info">
         <div class="model-pill-name" id="activeName">GEMMA 4 (26B MOE)</div>
-        <div class="model-pill-sub" id="activeSub">Contexto: 32K · Listo</div>
+        <div class="model-pill-sub" id="activeSub">Contexto: 8K · Listo</div>
       </div>
       <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
     </div>
@@ -830,7 +830,7 @@ think::before {
         </button>
       </div>
     </div>
-    <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Contexto: 32K · Listo para generar</div>
+    <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Contexto: 8K · Listo para generar</div>
     <div class="input-container">
       <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.py,.sh,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r" style="display:none" onchange="handleFileSelect(event)">
       <div class="attach-menu-wrapper" style="position:relative; display:flex; align-items:center;">
@@ -1104,16 +1104,11 @@ async function checkServicesHealth() {
   const drawerDot = document.getElementById('statusDot');
   const drawerText = document.getElementById('statusText');
 
-  if (ollamaOk && comfyOk) {
-    if (topDot) { topDot.style.background = '#3FB950'; topDot.title = 'Ollama y ComfyUI Operando y Listos'; }
-    if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">🟢 Ollama &amp; ComfyUI: Listos</span>';
+  if (ollamaOk) {
+    if (topDot) { topDot.style.background = '#3FB950'; topDot.title = 'Servidor Ollama Operando y Listo'; }
+    if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">🟢 Servidor Ollama: Listo</span>';
     if (drawerDot) drawerDot.style.background = '#3FB950';
-    if (drawerText) drawerText.innerHTML = 'Servicios locales <strong style="color:#3FB950">operando y listos</strong>';
-  } else if (ollamaOk) {
-    if (topDot) { topDot.style.background = '#e3b341'; topDot.title = 'Ollama Listo, ComfyUI Offline'; }
-    if (activeSub) activeSub.innerHTML = '<span style="color:#e3b341;">🟡 Ollama Listo (ComfyUI Off)</span>';
-    if (drawerDot) drawerDot.style.background = '#e3b341';
-    if (drawerText) drawerText.innerHTML = 'Ollama <strong style="color:#3FB950">listo</strong> (ComfyUI offline)';
+    if (drawerText) drawerText.innerHTML = 'Servidor Ollama <strong style="color:#3FB950">operando y listo</strong>';
   } else {
     if (topDot) { topDot.style.background = '#F85149'; topDot.title = 'Desconectado'; }
     if (activeSub) activeSub.innerHTML = '<span style="color:#F85149;">🔴 Servidor Offline</span>';
@@ -1124,7 +1119,7 @@ async function checkServicesHealth() {
 
 async function init() {
   loadConversations();
-  await Promise.all([discoverEndpoint(), probeComfy()]);
+  await discoverEndpoint();
   await loadModels();
   checkServicesHealth();
   setInterval(checkServicesHealth, 30000);
@@ -1154,7 +1149,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Mini PC Conectada · Gemma 4 26B MoE (32K) FORCE ONLY GPU`);
+    setStatus(true, `Server Live · Gemma 4 26B MoE (8K)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -1189,10 +1184,10 @@ function updateModelHeader() {
   const activeName = document.getElementById('activeName');
   if (activeName) activeName.textContent = 'GEMMA 4 (26B MOE)';
   const activeSub = document.getElementById('activeSub');
-  if (activeSub) activeSub.textContent = 'Contexto: 32K · Listo';
+  if (activeSub) activeSub.textContent = 'Contexto: 8K · Listo';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Contexto:')) {
-    tokenCount.textContent = 'Contexto: 32K · Listo para generar';
+    tokenCount.textContent = 'Contexto: 8K · Listo para generar';
   }
 }
 
@@ -1638,9 +1633,8 @@ async function sendMessage() {
           loadingIndicatorActive = true;
         }
       } else {
-        // Model not in ps yet = first cold load
         if (loadTime >= 1) {
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Cargando modelo en VRAM...</span>`;
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generando...</span>`;
           loadingIndicatorActive = true;
         }
       }
