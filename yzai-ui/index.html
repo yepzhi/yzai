@@ -938,28 +938,36 @@ think::before {
             <span class="attach-menu-badge">Visión + Docs + Código</span>
           </div>
           <div class="attach-menu-item" onclick="triggerFileInput('image/*')">
-            <div class="attach-item-icon" style="background:rgba(236,72,153,0.15);color:var(--secondary);">🖼️</div>
+            <div class="attach-item-icon" style="background:rgba(236,72,153,0.15);color:var(--secondary);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
             <div class="attach-item-info">
               <div class="attach-item-title">Imágenes y Visión Multimodal</div>
               <div class="attach-item-desc">PNG, JPG, WEBP, GIF, SVG (Comprensión, OCR, Diagramas)</div>
             </div>
           </div>
           <div class="attach-menu-item" onclick="triggerFileInput('.pdf,.txt,.md')">
-            <div class="attach-item-icon" style="background:rgba(6,182,212,0.15);color:var(--cyan);">📄</div>
+            <div class="attach-item-icon" style="background:rgba(6,182,212,0.15);color:var(--cyan);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
             <div class="attach-item-info">
               <div class="attach-item-title">Documentos y PDF</div>
               <div class="attach-item-desc">PDF (hasta 80k chars / ~20K tokens), TXT, Markdown</div>
             </div>
           </div>
           <div class="attach-menu-item" onclick="triggerFileInput('.csv,.tsv,.json,.jsonl,.xml,.yaml,.yml,.toml,.ini,.log,.env')">
-            <div class="attach-item-icon" style="background:rgba(16,185,129,0.15);color:var(--green);">📊</div>
+            <div class="attach-item-icon" style="background:rgba(16,185,129,0.15);color:var(--green);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
             <div class="attach-item-info">
               <div class="attach-item-title">Datos, Tablas y Configs</div>
               <div class="attach-item-desc">CSV, TSV, JSON, JSONL, XML, YAML, TOML, LOG</div>
             </div>
           </div>
           <div class="attach-menu-item" onclick="triggerFileInput('.py,.js,.ts,.jsx,.tsx,.html,.css,.sql,.sh,.bash,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.r')">
-            <div class="attach-item-icon" style="background:rgba(139,92,246,0.15);color:var(--primary);">💻</div>
+            <div class="attach-item-icon" style="background:rgba(139,92,246,0.15);color:var(--primary);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
             <div class="attach-item-info">
               <div class="attach-item-title">Código Fuente y Scripts</div>
               <div class="attach-item-desc">Python, JS/TS, HTML, CSS, SQL, C++, Rust, Shell</div>
@@ -967,7 +975,9 @@ think::before {
           </div>
           <div class="attach-menu-divider"></div>
           <div class="attach-menu-item" onclick="triggerFileInput('image/*,.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.jsx,.tsx,.py,.sh,.bash,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r')">
-            <div class="attach-item-icon" style="background:rgba(255,255,255,0.08);color:#fff;">📂</div>
+            <div class="attach-item-icon" style="background:rgba(255,255,255,0.08);color:#fff;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            </div>
             <div class="attach-item-info">
               <div class="attach-item-title">Todos los Archivos Admitidos</div>
               <div class="attach-item-desc">Seleccionar cualquier formato compatible</div>
