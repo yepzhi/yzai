@@ -1820,6 +1820,7 @@ async function sendMessage() {
         options: { 
           num_ctx: FIXED_CTX
         },
+        think: false,
         keep_alive: -1,
         stream: true 
       };
@@ -2015,7 +2016,6 @@ async function sendMessage() {
     startTypewriterLoop(); // Forzar el drenado final del búfer
     
     clearTimeout(loadPollStart);
-    if (loadInterval) clearInterval(loadInterval);
     if (liveTimer) clearInterval(liveTimer);
   } catch(e) {
     if (e.name !== 'AbortError') {
@@ -2035,7 +2035,6 @@ async function sendMessage() {
       document.getElementById('token-count').textContent = isOfflineErr ? 'Server offline / disconnected' : 'Response error';
     }
     clearTimeout(loadPollStart);
-    if (loadInterval) clearInterval(loadInterval);
     if (liveTimer) clearInterval(liveTimer);
     if (typewriterTimer) clearInterval(typewriterTimer);
     setStreaming(false);
