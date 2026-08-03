@@ -885,7 +885,7 @@ think::before {
       </div>
       <div class="model-pill-info">
         <div class="model-pill-name" id="activeName">QWEN 3.6 (35B MOE)</div>
-        <div class="model-pill-sub" id="activeSub">Context: 16K · Ready</div>
+        <div class="model-pill-sub" id="activeSub">Context: 8K · 8 Slots Ready</div>
       </div>
       <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
     </div>
@@ -1028,8 +1028,8 @@ let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
 let selectedModel = 'qwen36-yzai:latest';
-const FIXED_CTX   = 16384; // 16K 2-slot GPU Optimized
-let selectedModelDesc = 'Qwen 3.6 35B A3B (GPU 16K Ctx)';
+const FIXED_CTX   = 8192; // 8K 8-slot GPU Optimized
+let selectedModelDesc = 'Qwen 3.6 35B A3B (GPU 8K Ctx · 8 Slots)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -1280,10 +1280,10 @@ function updateModelHeader() {
   const activeName = document.getElementById('activeName');
   if (activeName) activeName.textContent = 'QWEN 3.6 (35B MOE)';
   const activeSub = document.getElementById('activeSub');
-  if (activeSub) activeSub.textContent = 'Context: 16K · Ready';
+  if (activeSub) activeSub.textContent = 'Context: 8K · 8 Slots Ready';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 16K · Ready to generate';
+    tokenCount.textContent = 'Context: 8K · 8 Slots Ready';
   }
 }
 
