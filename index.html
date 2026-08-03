@@ -563,18 +563,18 @@ think::before {
 /* ─── FLOATING INPUT BAR ─────────────────────────── */
 .input-wrapper {
   position: absolute; bottom: 0; left: 0; right: 0;
-  padding: 20px 16px calc(20px + var(--safe-b));
-  background: linear-gradient(to top, rgba(3,3,5,1) 30%, rgba(3,3,5,0.8) 70%, transparent);
+  padding: 16px 16px calc(24px + var(--safe-b, 0px));
+  background: linear-gradient(to top, rgba(3,3,5,0.98) 40%, rgba(3,3,5,0.85) 75%, transparent);
   pointer-events: none; z-index: 30; display: flex; flex-direction: column; align-items: center;
 }
 .input-container {
-  width: 100%; max-width: 850px; pointer-events: all;
-  background: rgba(20,20,25,0.7); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
-  padding: 12px 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
-  display: flex; align-items: flex-end; gap: 12px; transition: border-color 0.3s, box-shadow 0.3s;
+  width: 100%; max-width: 880px; pointer-events: all;
+  background: rgba(18, 18, 26, 0.88); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 22px;
+  padding: 10px 14px; box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+  display: flex; align-items: flex-end; gap: 10px; transition: border-color 0.3s, box-shadow 0.3s;
 }
-.input-container:focus-within { border-color: rgba(139,92,246,0.5); box-shadow: 0 0 0 4px rgba(139,92,246,0.1), 0 20px 40px rgba(0,0,0,0.6); }
+.input-container:focus-within { border-color: rgba(139,92,246,0.6); box-shadow: 0 0 0 4px rgba(139,92,246,0.18), 0 20px 40px rgba(0,0,0,0.7); }
 
 .attach-btn {
   background: none; border: none; color: var(--muted); padding: 8px; border-radius: 12px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
@@ -686,26 +686,26 @@ think::before {
 .msg-img { max-width: 100%; border-radius: 12px; margin-bottom: 12px; display: block; border: 1px solid rgba(255,255,255,0.1); }
 #prompt {
   flex: 1; background: none; border: none; outline: none;
-  color: #fff; font-size: 11px; font-family: var(--font-body);
-  resize: none; max-height: 150px; line-height: 1.5; min-height: 24px;
-  padding: 8px 0; scrollbar-width: none; transition: font-size 0.2s ease, max-height 0.2s ease;
+  color: #fff; font-size: 15px; font-family: var(--font-body);
+  resize: none; max-height: 180px; line-height: 1.45; min-height: 28px;
+  padding: 8px 4px; scrollbar-width: none; transition: font-size 0.2s ease, max-height 0.2s ease;
 }
-#prompt::placeholder { color: var(--muted); transition: color 0.2s; }
+#prompt::placeholder { color: var(--muted); opacity: 0.85; transition: color 0.2s; }
 #prompt.listening-input {
-  font-size: 14px !important; /* +27% más grande para máxima legibilidad durante dictado */
-  font-weight: 600; color: #10b981; max-height: 300px;
+  font-size: 18px !important; /* +20% más grande en dictado */
+  font-weight: 600; color: #10b981; max-height: 320px;
 }
 #prompt.listening-input::placeholder { color: #10b981; font-weight: 600; opacity: 0.85; }
 
 .send-btn, .stop-btn {
-  width: 40px; height: 40px; flex-shrink: 0;
+  width: 42px; height: 42px; flex-shrink: 0;
   border: none; border-radius: 14px;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
-.send-btn { background: var(--text); color: var(--bg); box-shadow: 0 4px 14px rgba(255,255,255,0.1); }
-.send-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,255,255,0.2); }
+.send-btn { background: var(--text); color: var(--bg); box-shadow: 0 4px 14px rgba(255,255,255,0.12); }
+.send-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,255,255,0.25); }
 .send-btn:active { transform: translateY(0) scale(0.95); }
 .send-btn:disabled { opacity: 0.2; pointer-events: none; background: var(--text-dim); }
 
@@ -713,12 +713,12 @@ think::before {
 .stop-btn:hover { background: rgba(239,68,68,0.25); transform: scale(1.05); }
 
 .mic-btn {
-  width: 40px; height: 40px; flex-shrink: 0;
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 14px;
-  background: rgba(255,255,255,0.05); color: var(--text-dim);
+  width: 42px; height: 42px; flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 14px;
+  background: rgba(255,255,255,0.06); color: var(--text-dim);
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  margin-bottom: 2px; margin-right: 4px;
+  margin-bottom: 1px; margin-right: 2px;
 }
 .mic-btn:hover { background: rgba(255,255,255,0.15); color: #fff; transform: translateY(-2px); border-color: rgba(255,255,255,0.2); }
 .mic-btn.listening {
@@ -830,9 +830,11 @@ think::before {
   .modal-overlay { align-items: center; padding: 0; border-radius: 24px; }
   .modal { border-radius: 24px; max-width: 500px; margin: 0 20px; transform: scale(0.95); }
   .modal-overlay.open .modal { transform: scale(1); }
-  .messages { padding: 40px 24px 140px; gap: 32px; }
-  .bubble { font-size: 13px; }
-  .input-wrapper { padding: 0 24px 32px; }
+  .messages { padding: 40px 24px 170px; gap: 32px; }
+  .bubble { font-size: 14px; }
+  .input-wrapper { padding: 20px 24px calc(28px + var(--safe-b, 0px)); }
+  .input-container { padding: 12px 18px; border-radius: 24px; }
+  #prompt { font-size: 15px; }
   .top-bar { padding: 16px 24px; }
   .menu-btn { display: none; }
 }
@@ -2535,12 +2537,13 @@ document.getElementById('prompt').addEventListener('keydown', e => {
   if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
 });
 
-// Fix for iOS Safari Keyboard hiding input bar
+// Fix for iOS Safari / iPadOS Keyboard hiding input bar
 if (window.visualViewport) {
   window.visualViewport.addEventListener('resize', () => {
     const iw = document.querySelector('.input-wrapper');
+    if (!iw) return;
     const offset = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
-    iw.style.paddingBottom = Math.max(offset + 20, 20) + 'px';
+    iw.style.paddingBottom = Math.max(offset + 24, 24) + 'px';
     scrollBottom();
   });
 }
