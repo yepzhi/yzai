@@ -686,13 +686,13 @@ think::before {
 .msg-img { max-width: 100%; border-radius: 12px; margin-bottom: 12px; display: block; border: 1px solid rgba(255,255,255,0.1); }
 #prompt {
   flex: 1; background: none; border: none; outline: none;
-  color: #fff; font-size: 15px; font-family: var(--font-body);
-  resize: none; max-height: 180px; line-height: 1.45; min-height: 28px;
+  color: #fff; font-size: 18px; font-family: var(--font-body);
+  resize: none; max-height: 180px; line-height: 1.45; min-height: 32px;
   padding: 8px 4px; scrollbar-width: none; transition: font-size 0.2s ease, max-height 0.2s ease;
 }
 #prompt::placeholder { color: var(--muted); opacity: 0.85; transition: color 0.2s; }
 #prompt.listening-input {
-  font-size: 18px !important; /* +20% más grande en dictado */
+  font-size: 22px !important; /* +20% más grande en dictado */
   font-weight: 600; color: #10b981; max-height: 320px;
 }
 #prompt.listening-input::placeholder { color: #10b981; font-weight: 600; opacity: 0.85; }
@@ -834,7 +834,7 @@ think::before {
   .bubble { font-size: 14px; }
   .input-wrapper { padding: 20px 24px calc(28px + var(--safe-b, 0px)); }
   .input-container { padding: 12px 18px; border-radius: 24px; }
-  #prompt { font-size: 15px; }
+  #prompt { font-size: 18px; }
   .top-bar { padding: 16px 24px; }
   .menu-btn { display: none; }
 }
@@ -1472,7 +1472,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · Qwen 3.6 35B A3B (16K)`);
+    setStatus(true, `Server Live · Qwen 3.6 35B A3B (8K)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -1854,7 +1854,7 @@ let isImagineMode = false;
 
 async function sendMessage() {
   const input = document.getElementById('prompt');
-  let text  = input.value.replace(/^🎙️\s*/, '').trim();
+  let text  = input.value.trim();
   if (!text) return;
   checkContextUsage();
   if (isVoiceModeActive && typeof VoiceQueue !== 'undefined') {
@@ -2415,7 +2415,7 @@ function initSpeechRecognition() {
     const p = document.getElementById('prompt');
     if (p) {
       p.classList.add('listening-input');
-      p.placeholder = "🎙️ Escuchando tu voz... habla ahora";
+      p.placeholder = "Escuchando tu voz... habla ahora";
       autoResize(p);
     }
     const overlayMicBtn = document.getElementById('voiceOverlayMicBtn');
@@ -2429,7 +2429,7 @@ function initSpeechRecognition() {
     }
     const input = document.getElementById('prompt');
     if (input) {
-      input.value = "🎙️ " + transcript;
+      input.value = transcript;
       input.classList.add('listening-input');
       autoResize(input);
     }
