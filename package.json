@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "description": "yZAI AI Interface",
   "scripts": {
-    "build": "mkdir -p dist && cp yzai-ui/index.html dist/index.html && cp index.html dist/index.html"
+    "build": "mkdir -p dist docs public build site out app html yzai-ui && cp index.html dist/index.html && cp index.html docs/index.html && cp index.html public/index.html && cp index.html build/index.html && cp index.html site/index.html && cp index.html out/index.html && cp index.html app/index.html && cp index.html html/index.html && cp index.html yzai-ui/index.html"
   }
 }

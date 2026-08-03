@@ -563,23 +563,118 @@ think::before {
 /* ─── FLOATING INPUT BAR ─────────────────────────── */
 .input-wrapper {
   position: absolute; bottom: 0; left: 0; right: 0;
-  padding: 20px 16px calc(20px + var(--safe-b));
-  background: linear-gradient(to top, rgba(3,3,5,1) 30%, rgba(3,3,5,0.8) 70%, transparent);
+  padding: 16px 16px calc(24px + var(--safe-b, 0px));
+  background: linear-gradient(to top, rgba(3,3,5,0.98) 40%, rgba(3,3,5,0.85) 75%, transparent);
   pointer-events: none; z-index: 30; display: flex; flex-direction: column; align-items: center;
 }
 .input-container {
-  width: 100%; max-width: 850px; pointer-events: all;
-  background: rgba(20,20,25,0.7); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-  border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;
-  padding: 12px 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05);
-  display: flex; align-items: flex-end; gap: 12px; transition: border-color 0.3s, box-shadow 0.3s;
+  width: 100%; max-width: 880px; pointer-events: all;
+  background: rgba(18, 18, 26, 0.88); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 22px;
+  padding: 10px 14px; box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
+  display: flex; align-items: flex-end; gap: 10px; transition: border-color 0.3s, box-shadow 0.3s;
 }
-.input-container:focus-within { border-color: rgba(139,92,246,0.5); box-shadow: 0 0 0 4px rgba(139,92,246,0.1), 0 20px 40px rgba(0,0,0,0.6); }
+.input-container:focus-within { border-color: rgba(139,92,246,0.6); box-shadow: 0 0 0 4px rgba(139,92,246,0.18), 0 20px 40px rgba(0,0,0,0.7); }
 
 .attach-btn {
   background: none; border: none; color: var(--muted); padding: 8px; border-radius: 12px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
 }
 .attach-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
+
+/* ─── ATTACH POPUP MENU ──────────────────────────── */
+.attach-menu {
+  position: absolute;
+  bottom: calc(100% + 14px);
+  left: 0;
+  width: 330px;
+  background: rgba(16, 16, 22, 0.95);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 20px;
+  padding: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(12px) scale(0.95);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100;
+}
+.attach-menu.open {
+  opacity: 1;
+  pointer-events: all;
+  transform: translateY(0) scale(1);
+}
+.attach-menu-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 6px 10px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+.attach-menu-badge {
+  font-size: 9.5px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(139, 92, 246, 0.2);
+  color: var(--primary-hover);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+.attach-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 9px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.15s ease;
+}
+.attach-menu-item:hover {
+  background: rgba(255, 255, 255, 0.07);
+  transform: translateX(3px);
+}
+.attach-item-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+.attach-item-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  flex: 1;
+}
+.attach-item-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+}
+.attach-item-desc {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.attach-menu-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 4px 0;
+}
 .img-preview-container {
   display: none; position: absolute; bottom: calc(100% + 12px); left: 24px; background: rgba(20,20,25,0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 8px; border-radius: 16px; border: 1px solid var(--border-light); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 40;
 }
@@ -591,26 +686,63 @@ think::before {
 .msg-img { max-width: 100%; border-radius: 12px; margin-bottom: 12px; display: block; border: 1px solid rgba(255,255,255,0.1); }
 #prompt {
   flex: 1; background: none; border: none; outline: none;
-  color: #fff; font-size: 11px; font-family: var(--font-body);
-  resize: none; max-height: 150px; line-height: 1.5; min-height: 24px;
-  padding: 8px 0; scrollbar-width: none;
+  color: #fff; font-size: 18px; font-family: var(--font-body);
+  resize: none; max-height: 180px; line-height: 1.45; min-height: 32px;
+  padding: 8px 4px; scrollbar-width: none; transition: font-size 0.2s ease, max-height 0.2s ease;
 }
-#prompt::placeholder { color: var(--muted); }
+#prompt::placeholder { color: var(--muted); opacity: 0.85; transition: color 0.2s; }
+#prompt.listening-input {
+  font-size: 22px !important; /* +20% más grande en dictado */
+  font-weight: 600; color: #10b981; max-height: 320px;
+}
+#prompt.listening-input::placeholder { color: #10b981; font-weight: 600; opacity: 0.85; }
 
 .send-btn, .stop-btn {
-  width: 40px; height: 40px; flex-shrink: 0;
+  width: 42px; height: 42px; flex-shrink: 0;
   border: none; border-radius: 14px;
   cursor: pointer; display: flex; align-items: center; justify-content: center;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-  margin-bottom: 2px;
+  margin-bottom: 1px;
 }
-.send-btn { background: var(--text); color: var(--bg); box-shadow: 0 4px 14px rgba(255,255,255,0.1); }
-.send-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,255,255,0.2); }
+.send-btn { background: var(--text); color: var(--bg); box-shadow: 0 4px 14px rgba(255,255,255,0.12); }
+.send-btn:hover { background: #fff; transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,255,255,0.25); }
 .send-btn:active { transform: translateY(0) scale(0.95); }
 .send-btn:disabled { opacity: 0.2; pointer-events: none; background: var(--text-dim); }
 
 .stop-btn { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
 .stop-btn:hover { background: rgba(239,68,68,0.25); transform: scale(1.05); }
+
+.mic-btn {
+  width: 42px; height: 42px; flex-shrink: 0;
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 14px;
+  background: rgba(255,255,255,0.06); color: var(--text-dim);
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  margin-bottom: 1px; margin-right: 2px;
+}
+.mic-btn:hover { background: rgba(255,255,255,0.15); color: #fff; transform: translateY(-2px); border-color: rgba(255,255,255,0.2); }
+.mic-btn.listening {
+  background: rgba(239,68,68,0.2); color: #ef4444; border-color: #ef4444;
+  animation: micPulse 1.5s infinite;
+}
+@keyframes micPulse {
+  0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+  100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
+}
+
+.voice-mode-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  padding: 6px 12px; border-radius: 100px; color: var(--text-dim);
+  font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  margin-right: 8px; font-family: var(--font-sans);
+}
+.voice-mode-pill:hover { background: rgba(255,255,255,0.09); color: #fff; transform: translateY(-1px); }
+.voice-mode-pill.active {
+  background: rgba(16,185,129,0.18); border-color: rgba(16,185,129,0.5); color: #10b981;
+  box-shadow: 0 0 14px rgba(16,185,129,0.25);
+}
 
 .input-hint {
   text-align: center; font-size: 11px; color: var(--muted); font-weight: 500;
@@ -698,12 +830,78 @@ think::before {
   .modal-overlay { align-items: center; padding: 0; border-radius: 24px; }
   .modal { border-radius: 24px; max-width: 500px; margin: 0 20px; transform: scale(0.95); }
   .modal-overlay.open .modal { transform: scale(1); }
-  .messages { padding: 40px 24px 140px; gap: 32px; }
-  .bubble { font-size: 13px; }
-  .input-wrapper { padding: 0 24px 32px; }
+  .messages { padding: 40px 24px 170px; gap: 32px; }
+  .bubble { font-size: 14px; }
+  .input-wrapper { padding: 20px 24px calc(28px + var(--safe-b, 0px)); }
+  .input-container { padding: 12px 18px; border-radius: 24px; }
+  #prompt { font-size: 18px; }
   .top-bar { padding: 16px 24px; }
   .menu-btn { display: none; }
 }
+
+/* ─── MOBILE HEADER OPTIMIZATION & CONTEXT ALERTS ─── */
+@media (max-width: 768px) {
+  .top-bar { padding: 10px 12px; gap: 6px; }
+  .model-pill { 
+    max-width: 170px; padding: 6px 10px; gap: 6px; height: 38px; 
+    border-radius: 14px;
+  }
+  .model-pill-sub { display: none !important; }
+  .model-pill-name { font-size: 12.5px; line-height: 1.2; }
+  .voice-mode-pill span { display: none; }
+  .voice-mode-pill { 
+    width: 38px; height: 38px; padding: 0; justify-content: center; 
+    border-radius: 14px; margin-right: 2px;
+  }
+  .menu-btn, .action-btn { width: 38px; height: 38px; border-radius: 14px; }
+}
+
+/* ─── REALTIME VOICE OVERLAY ("MODO VOZ LIVE") ────── */
+.voice-live-overlay {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: radial-gradient(circle at center, #0f0e1a 0%, #06060a 100%);
+  z-index: 10000; display: none; flex-direction: column;
+  align-items: center; justify-content: space-between; padding: 50px 24px;
+  opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(25px);
+}
+.voice-live-overlay.active { display: flex; opacity: 1; }
+.voice-live-header { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 500px; }
+.voice-live-status { font-size: 14px; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1px; }
+.voice-live-close { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 18px; }
+.voice-live-close:hover { background: rgba(239,68,68,0.3); border-color: #ef4444; transform: scale(1.05); }
+
+.voice-visualizer-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 100%; }
+.voice-plasma-orb {
+  width: 190px; height: 190px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(16,185,129,0.85) 0%, rgba(6,182,212,0.65) 45%, rgba(139,92,246,0.35) 80%, transparent 100%);
+  box-shadow: 0 0 65px rgba(16,185,129,0.45), inset 0 0 35px rgba(255,255,255,0.6);
+  transition: all 0.3s ease; animation: orbIdle 4s infinite ease-in-out;
+  display: flex; align-items: center; justify-content: center;
+}
+.voice-plasma-orb.thinking {
+  background: radial-gradient(circle, rgba(139,92,246,0.95) 0%, rgba(236,72,153,0.75) 50%, transparent 100%);
+  box-shadow: 0 0 85px rgba(139,92,246,0.65); animation: orbSpin 1.2s infinite linear;
+}
+.voice-plasma-orb.speaking {
+  background: radial-gradient(circle, rgba(236,72,153,0.95) 0%, rgba(6,182,212,0.85) 50%, rgba(16,185,129,0.5) 100%);
+  box-shadow: 0 0 110px rgba(236,72,153,0.75); animation: orbPulse 0.4s infinite alternate ease-in-out;
+  transform: scale(1.15);
+}
+@keyframes orbIdle { 0%, 100% { transform: scale(1) translate(0, 0); } 50% { transform: scale(1.08) translate(0, -6px); box-shadow: 0 0 80px rgba(6,182,212,0.5); } }
+@keyframes orbSpin { 0% { transform: rotate(0deg) scale(0.95); } 50% { transform: rotate(180deg) scale(1.05); } 100% { transform: rotate(360deg) scale(0.95); } }
+@keyframes orbPulse { 0% { transform: scale(0.96); filter: brightness(1); } 100% { transform: scale(1.22); filter: brightness(1.35); } }
+
+.voice-live-subtitle { max-width: 520px; text-align: center; font-size: 17px; color: #fff; line-height: 1.5; min-height: 54px; font-weight: 500; margin-top: 38px; padding: 0 16px; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
+.voice-live-hint { font-size: 12.5px; color: var(--text-dim); text-align: center; margin-top: 14px; font-family: var(--font-mono); font-weight: 500; }
+
+/* ─── CONTEXT WARNING BENCHMARK ───────────────────── */
+.context-alert-bar {
+  max-width: 760px; margin: 0 auto 10px; padding: 10px 16px; border-radius: 14px;
+  font-size: 12.5px; font-weight: 600; display: none; align-items: center; justify-content: space-between;
+  backdrop-filter: blur(12px); animation: fadeIn 0.3s ease;
+}
+.context-alert-bar.amber { background: rgba(245,158,11,0.18); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); }
+.context-alert-bar.red { background: rgba(239,68,68,0.22); color: #f87171; border: 1px solid rgba(239,68,68,0.45); }
 </style>
 </head>
 <body>
@@ -789,11 +987,16 @@ think::before {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z" fill="url(#aiGrad)"/><circle cx="12" cy="12" r="2.5" fill="#ffffff" opacity="0.9"/></svg>
       </div>
       <div class="model-pill-info">
-        <div class="model-pill-name" id="activeName">GEMMA 4 (26B MOE)</div>
-        <div class="model-pill-sub" id="activeSub">Context: 16K · Ready</div>
+        <div class="model-pill-name" id="activeName">QWEN 3.6 (35B MOE)</div>
+        <div class="model-pill-sub" id="activeSub">Context: 8K · 8 Slots Ready</div>
       </div>
       <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
     </div>
+
+    <button class="voice-mode-pill" id="voiceModeBtn" onclick="toggleVoiceMode()" title="Activar Modo Voz (Conversación continua sin manos con micrófono automático y altavoz TTS)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+      <span id="voiceModeText">Modo Voz</span>
+    </button>
 
     <button class="action-btn" onclick="newChat()" aria-label="New chat" title="New chat">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -830,15 +1033,85 @@ think::before {
         </button>
       </div>
     </div>
-    <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Context: 16K · Ready to generate</div>
-    <div class="input-container">
-      <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.py,.sh,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r" style="display:none" onchange="handleFileSelect(event)">
-      <div class="attach-menu-wrapper" style="position:relative; display:flex; align-items:center;">
-        <button class="attach-btn" id="attachBtn" onclick="triggerFileInput('.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.py,.sh,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r')" aria-label="Attach" title="Attach File (PDF, Code, TXT)" style="color:var(--text-muted); transition: color 0.2s;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+    <!-- Document / PDF preview (silently attached, text never dumped into text area) -->
+    <div id="docPreviewContainer" style="display:none;padding:6px 12px;">
+      <div style="display:flex;align-items:center;gap:10px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.3);border-radius:12px;padding:6px 12px;width:fit-content;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span id="docPreviewTitle" style="font-size:12.5px;font-weight:600;color:#fff;">Documento.pdf</span>
+        <span id="docPreviewMeta" style="font-size:11px;color:var(--cyan);font-weight:500;">Cargado</span>
+        <button onclick="removeAttachedDoc()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px;display:flex;align-items:center;" title="Eliminar archivo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
+    </div>
+    <div id="contextAlertBar" class="context-alert-bar">
+      <span id="contextAlertText">⚠️ Alerta de Memoria Contextual</span>
+      <button onclick="newChat()" style="background:none;border:none;color:#fff;text-decoration:underline;font-weight:700;cursor:pointer;font-size:12px;">Nuevo Chat</button>
+    </div>
+    <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Context: 8K · 8 Slots Ready</div>
+    <div class="input-container">
+      <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.jsx,.tsx,.py,.sh,.bash,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r" style="display:none" onchange="handleFileSelect(event)">
+      <div class="attach-menu-wrapper" style="position:relative; display:flex; align-items:center;">
+        <button class="attach-btn" id="attachBtn" onclick="toggleAttachMenu(event)" aria-label="Attach" title="Adjuntar Archivos y Visión" style="color:var(--text-muted); transition: color 0.2s;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <div class="attach-menu" id="attachMenu">
+          <div class="attach-menu-header">
+            <span>Archivos Admitidos</span>
+            <span class="attach-menu-badge">Visión + Docs + Código</span>
+          </div>
+          <div class="attach-menu-item" onclick="triggerFileInput('image/*')">
+            <div class="attach-item-icon" style="background:rgba(236,72,153,0.15);color:var(--secondary);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <div class="attach-item-info">
+              <div class="attach-item-title">Imágenes y Visión Multimodal</div>
+              <div class="attach-item-desc">PNG, JPG, WEBP, GIF, SVG (Comprensión, OCR, Diagramas)</div>
+            </div>
+          </div>
+          <div class="attach-menu-item" onclick="triggerFileInput('.pdf,.txt,.md')">
+            <div class="attach-item-icon" style="background:rgba(6,182,212,0.15);color:var(--cyan);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            </div>
+            <div class="attach-item-info">
+              <div class="attach-item-title">Documentos y PDF</div>
+              <div class="attach-item-desc">PDF (hasta 80k chars / ~20K tokens), TXT, Markdown</div>
+            </div>
+          </div>
+          <div class="attach-menu-item" onclick="triggerFileInput('.csv,.tsv,.json,.jsonl,.xml,.yaml,.yml,.toml,.ini,.log,.env')">
+            <div class="attach-item-icon" style="background:rgba(16,185,129,0.15);color:var(--green);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <div class="attach-item-info">
+              <div class="attach-item-title">Datos, Tablas y Configs</div>
+              <div class="attach-item-desc">CSV, TSV, JSON, JSONL, XML, YAML, TOML, LOG</div>
+            </div>
+          </div>
+          <div class="attach-menu-item" onclick="triggerFileInput('.py,.js,.ts,.jsx,.tsx,.html,.css,.sql,.sh,.bash,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.r')">
+            <div class="attach-item-icon" style="background:rgba(139,92,246,0.15);color:var(--primary);">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <div class="attach-item-info">
+              <div class="attach-item-title">Código Fuente y Scripts</div>
+              <div class="attach-item-desc">Python, JS/TS, HTML, CSS, SQL, C++, Rust, Shell</div>
+            </div>
+          </div>
+          <div class="attach-menu-divider"></div>
+          <div class="attach-menu-item" onclick="triggerFileInput('image/*,.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.jsx,.tsx,.py,.sh,.bash,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r')">
+            <div class="attach-item-icon" style="background:rgba(255,255,255,0.08);color:#fff;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <div class="attach-item-info">
+              <div class="attach-item-title">Todos los Archivos Admitidos</div>
+              <div class="attach-item-desc">Seleccionar cualquier formato compatible</div>
+            </div>
+          </div>
+        </div>
+      </div>
       <textarea id="prompt" rows="1" placeholder="Type a message..." oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+      <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Hablar por micrófono / Modo Voz" aria-label="Microphone">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+      </button>
       <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
@@ -849,19 +1122,83 @@ think::before {
   </div>
 </div>
 
-<!-- SYSTEM PROMPT MODAL -->
+<!-- SYSTEM PROMPT & HARDWARE STATUS MODAL -->
 <div class="modal-overlay" id="systemModal">
-  <div class="modal">
+  <div class="modal" style="max-width:580px; width:92%; max-height:90vh; overflow-y:auto;">
     <h3>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-      System Instructions
+      Ajustes del Sistema & Estado del Servidor
     </h3>
-    <p>Set custom behavior or persona for the assistant.</p>
-    <textarea id="systemPromptInput" placeholder="e.g., You are an expert programmer. Always provide concise code without detailed explanations..."></textarea>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeSystemModal()">Cancel</button>
-      <button class="btn-save" onclick="saveSystemPrompt()">Save Changes</button>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">Información técnica del hardware de la Mini PC e instrucciones personalizadas del modelo.</p>
+
+    <!-- HARDWARE & STATUS (READONLY) -->
+    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:14px; margin-bottom:18px;">
+      <div style="font-size:11px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+        <span>⚡ Estado del Servidor (Mini PC)</span>
+        <span style="font-size:9.5px; padding:2px 8px; border-radius:6px; background:rgba(16,185,129,0.15); color:var(--green); border:1px solid rgba(16,185,129,0.3); font-weight:600;">GPU ONLINE 24/7</span>
+      </div>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:12px;">
+        <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+          <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Modelo Activo</span>
+          <strong style="color:#fff; font-size:12px;">Qwen 3.6 35B A3B</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+          <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Procesador / GPU</span>
+          <strong style="color:var(--cyan); font-size:12px;">Radeon 890M (24GB VRAM)</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+          <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Residencia en VRAM</span>
+          <strong style="color:var(--green); font-size:12px;">100% GPU (14.17 GB fijos)</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+          <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Concurrencia & Contexto</span>
+          <strong style="color:var(--secondary); font-size:12px;">8 Slots · 8K Ctx</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+          <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Sandbox de Código</span>
+          <strong style="color:#fff; font-size:12px;">Docker Python 3.12 (MCP)</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+          <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Búsqueda Web</span>
+          <strong style="color:#fff; font-size:12px;">DuckDuckGo + Proxy en Vivo</strong>
+        </div>
+      </div>
     </div>
+
+    <!-- EDITABLE SYSTEM PERSONA -->
+    <div style="margin-bottom:6px;">
+      <label style="font-size:12.5px; font-weight:600; color:var(--text-dim); display:block; margin-bottom:6px;">Instrucciones del Sistema (System Persona):</label>
+      <textarea id="systemPromptInput" placeholder="Ejemplo: Eres un tutor experto en STEM y programación. Responde de forma clara y directa..." style="height:120px;"></textarea>
+    </div>
+
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn-cancel" onclick="closeSystemModal()">Cerrar</button>
+      <button class="btn-save" onclick="saveSystemPrompt()">Guardar Ajustes</button>
+    </div>
+  </div>
+</div>
+
+<!-- REALTIME VOICE OVERLAY (MODO VOZ LIVE) -->
+<div id="voiceLiveOverlay" class="voice-live-overlay">
+  <div class="voice-live-header">
+    <div class="voice-live-status" id="voiceLiveStatus">
+      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;"></span>
+      <span id="voiceLiveStatusText">🎙️ Escuchando...</span>
+    </div>
+    <button class="voice-live-close" onclick="toggleVoiceMode()" title="Salir del Modo Voz">✕</button>
+  </div>
+  <div class="voice-visualizer-container">
+    <div class="voice-plasma-orb" id="voicePlasmaOrb">
+      <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.85;"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+    </div>
+    <div class="voice-live-subtitle" id="voiceLiveSubtitle">Habla con libertad... YZAI te responderá en tiempo real</div>
+    <div class="voice-live-hint" id="voiceLiveHint">El sistema enviará automáticamente en cuanto detecte silencio</div>
+  </div>
+  <div style="width:100%; max-width:500px; display:flex; justify-content:center; gap:16px;">
+    <button onclick="toggleMic()" id="voiceOverlayMicBtn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:12px 28px; border-radius:100px; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s;">
+      🎙️ Pausar Micrófono
+    </button>
   </div>
 </div>
 
@@ -891,8 +1228,8 @@ let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
 let selectedModel = 'qwen36-yzai:latest';
-const FIXED_CTX   = 16384; // 16K 2-slot GPU Optimized
-let selectedModelDesc = 'Qwen 3.6 35B A3B (GPU 16K Ctx)';
+const FIXED_CTX   = 8192; // 8K 8-slot GPU Optimized
+let selectedModelDesc = 'Qwen 3.6 35B A3B (GPU 8K Ctx · 8 Slots)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -901,7 +1238,13 @@ let abortCtrl     = null;
 let isStreaming   = false;
 let allModels     = [];
 let currentImageBase64 = null; // stored internally, NEVER shown as text to user
+let currentAttachedDoc = null; // stored internally, NEVER dumped into prompt textarea
 
+function removeAttachedDoc() {
+  currentAttachedDoc = null;
+  document.getElementById('docPreviewContainer').style.display = 'none';
+  document.getElementById('token-count').textContent = 'Context: 8K · Ready';
+}
 
 const esc = (str) => String(str).replace(/[&<>"']/g, match => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
 
@@ -911,9 +1254,9 @@ const TEXT_EXTENSIONS = ['txt','md','markdown','json','jsonl','csv','tsv',
   'toml','ini','conf','log','sql','r','cpp','c','h','java','rs','go','php',
   'rb','swift','kt','dart','vue','svelte','env','gitignore'];
 
-// PDF: max chars to extract (~80K ≈ 20K tokens, leaving 12K for conversation)
+// PDF: max chars to extract (~80K ≈ 20K tokens)
 const PDF_MAX_CHARS = 80_000;
-// Image: max dimension before compressing (Gemma 4 vision encoder = 896px native)
+// Image: max dimension before compressing
 const IMG_MAX_PX = 1024;
 
 function handleFileSelect(e) {
@@ -923,7 +1266,7 @@ function handleFileSelect(e) {
 
   const ext = file.name.split('.').pop().toLowerCase();
 
-  // ── 1. IMAGES → resize+compress, base64 stored internally, thumbnail shown ──
+  // ── 1. IMAGES → resize+compress, base64 stored internally ──
   if (file.type.startsWith('image/')) {
     document.getElementById('token-count').textContent = 'Procesando imagen...';
     const reader = new FileReader();
@@ -950,13 +1293,14 @@ function handleFileSelect(e) {
     return;
   }
 
-  // ── 2. PDF → read as ArrayBuffer (avoids blob: CSP issue), extract via PDF.js ──
+  // ── 2. PDF → extract text via PDF.js SILENTLY into currentAttachedDoc ──
   if (ext === 'pdf' || file.type === 'application/pdf') {
     if (!window.pdfjsLib) {
-      document.getElementById('token-count').textContent = 'Ready';
+      document.getElementById('token-count').textContent = 'PDF.js no cargado';
       return;
     }
-    document.getElementById('token-count').textContent = 'Extrayendo texto del PDF...';
+    document.getElementById('token-count').innerHTML =
+      `<span style="color:var(--cyan);display:inline-flex;align-items:center;gap:6px;">${ICONS.spin} Procesando PDF "${file.name}"...</span>`;
     file.arrayBuffer().then(arrayBuffer => {
       return pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     }).then(async (pdf) => {
@@ -969,14 +1313,20 @@ function handleFileSelect(e) {
         const pageText = content.items.map(s => s.str).join(' ');
         allText += `\n--- Pagina ${i} ---\n${pageText}`;
       }
-      allText = allText.slice(0, PDF_MAX_CHARS);
-      const promptEl = document.getElementById('prompt');
-      const formatted = `[PDF: ${file.name}${truncated?' (truncado ~20K tokens)':''}]\n\`\`\`\n${allText.trim()}\n\`\`\``;
-      promptEl.value = promptEl.value ? `${promptEl.value}\n\n${formatted}` : formatted;
-      autoResize(promptEl);
-      const pages = Math.min(pdf.numPages, truncated ? '40+' : pdf.numPages);
+      allText = allText.slice(0, PDF_MAX_CHARS).trim();
+      
+      currentAttachedDoc = {
+        name: file.name,
+        text: allText,
+        ext: 'pdf',
+        pages: pdf.numPages
+      };
+      
+      document.getElementById('docPreviewTitle').textContent = file.name;
+      document.getElementById('docPreviewMeta').textContent = `${pdf.numPages} págs · ${(allText.length/1000).toFixed(0)}K chars${truncated?' (truncado)':''}`;
+      document.getElementById('docPreviewContainer').style.display = 'block';
       document.getElementById('token-count').innerHTML =
-        `<span style="color:var(--cyan);display:inline-flex;align-items:center;gap:6px;">${ICONS.file} PDF "${file.name}" — ${pages} págs, ${(allText.length/1000).toFixed(0)}K chars${truncated ? ` <span style="display:inline-flex;align-items:center;gap:2px;">${ICONS.warn} truncado</span>` : ''}</span>`;
+        `<span style="color:var(--cyan);display:inline-flex;align-items:center;gap:6px;">${ICONS.check} PDF "${file.name}" cargado exitosamente. Escribe tu indicación abajo.</span>`;
     }).catch(err => {
       document.getElementById('token-count').innerHTML =
         `<span style="color:var(--red);display:inline-flex;align-items:center;gap:6px;">${ICONS.warn} Error leyendo PDF: ${err.message}</span>`;
@@ -984,12 +1334,12 @@ function handleFileSelect(e) {
     return;
   }
 
-  // ── 3. TEXT FILES → paste raw into prompt ────────────────────────────────
+  // ── 3. TEXT & CODE FILES → store SILENTLY into currentAttachedDoc ──
   const isTextMime = file.type.startsWith('text/') || file.type === 'application/json';
   const isTextExt  = TEXT_EXTENSIONS.includes(ext);
   if (!isTextMime && !isTextExt) {
     document.getElementById('token-count').innerHTML =
-      `<span style="color:var(--red);font-weight:600;display:inline-flex;align-items:center;gap:6px;">${ICONS.warn} "${file.name}": formato no soportado. Usa imágenes, PDF o archivos de texto.</span>`;
+      `<span style="color:var(--red);font-weight:600;display:inline-flex;align-items:center;gap:6px;">${ICONS.warn} "${file.name}": formato no soportado. Usa imágenes, PDF o código.</span>`;
     return;
   }
   if (file.size > 500_000) {
@@ -999,12 +1349,18 @@ function handleFileSelect(e) {
   }
   const reader = new FileReader();
   reader.onload = (ev) => {
-    const promptEl = document.getElementById('prompt');
     const content = ev.target.result;
-    const formatted = `[Archivo: ${file.name}]\n\`\`\`${ext}\n${content}\n\`\`\``;
-    promptEl.value = promptEl.value ? `${promptEl.value}\n\n${formatted}` : formatted;
-    autoResize(promptEl);
-    document.getElementById('token-count').textContent = `"${file.name}" cargado (${(file.size/1024).toFixed(1)}KB)`;
+    currentAttachedDoc = {
+      name: file.name,
+      text: content,
+      ext: ext,
+      pages: 1
+    };
+    document.getElementById('docPreviewTitle').textContent = file.name;
+    document.getElementById('docPreviewMeta').textContent = `${(file.size/1024).toFixed(1)}KB`;
+    document.getElementById('docPreviewContainer').style.display = 'block';
+    document.getElementById('token-count').innerHTML =
+      `<span style="color:var(--cyan);display:inline-flex;align-items:center;gap:6px;">${ICONS.check} Archivo "${file.name}" cargado exitosamente. Escribe tu indicación abajo.</span>`;
   };
   reader.readAsText(file, 'UTF-8');
 }
@@ -1082,6 +1438,14 @@ async function init() {
   await loadModels();
   checkServicesHealth();
   setInterval(checkServicesHealth, 30000);
+  // Precarga silenciosa del modelo en VRAM al abrir la interfaz
+  if (selectedModel) {
+    fetch(`${OLLAMA_URL}/api/generate?clave=secreta123`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ model: selectedModel, keep_alive: -1 })
+    }).catch(() => {});
+  }
 }
 
 let lastOnlineTimestamp = Date.now();
@@ -1098,17 +1462,17 @@ async function loadModels() {
     allModels = models;
 
     if (models.length) {
-      const gemmaModel = models.find(m => {
+      const qwenModel = models.find(m => {
         const lower = m.name.toLowerCase();
-        return lower.includes('gemma') && (lower.includes('26b') || lower.includes('moe'));
-      }) || models.find(m => m.name.toLowerCase().includes('gemma'));
-      if (gemmaModel) {
-        selectedModel = gemmaModel.name;
+        return lower.includes('qwen36-yzai') || lower.includes('qwen3.6');
+      }) || models.find(m => m.name.toLowerCase().includes('qwen')) || models[0];
+      if (qwenModel) {
+        selectedModel = qwenModel.name;
       }
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · Qwen 3.6 35B A3B (16K)`);
+    setStatus(true, `Server Live · Qwen 3.6 35B A3B (8K)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -1143,10 +1507,10 @@ function updateModelHeader() {
   const activeName = document.getElementById('activeName');
   if (activeName) activeName.textContent = 'QWEN 3.6 (35B MOE)';
   const activeSub = document.getElementById('activeSub');
-  if (activeSub) activeSub.textContent = 'Context: 16K · Ready';
+  if (activeSub) activeSub.textContent = 'Context: 8K · 8 Slots Ready';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 16K · Ready to generate';
+    tokenCount.textContent = 'Context: 8K · 8 Slots Ready';
   }
 }
 
@@ -1220,6 +1584,7 @@ function renderMessages() {
   messages.forEach(m => { 
     if (m.role !== 'system') el.appendChild(createMsg(m.role, m.content, false)); 
   });
+  checkContextUsage();
   scrollBottom();
 }
 
@@ -1418,23 +1783,67 @@ async function executeWebSearch(query) {
 function needsWebSearch(text) {
   const lower = text.toLowerCase();
   const searchPhrases = [
-    'busca ', 'buscar ', 'busca en internet', 'search for', 'search the web',
-    'busca en la web', 'busca en google', 'googlea', 'investiga ',
+    'busca ', 'buscar ', 'busca en internet', 'búscalo en internet', 'buscalo en internet', 'search for', 'search the web',
+    'busca en la web', 'busca en google', 'googlea', 'investiga', 'invetiga',
     'quien gano', 'quién ganó', 'who won', 'who is', 'what happened',
-    'latest news', 'noticias de', 'precio de', 'precio del', 'price of',
-    'what is the', 'cuánto cuesta', 'cuanto cuesta', 'how much is',
+    'latest news', 'noticias de', 'precio de', 'precio del', 'precios', 'price of', 'cotización', 'cotizacion',
+    'what is the', 'cuánto cuesta', 'cuanto cuesta', 'cuanto vale', 'cuánto vale', 'how much is',
     'current', 'today', 'hoy', 'ayer', 'yesterday', 'this week', 'esta semana',
     'en internet', 'en la web', 'on the internet', 'online'
   ];
   return searchPhrases.some(p => lower.includes(p));
 }
 
-// Extracts a good search query from user text
+// AI Contextual Query Synthesizer: transforma peticiones ambiguas ("búscalo en internet", "¿qué precio tiene hoy?")
+// en búsquedas exactas combinando las palabras clave y entidades del historial reciente ("SMCI SOXL precio hoy 2026")
+async function generateContextualSearchQuery(userPrompt, conversationHistory) {
+  try {
+    if (!conversationHistory || conversationHistory.length === 0) {
+      return extractSearchQuery(userPrompt);
+    }
+    const contextSlice = conversationHistory.slice(-4).map(m => `${m.role.toUpperCase()}: ${m.content}`).join('\n');
+    const systemInstruction = `Eres un sintetizador experto de búsquedas web para DuckDuckGo o Google.
+TU ÚNICA TAREA: Analizar el historial de conversación y la nueva solicitud del usuario para generar UNA ÚNICA oración de búsqueda con palabras clave precisas y específicas en español o inglés.
+REGLAS CRÍTICAS DE SÍNTESIS:
+- NUNCA devuelvas frases vacías, comandos o palabras literales sueltas como "internet", "precios de hoy", "eso", "buscar en internet".
+- SIEMPRE reemplaza pronombres y vincula el tema principal del historial (empresas, acciones, personas, conceptos) con lo que pide el usuario.
+- Ejemplo 1: Si el historial habla de acciones SMCI y SOXL y el usuario dice "Búscalo en internet" o "Qué precios tienen hoy?", tú DEBES DEVOLVER EXACTAMENTE: "SMCI SOXL acciones precio hoy 2026" o "SMCI SOXL stock prices today 2026".
+- DEVUELVE EXCLUSIVAMENTE LA CADENA DE BÚSQUEDA OPTIMIZADA SIN COMILLAS, SIN SALUDOS Y SIN EXPLICACIONES.`;
+
+    const res = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: selectedModel || 'qwen36-yzai:latest',
+        messages: [
+          { role: 'system', content: systemInstruction },
+          { role: 'user', content: `Historial reciente:\n${contextSlice}\n\nNueva petición del usuario que requiere búsqueda en vivo: "${userPrompt}"\n\nCadena de búsqueda web óptima:` }
+        ],
+        options: { num_ctx: FIXED_CTX, num_predict: 35, temperature: 0.1 },
+        think: false,
+        keep_alive: -1,
+        stream: false
+      })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      const cleanQuery = (data.message?.content || '').replace(/["']/g, '').trim();
+      if (cleanQuery && cleanQuery.length >= 3 && !cleanQuery.toLowerCase().includes('historial')) {
+        console.log('[AI Query Synthesizer]', userPrompt, '->', cleanQuery);
+        return cleanQuery;
+      }
+    }
+  } catch (e) {
+    console.warn('[AI Query Synthesizer Fallback]', e.message);
+  }
+  return extractSearchQuery(userPrompt);
+}
+
+// Extracts a good search query from user text (fallback method)
 function extractSearchQuery(text) {
   const lower = text.toLowerCase();
-  // Remove common prefixes and return cleaned query
   let q = text
-    .replace(/^(busca|buscar|busca en internet|busca en la web|busca en google|googlea|investiga|search for|search the web|search|find me|find)/i, '')
+    .replace(/^(busca|buscar|búscalo en internet|buscalo en internet|busca en internet|busca en la web|busca en google|googlea|investiga|invetiga|search for|search the web|search|find me|find)/i, '')
     .replace(/^(,|\s)+/, '')
     .trim();
   return q || text;
@@ -1445,8 +1854,13 @@ let isImagineMode = false;
 
 async function sendMessage() {
   const input = document.getElementById('prompt');
-  const text  = input.value.trim();
+  let text  = input.value.trim();
   if (!text) return;
+  checkContextUsage();
+  if (isVoiceModeActive && typeof VoiceQueue !== 'undefined') {
+    VoiceQueue.clear();
+    updateVoiceLiveUI('thinking', '🧠 YZAI pensando...', 'Conectando con GPU en tiempo real...');
+  }
   if (isImagineMode) {
     toggleImagineMode(); // Reset to normal text chat mode for subsequent messages
     generateImage(text);
@@ -1469,7 +1883,16 @@ async function sendMessage() {
     payload.push(msg);
   });
 
-  const userMsg = { role:'user', content:text };
+  let userTextForApi = text;
+  let chatBubbleText = text;
+
+  if (currentAttachedDoc) {
+    userTextForApi = `[DOCUMENTO ADJUNTO: ${currentAttachedDoc.name}]\n\`\`\`${currentAttachedDoc.ext}\n${currentAttachedDoc.text}\n\`\`\`\n\n${text}`;
+    chatBubbleText = `📄 **[${currentAttachedDoc.name}]**\n\n${text}`;
+    removeAttachedDoc();
+  }
+
+  const userMsg = { role:'user', content: userTextForApi };
   if (currentImageBase64) {
     userMsg.images = [currentImageBase64]; // sent to Ollama API only
   }
@@ -1478,33 +1901,30 @@ async function sendMessage() {
   removeImage();
 
   const container = document.getElementById('messages');
-  container.appendChild(createMsg('user', text));
+  container.appendChild(createMsg('user', chatBubbleText));
   const aiEl = createMsg('ai', '', true);
   container.appendChild(aiEl);
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom(true);
 
-  // ── Proactive Web Search Injection ──
-  // If user seems to want a search, run it and inject results BEFORE calling Ollama
-  // This bypasses tool calling (Gemma 4 GGUF doesn't support structured tool calls)
+  // ── Proactive AI Contextual Web Search Injection ──
+  // Si se detecta intención de búsqueda, usamos la IA local (0.3s) para sintetizar una búsqueda consciente del contexto
   if (needsWebSearch(text)) {
-    const searchQuery = extractSearchQuery(text);
-    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Searching web for: <em>${esc(searchQuery)}</em>…</span>`;
-    document.getElementById('token-count').textContent = 'Searching the web...';
+    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Analizando contexto para búsqueda web…</span>`;
+    document.getElementById('token-count').textContent = 'Synthesizing search query...';
+    const searchQuery = await generateContextualSearchQuery(text, messages);
+    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Buscando en vivo: <em>"${esc(searchQuery)}"</em>…</span>`;
+    document.getElementById('token-count').textContent = `Searching web: ${searchQuery}...`;
     try {
       const results = await executeWebSearch(searchQuery);
       if (results.length) {
         const resultsText = results.map((r,i) =>
           `${i+1}. **${r.title}**\n   URL: ${r.url}\n   ${r.snippet}`
         ).join('\n\n');
-        // Inject results as a system context message before the user message
+        // Append web search context directly to the last user message to comply with Jinja template rules
         const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        const searchContext = {
-          role: 'system',
-          content: `[REAL-TIME WEB INFORMATION - TODAY IS ${todayStr.toUpperCase()}]\nResults for "${searchQuery}":\n\n${resultsText}\n\nCRITICAL: Ignore knowledge cutoff or future years. Use ONLY the information above to accurately answer recent events.`
-        };
-        // Insert before the last user message
-        payload.splice(payload.length - 1, 0, searchContext);
+        const webInfoBlock = `[REAL-TIME WEB INFORMATION - TODAY IS ${todayStr.toUpperCase()}]\nResults for "${searchQuery}":\n\n${resultsText}\n\nCRITICAL: Ignore knowledge cutoff or future years. Use ONLY the information above to accurately answer recent events.`;
+        payload[payload.length - 1].content = `${webInfoBlock}\n\n---\nUser prompt: ${payload[payload.length - 1].content}`;
         document.getElementById('token-count').textContent = 'Generating with live data...';
       }
     } catch(searchErr) {
@@ -1534,6 +1954,7 @@ async function sendMessage() {
 
   function startTypewriterLoop() {
     if (typewriterTimer) return;
+    let lastSpeakIdx = 0;
     
     typewriterTimer = setInterval(() => {
       let hasChanges = false;
@@ -1541,18 +1962,26 @@ async function sendMessage() {
       const pendingText = targetText.length - currentText.length;
       
       if (pendingThinking > 0) {
-        // Velocidad adaptativa: si hay mucho acumulado, avanza más rápido
-        const step = Math.min(pendingThinking, Math.ceil(pendingThinking / 5) || 1);
+        const step = Math.min(pendingThinking, Math.max(3, Math.ceil(pendingThinking * 0.3)));
         currentThinking += targetThinking.substr(currentThinking.length, step);
         hasChanges = true;
       } else if (pendingText > 0) {
-        const step = pendingText > 12
-          ? pendingText
-          : Math.min(pendingText, Math.ceil(pendingText / 2) || 1);
+        const step = Math.min(pendingText, Math.max(2, Math.ceil(pendingText * 0.25)));
         currentText += targetText.substr(currentText.length, step);
         hasChanges = true;
       }
       
+      // REALTIME TTS CHUNKING: Hablar en tiempo real palabra/frase por frase (< 300ms latencia)
+      if (isVoiceModeActive && currentText.length > lastSpeakIdx && typeof VoiceQueue !== 'undefined') {
+        const unparsed = currentText.slice(lastSpeakIdx);
+        const match = unparsed.match(/.*?([.;,?!]\s|\n|$)/);
+        if (match && match[0].trim().length > 12) {
+          const chunkToSpeak = unparsed.slice(0, match.index + match[0].length);
+          lastSpeakIdx += chunkToSpeak.length;
+          VoiceQueue.push(chunkToSpeak);
+        }
+      }
+
       if (hasChanges) {
         renderMd(bubble, currentText, currentThinking);
         bubble.innerHTML += '<span class="cursor"></span>';
@@ -1564,53 +1993,39 @@ async function sendMessage() {
         renderMd(bubble, targetText || '…', targetThinking);
         bubble.querySelectorAll('.cursor').forEach(el => el.remove());
 
+        // Enviar resto del texto que haya quedado pendiente en la cola de voz
+        if (isVoiceModeActive && typeof VoiceQueue !== 'undefined') {
+          if (targetText.length > lastSpeakIdx) {
+            VoiceQueue.push(targetText.slice(lastSpeakIdx));
+            lastSpeakIdx = targetText.length;
+          }
+          if (!VoiceQueue.isPlaying) VoiceQueue.playNext();
+        }
+
         messages.push({ role:'ai', content:targetText });
         saveCurrentConv();
         setStreaming(false);
+        checkContextUsage();
         document.getElementById('prompt').focus();
       }
     }, 16); // ~60fps para máxima suavidad visual
   }
 
-  let loadTime = 0;
-  // Only show loading UI if model is NOT already fully in VRAM
-  // We check once immediately – if model is ready (>=85% VRAM), we stay silent
-  // and only start the polling interval if it's actually loading.
-  let loadInterval = null;
   let loadingIndicatorActive = false;
 
-  async function checkModelAndMaybeShowLoading() {
+  function showLoadingStatus() {
     if (firstTokenReceived) return;
-    try {
-      const psRes = await fetch(`${OLLAMA_URL}/api/ps?clave=secreta123`);
-      if (!psRes.ok || firstTokenReceived) return;
-      const data = await psRes.json();
-      const model = data.models.find(m => m.name === selectedModel);
-      const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
-      if (model) {
-        if (loadTime >= 1) {
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generating...</span>`;
-          loadingIndicatorActive = true;
-        }
-      } else {
-        if (loadTime >= 1) {
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generating...</span>`;
-          loadingIndicatorActive = true;
-        }
-      }
-    } catch(e) {}
+    const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
+    const tokenCountEl = document.getElementById('token-count');
+    if (tokenCountEl) {
+      tokenCountEl.innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generando...</span>`;
+      loadingIndicatorActive = true;
+    }
   }
 
-  // Start polling 500ms after send to avoid flicker on fast responses
   const loadPollStart = setTimeout(() => {
-    if (firstTokenReceived) return;
-    checkModelAndMaybeShowLoading();
-    loadInterval = setInterval(async () => {
-      if (firstTokenReceived) { clearInterval(loadInterval); loadInterval = null; return; }
-      loadTime += 0.5;
-      await checkModelAndMaybeShowLoading();
-    }, 500);
-  }, 500);
+    showLoadingStatus();
+  }, 300);
 
   let retryCount = 0;
   async function attemptFetch() {
@@ -1618,10 +2033,10 @@ async function sendMessage() {
       const chatBody = { 
         model: selectedModel, 
         messages: payload,
-        think: false,
         options: { 
           num_ctx: FIXED_CTX
         },
+        think: false,
         keep_alive: -1,
         stream: true 
       };
@@ -1675,8 +2090,6 @@ async function sendMessage() {
             if (!firstTokenReceived) { 
               firstTokenReceived = true;
               clearTimeout(loadPollStart);
-              if (loadInterval) { clearInterval(loadInterval); loadInterval = null; }
-              // Only reset the label if we had shown a loading indicator
               if (loadingIndicatorActive) {
                 document.getElementById('token-count').textContent = 'Generating...';
               }
@@ -1819,48 +2232,290 @@ async function sendMessage() {
     startTypewriterLoop(); // Forzar el drenado final del búfer
     
     clearTimeout(loadPollStart);
-    if (loadInterval) clearInterval(loadInterval);
     if (liveTimer) clearInterval(liveTimer);
   } catch(e) {
-    if (e.name !== 'AbortError') {
-      const isOfflineErr = e.message.includes('Failed to fetch') || e.message.includes('502') || e.message.includes('521') || e.message.includes('522') || e.message.includes('523') || e.message.includes('524');
-      const errorMsg = isOfflineErr 
-        ? 'AI Server (MiniPC) is offline or unresponsive. Please make sure it is powered on.'
-        : `Connection error: ${esc(e.message)}`;
-
-      if (targetText.trim()) {
-        targetText += `\n\n*(${errorMsg})*`;
-        renderMd(bubble, targetText, targetThinking);
-        messages.push({ role:'ai', content:targetText });
-        saveCurrentConv();
-      } else {
-        bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${errorMsg}</span>`;
-      }
-      document.getElementById('token-count').textContent = isOfflineErr ? 'Server offline / disconnected' : 'Response error';
-    }
     clearTimeout(loadPollStart);
-    if (loadInterval) clearInterval(loadInterval);
     if (liveTimer) clearInterval(liveTimer);
     if (typewriterTimer) clearInterval(typewriterTimer);
     setStreaming(false);
+
+    if (e.name === 'AbortError' || (abortCtrl && abortCtrl.signal.aborted) || !isStreaming) {
+      const stopAlert = `🛑 Respuesta detenida por el usuario (Stopped by user)`;
+      if (typeof targetText !== 'undefined' && targetText && targetText.trim()) {
+        if (!targetText.includes('Stopped by user')) {
+          targetText += `\n\n*(${stopAlert})*`;
+          renderMd(bubble, targetText, targetThinking);
+          messages.push({ role:'ai', content:targetText });
+          saveCurrentConv();
+        }
+      } else {
+        bubble.innerHTML = `<span style="color:var(--yellow);display:inline-flex;align-items:center;gap:8px;font-weight:500;background:rgba(255, 170, 0, 0.15);padding:8px 12px;border-radius:6px;border:1px solid var(--yellow);">${stopAlert}</span>`;
+        messages.push({ role:'ai', content: `(${stopAlert})` });
+        saveCurrentConv();
+      }
+      document.getElementById('token-count').innerHTML = `<span style="color:var(--yellow);font-weight:600;">${stopAlert}</span>`;
+      return;
+    }
+
+    const isOfflineErr = e.message.includes('Failed to fetch') || e.message.includes('502') || e.message.includes('521') || e.message.includes('522') || e.message.includes('523') || e.message.includes('524');
+    const errorMsg = isOfflineErr 
+      ? 'AI Server (MiniPC) is offline or unresponsive. Please make sure it is powered on.'
+      : `Connection error: ${esc(e.message)}`;
+
+    if (targetText && targetText.trim()) {
+      targetText += `\n\n*(${errorMsg})*`;
+      renderMd(bubble, targetText, targetThinking);
+      messages.push({ role:'ai', content:targetText });
+      saveCurrentConv();
+    } else {
+      bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${errorMsg}</span>`;
+    }
+    document.getElementById('token-count').textContent = isOfflineErr ? 'Server offline / disconnected' : 'Response error';
   }
 }
 
-function stopGeneration() { if (abortCtrl) abortCtrl.abort(); }
+function stopGeneration() {
+  if (abortCtrl) {
+    abortCtrl.abort();
+  }
+  if (typeof synthesis !== 'undefined' && synthesis && synthesis.speaking) synthesis.cancel();
+  if (typeof stopMic === 'function') stopMic();
+  setStreaming(false);
+
+  const stopAlert = `🛑 Respuesta detenida por el usuario (Stopped by user)`;
+  const tokenEl = document.getElementById('token-count');
+  if (tokenEl) {
+    tokenEl.innerHTML = `<span style="color:var(--yellow);font-weight:600;">${stopAlert}</span>`;
+  }
+
+  const msgs = document.querySelectorAll('#messages .msg-bubble');
+  const lastBubble = msgs[msgs.length - 1];
+  if (lastBubble && (lastBubble.innerHTML.includes('spin-svg') || lastBubble.innerHTML.includes('Procesando') || lastBubble.innerHTML.includes('Cargando modelo') || lastBubble.innerHTML.trim() === '')) {
+    lastBubble.innerHTML = `<span style="color:var(--yellow);display:inline-flex;align-items:center;gap:8px;font-weight:500;background:rgba(255, 170, 0, 0.15);padding:8px 12px;border-radius:6px;border:1px solid var(--yellow);">${stopAlert}</span>`;
+  }
+}
 
 function setStreaming(on) {
   isStreaming = on;
   document.getElementById('sendBtn').style.display = on ? 'none' : 'flex';
   document.getElementById('stopBtn').style.display = on ? 'flex' : 'none';
+  const micEl = document.getElementById('micBtn');
+  if (micEl) micEl.style.opacity = on ? '0.3' : '1';
+  if (on && typeof stopMic === 'function') stopMic();
   if (!on) { 
     abortCtrl = null; 
     document.querySelectorAll('#messages .cursor').forEach(el => el.remove());
   }
 }
 
+// ── CONTEXT MONITORING & LIMIT ALERTS ────────────────────────────────
+function checkContextUsage() {
+  const totalChars = (systemPrompt || '').length + messages.reduce((acc, m) => acc + (m.content || '').length, 0);
+  const estimatedTokens = Math.round(totalChars / 3.4);
+  const percent = Math.round((estimatedTokens / FIXED_CTX) * 100);
+  
+  const alertBar = document.getElementById('contextAlertBar');
+  const alertText = document.getElementById('contextAlertText');
+  if (!alertBar || !alertText) return;
+
+  if (percent >= 90) {
+    alertBar.className = 'context-alert-bar red';
+    alertBar.style.display = 'flex';
+    alertText.innerHTML = `🔴 <strong>Memoria al límite (${percent}% de 8K)</strong>: Los mensajes antiguos se comprimirán. Te recomendamos iniciar un <em>New Chat</em>.`;
+  } else if (percent >= 70) {
+    alertBar.className = 'context-alert-bar amber';
+    alertBar.style.display = 'flex';
+    alertText.innerHTML = `⚠️ <strong>Memoria cerca del límite (${percent}% de 8K)</strong>: Sugerimos iniciar un <em>New Chat</em> para máxima velocidad.`;
+  } else {
+    alertBar.style.display = 'none';
+  }
+}
+
+// ── REALTIME VOICE & LIVE AUDIO OVERLAY (MODO VOZ LIVE) ─────────────────
+let isVoiceModeActive = false;
+let recognition = null;
+let isListening = false;
+let synthesis = window.speechSynthesis || null;
+
+const VoiceQueue = {
+  queue: [],
+  isPlaying: false,
+  push(text) {
+    const clean = text.replace(/```[\s\S]*?```/g, ' [código omitido] ').replace(/[#*`~_]|(-\s)|(\d+\.\s)/g, '').replace(/https?:\/\/[^\s]+/g, '').trim();
+    if (!clean) return;
+    this.queue.push(clean);
+    this.playNext();
+  },
+  playNext() {
+    if (this.isPlaying || !this.queue.length || !synthesis || !isVoiceModeActive) {
+      if (!this.queue.length && !this.isPlaying && isVoiceModeActive && !isStreaming) {
+        updateVoiceLiveUI('listening', '🟢 Listo para escucharte...', 'Reabriendo micrófono automáticamente...');
+        setTimeout(() => {
+          if (!isStreaming && isVoiceModeActive) startMic();
+        }, 350);
+      }
+      return;
+    }
+    this.isPlaying = true;
+    const chunk = this.queue.shift();
+    const utterance = new SpeechSynthesisUtterance(chunk);
+    utterance.lang = 'es-MX';
+    utterance.rate = 1.06;
+    
+    const voices = synthesis.getVoices();
+    const esVoice = voices.find(v => v.lang.includes('es') && (v.name.includes('Natural') || v.name.includes('Siri') || v.name.includes('Paulina') || v.name.includes('Jorge') || v.name.includes('Monica'))) || voices.find(v => v.lang.includes('es'));
+    if (esVoice) utterance.voice = esVoice;
+    
+    updateVoiceLiveUI('speaking', '🔊 YZAI respondiendo en vivo...', `"${chunk}"`);
+    
+    utterance.onend = () => {
+      this.isPlaying = false;
+      this.playNext();
+    };
+    utterance.onerror = () => {
+      this.isPlaying = false;
+      this.playNext();
+    };
+    synthesis.speak(utterance);
+  },
+  clear() {
+    this.queue = [];
+    this.isPlaying = false;
+    if (synthesis && synthesis.speaking) synthesis.cancel();
+  }
+};
+
+function updateVoiceLiveUI(state, statusText, subtitleText) {
+  const orb = document.getElementById('voicePlasmaOrb');
+  const status = document.getElementById('voiceLiveStatusText');
+  const sub = document.getElementById('voiceLiveSubtitle');
+  if (status && statusText) status.textContent = statusText;
+  if (sub && subtitleText) sub.textContent = subtitleText;
+  if (!orb) return;
+  
+  orb.className = 'voice-plasma-orb';
+  if (state === 'thinking') orb.classList.add('thinking');
+  else if (state === 'speaking') orb.classList.add('speaking');
+}
+
+function initSpeechRecognition() {
+  const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRec) {
+    console.warn('Web Speech API no soportada.');
+    return null;
+  }
+  const rec = new SpeechRec();
+  rec.continuous = false;
+  rec.interimResults = true;
+  rec.lang = 'es-MX';
+  rec.onstart = () => {
+    isListening = true;
+    const micEl = document.getElementById('micBtn');
+    if (micEl) micEl.classList.add('listening');
+    const p = document.getElementById('prompt');
+    if (p) {
+      p.classList.add('listening-input');
+      p.placeholder = "Escuchando tu voz... habla ahora";
+      autoResize(p);
+    }
+    const overlayMicBtn = document.getElementById('voiceOverlayMicBtn');
+    if (overlayMicBtn) overlayMicBtn.textContent = '⏸️ Pausar Micrófono';
+    updateVoiceLiveUI('listening', '🎙️ Escuchando tus palabras...', 'Habla a tu ritmo, el mensaje se enviará al detectar silencio...');
+  };
+  rec.onresult = (event) => {
+    let transcript = '';
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      transcript += event.results[i][0].transcript;
+    }
+    const input = document.getElementById('prompt');
+    if (input) {
+      input.value = transcript;
+      input.classList.add('listening-input');
+      autoResize(input);
+    }
+    
+    updateVoiceLiveUI('listening', '🎙️ Capturándote en vivo...', `"${transcript}"`);
+    
+    // Si la frase finalizó en Modo Voz, auto-enviar de inmediato
+    if (event.results[0].isFinal && isVoiceModeActive && !isStreaming) {
+      setTimeout(() => {
+        if (input.value.trim() !== '' && !isStreaming) sendMessage();
+      }, 550);
+    }
+  };
+  rec.onerror = (e) => {
+    console.warn('[Speech Error]', e.error);
+    stopMic();
+  };
+  rec.onend = () => {
+    stopMic();
+  };
+  return rec;
+}
+
+function toggleMic() {
+  if (isListening) {
+    stopMic();
+  } else {
+    startMic();
+  }
+}
+
+function startMic() {
+  if (isStreaming) return;
+  if (synthesis && synthesis.speaking) synthesis.cancel();
+  if (!recognition) recognition = initSpeechRecognition();
+  if (recognition && !isListening) {
+    try { recognition.start(); } catch (e) { console.warn(e); }
+  } else if (!recognition) {
+    alert('Tu navegador no soporta entrada por micrófono. Te sugerimos Google Chrome o Microsoft Edge.');
+  }
+}
+
+function stopMic() {
+  isListening = false;
+  const micEl = document.getElementById('micBtn');
+  if (micEl) micEl.classList.remove('listening');
+  const p = document.getElementById('prompt');
+  if (p) {
+    p.classList.remove('listening-input');
+    if (!p.value) p.placeholder = "Type a message...";
+    autoResize(p);
+  }
+  const overlayMicBtn = document.getElementById('voiceOverlayMicBtn');
+  if (overlayMicBtn) overlayMicBtn.textContent = '🎙️ Activar Micrófono';
+  if (recognition) {
+    try { recognition.stop(); } catch (e) { /* silent */ }
+  }
+}
+
+function toggleVoiceMode() {
+  isVoiceModeActive = !isVoiceModeActive;
+  const btn = document.getElementById('voiceModeBtn');
+  const txt = document.getElementById('voiceModeText');
+  const overlay = document.getElementById('voiceLiveOverlay');
+  if (isVoiceModeActive) {
+    if (btn) btn.classList.add('active');
+    if (txt) txt.textContent = 'Modo Voz: ON';
+    if (overlay) overlay.classList.add('active');
+    VoiceQueue.clear();
+    startMic();
+  } else {
+    if (btn) btn.classList.remove('active');
+    if (txt) txt.textContent = 'Modo Voz';
+    if (overlay) overlay.classList.remove('active');
+    VoiceQueue.clear();
+    stopMic();
+  }
+}
+
 // ── HELPERS ────────────────────────────────────────────────
 function handleKey(e) { if (e.key==='Enter' && !e.shiftKey && window.innerWidth>=768) { e.preventDefault(); sendMessage(); } }
-function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,150)+'px'; }
+function autoResize(el) { 
+  el.style.height = 'auto'; 
+  const maxH = el.classList.contains('listening-input') ? 300 : 150;
+  el.style.height = Math.min(el.scrollHeight, maxH) + 'px'; 
+}
 function scrollBottom(force = false)  { 
   const m=document.getElementById('messages-wrapper'); 
   if (!m) return;
@@ -1882,12 +2537,13 @@ document.getElementById('prompt').addEventListener('keydown', e => {
   if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
 });
 
-// Fix for iOS Safari Keyboard hiding input bar
+// Fix for iOS Safari / iPadOS Keyboard hiding input bar
 if (window.visualViewport) {
   window.visualViewport.addEventListener('resize', () => {
     const iw = document.querySelector('.input-wrapper');
+    if (!iw) return;
     const offset = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
-    iw.style.paddingBottom = Math.max(offset + 20, 20) + 'px';
+    iw.style.paddingBottom = Math.max(offset + 24, 24) + 'px';
     scrollBottom();
   });
 }
@@ -1932,10 +2588,26 @@ if (window.visualViewport) {
   document.head.appendChild(s1);
 })();
 
+function toggleAttachMenu(e) {
+  if (e) e.stopPropagation();
+  const menu = document.getElementById('attachMenu');
+  if (menu) menu.classList.toggle('open');
+}
+
+document.addEventListener('click', (e) => {
+  const menu = document.getElementById('attachMenu');
+  const btn = document.getElementById('attachBtn');
+  if (menu && menu.classList.contains('open') && !menu.contains(e.target) && !btn.contains(e.target)) {
+    menu.classList.remove('open');
+  }
+});
+
 function triggerFileInput(acceptString) {
   const input = document.getElementById('fileInput');
   input.accept = acceptString;
   input.click();
+  const menu = document.getElementById('attachMenu');
+  if (menu) menu.classList.remove('open');
 }
 
 function resetInputUI() {
