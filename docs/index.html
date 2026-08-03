@@ -885,7 +885,7 @@ think::before {
       </div>
       <div class="model-pill-info">
         <div class="model-pill-name" id="activeName">QWEN 3.6 (35B MOE)</div>
-        <div class="model-pill-sub" id="activeSub">Context: 8K · 8 Slots Ready</div>
+        <div class="model-pill-sub" id="activeSub">Context: 8K · 6 Slots Ready</div>
       </div>
       <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
     </div>
@@ -922,6 +922,17 @@ think::before {
         <img id="imgPreview" style="height:40px;width:40px;object-fit:cover;border-radius:6px;">
         <button onclick="removeImage()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px;display:flex;align-items:center;" title="Eliminar imagen">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    </div>
+    <!-- Document / PDF preview (silently attached, text never dumped into text area) -->
+    <div id="docPreviewContainer" style="display:none;padding:6px 12px;">
+      <div style="display:flex;align-items:center;gap:10px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.3);border-radius:12px;padding:6px 12px;width:fit-content;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        <span id="docPreviewTitle" style="font-size:12.5px;font-weight:600;color:#fff;">Documento.pdf</span>
+        <span id="docPreviewMeta" style="font-size:11px;color:var(--cyan);font-weight:500;">Cargado</span>
+        <button onclick="removeAttachedDoc()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px;display:flex;align-items:center;" title="Eliminar archivo">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
     </div>
@@ -1027,7 +1038,7 @@ think::before {
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Concurrencia & Contexto</span>
-          <strong style="color:var(--secondary); font-size:12px;">8 Slots · 8K Ctx</strong>
+          <strong style="color:var(--secondary); font-size:12px;">6 Slots · 8K Ctx</strong>
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Sandbox de Código</span>
@@ -1080,7 +1091,7 @@ const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
 let selectedModel = 'qwen36-yzai:latest';
 const FIXED_CTX   = 8192; // 8K 8-slot GPU Optimized
-let selectedModelDesc = 'Qwen 3.6 35B A3B (GPU 8K Ctx · 8 Slots)';
+let selectedModelDesc = 'Qwen 3.6 35B A3B (GPU 8K Ctx · 6 Slots)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -1089,7 +1100,13 @@ let abortCtrl     = null;
 let isStreaming   = false;
 let allModels     = [];
 let currentImageBase64 = null; // stored internally, NEVER shown as text to user
+let currentAttachedDoc = null; // stored internally, NEVER dumped into prompt textarea
 
+function removeAttachedDoc() {
+  currentAttachedDoc = null;
+  document.getElementById('docPreviewContainer').style.display = 'none';
+  document.getElementById('token-count').textContent = 'Context: 8K · Ready';
+}
 
 const esc = (str) => String(str).replace(/[&<>"']/g, match => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
 
@@ -1099,9 +1116,9 @@ const TEXT_EXTENSIONS = ['txt','md','markdown','json','jsonl','csv','tsv',
   'toml','ini','conf','log','sql','r','cpp','c','h','java','rs','go','php',
   'rb','swift','kt','dart','vue','svelte','env','gitignore'];
 
-// PDF: max chars to extract (~80K ≈ 20K tokens, leaving 12K for conversation)
+// PDF: max chars to extract (~80K ≈ 20K tokens)
 const PDF_MAX_CHARS = 80_000;
-// Image: max dimension before compressing (Gemma 4 vision encoder = 896px native)
+// Image: max dimension before compressing
 const IMG_MAX_PX = 1024;
 
 function handleFileSelect(e) {
@@ -1111,7 +1128,7 @@ function handleFileSelect(e) {
 
   const ext = file.name.split('.').pop().toLowerCase();
 
-  // ── 1. IMAGES → resize+compress, base64 stored internally, thumbnail shown ──
+  // ── 1. IMAGES → resize+compress, base64 stored internally ──
   if (file.type.startsWith('image/')) {
     document.getElementById('token-count').textContent = 'Procesando imagen...';
     const reader = new FileReader();
@@ -1138,13 +1155,14 @@ function handleFileSelect(e) {
     return;
   }
 
-  // ── 2. PDF → read as ArrayBuffer (avoids blob: CSP issue), extract via PDF.js ──
+  // ── 2. PDF → extract text via PDF.js SILENTLY into currentAttachedDoc ──
   if (ext === 'pdf' || file.type === 'application/pdf') {
     if (!window.pdfjsLib) {
-      document.getElementById('token-count').textContent = 'Ready';
+      document.getElementById('token-count').textContent = 'PDF.js no cargado';
       return;
     }
-    document.getElementById('token-count').textContent = 'Extrayendo texto del PDF...';
+    document.getElementById('token-count').innerHTML =
+      `<span style="color:var(--cyan);display:inline-flex;align-items:center;gap:6px;">${ICONS.spin} Procesando PDF "${file.name}"...</span>`;
     file.arrayBuffer().then(arrayBuffer => {
       return pdfjsLib.getDocument({ data: arrayBuffer }).promise;
     }).then(async (pdf) => {
@@ -1157,14 +1175,20 @@ function handleFileSelect(e) {
         const pageText = content.items.map(s => s.str).join(' ');
         allText += `\n--- Pagina ${i} ---\n${pageText}`;
       }
-      allText = allText.slice(0, PDF_MAX_CHARS);
-      const promptEl = document.getElementById('prompt');
-      const formatted = `[PDF: ${file.name}${truncated?' (truncado ~20K tokens)':''}]\n\`\`\`\n${allText.trim()}\n\`\`\``;
-      promptEl.value = promptEl.value ? `${promptEl.value}\n\n${formatted}` : formatted;
-      autoResize(promptEl);
-      const pages = Math.min(pdf.numPages, truncated ? '40+' : pdf.numPages);
+      allText = allText.slice(0, PDF_MAX_CHARS).trim();
+      
+      currentAttachedDoc = {
+        name: file.name,
+        text: allText,
+        ext: 'pdf',
+        pages: pdf.numPages
+      };
+      
+      document.getElementById('docPreviewTitle').textContent = file.name;
+      document.getElementById('docPreviewMeta').textContent = `${pdf.numPages} págs · ${(allText.length/1000).toFixed(0)}K chars${truncated?' (truncado)':''}`;
+      document.getElementById('docPreviewContainer').style.display = 'block';
       document.getElementById('token-count').innerHTML =
-        `<span style="color:var(--cyan);display:inline-flex;align-items:center;gap:6px;">${ICONS.file} PDF "${file.name}" — ${pages} págs, ${(allText.length/1000).toFixed(0)}K chars${truncated ? ` <span style="display:inline-flex;align-items:center;gap:2px;">${ICONS.warn} truncado</span>` : ''}</span>`;
+        `<span style="color:var(--cyan);display:inline-flex;align-items:center;gap:6px;">${ICONS.check} PDF "${file.name}" cargado exitosamente. Escribe tu indicación abajo.</span>`;
     }).catch(err => {
       document.getElementById('token-count').innerHTML =
         `<span style="color:var(--red);display:inline-flex;align-items:center;gap:6px;">${ICONS.warn} Error leyendo PDF: ${err.message}</span>`;
@@ -1172,12 +1196,12 @@ function handleFileSelect(e) {
     return;
   }
 
-  // ── 3. TEXT FILES → paste raw into prompt ────────────────────────────────
+  // ── 3. TEXT & CODE FILES → store SILENTLY into currentAttachedDoc ──
   const isTextMime = file.type.startsWith('text/') || file.type === 'application/json';
   const isTextExt  = TEXT_EXTENSIONS.includes(ext);
   if (!isTextMime && !isTextExt) {
     document.getElementById('token-count').innerHTML =
-      `<span style="color:var(--red);font-weight:600;display:inline-flex;align-items:center;gap:6px;">${ICONS.warn} "${file.name}": formato no soportado. Usa imágenes, PDF o archivos de texto.</span>`;
+      `<span style="color:var(--red);font-weight:600;display:inline-flex;align-items:center;gap:6px;">${ICONS.warn} "${file.name}": formato no soportado. Usa imágenes, PDF o código.</span>`;
     return;
   }
   if (file.size > 500_000) {
@@ -1187,12 +1211,18 @@ function handleFileSelect(e) {
   }
   const reader = new FileReader();
   reader.onload = (ev) => {
-    const promptEl = document.getElementById('prompt');
     const content = ev.target.result;
-    const formatted = `[Archivo: ${file.name}]\n\`\`\`${ext}\n${content}\n\`\`\``;
-    promptEl.value = promptEl.value ? `${promptEl.value}\n\n${formatted}` : formatted;
-    autoResize(promptEl);
-    document.getElementById('token-count').textContent = `"${file.name}" cargado (${(file.size/1024).toFixed(1)}KB)`;
+    currentAttachedDoc = {
+      name: file.name,
+      text: content,
+      ext: ext,
+      pages: 1
+    };
+    document.getElementById('docPreviewTitle').textContent = file.name;
+    document.getElementById('docPreviewMeta').textContent = `${(file.size/1024).toFixed(1)}KB`;
+    document.getElementById('docPreviewContainer').style.display = 'block';
+    document.getElementById('token-count').innerHTML =
+      `<span style="color:var(--cyan);display:inline-flex;align-items:center;gap:6px;">${ICONS.check} Archivo "${file.name}" cargado exitosamente. Escribe tu indicación abajo.</span>`;
   };
   reader.readAsText(file, 'UTF-8');
 }
@@ -1331,10 +1361,10 @@ function updateModelHeader() {
   const activeName = document.getElementById('activeName');
   if (activeName) activeName.textContent = 'QWEN 3.6 (35B MOE)';
   const activeSub = document.getElementById('activeSub');
-  if (activeSub) activeSub.textContent = 'Context: 8K · 8 Slots Ready';
+  if (activeSub) activeSub.textContent = 'Context: 8K · 6 Slots Ready';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 8K · 8 Slots Ready';
+    tokenCount.textContent = 'Context: 8K · 6 Slots Ready';
   }
 }
 
@@ -1649,7 +1679,9 @@ async function sendMessage() {
   document.getElementById('token-count').textContent = 'Generating...';
 
   const payload = [];
-  if (systemPrompt) payload.push({ role:'system', content: systemPrompt });
+  // Direct response system directive (ALL THINKING OFF)
+  const defaultSystemPrompt = "Direct Response Mode: Answer directly, clearly, and concisely. Do NOT output <think> tags or reasoning steps under any circumstances.";
+  payload.push({ role:'system', content: systemPrompt ? `${systemPrompt}\n${defaultSystemPrompt}` : defaultSystemPrompt });
 
   messages.forEach(m => {
     const msg = { role: m.role==='ai'?'assistant':m.role, content: m.content };
@@ -1657,7 +1689,16 @@ async function sendMessage() {
     payload.push(msg);
   });
 
-  const userMsg = { role:'user', content:text };
+  let userTextForApi = text;
+  let chatBubbleText = text;
+
+  if (currentAttachedDoc) {
+    userTextForApi = `[DOCUMENTO ADJUNTO: ${currentAttachedDoc.name}]\n\`\`\`${currentAttachedDoc.ext}\n${currentAttachedDoc.text}\n\`\`\`\n\n${text}`;
+    chatBubbleText = `📄 **[${currentAttachedDoc.name}]**\n\n${text}`;
+    removeAttachedDoc();
+  }
+
+  const userMsg = { role:'user', content: userTextForApi };
   if (currentImageBase64) {
     userMsg.images = [currentImageBase64]; // sent to Ollama API only
   }
@@ -1666,7 +1707,7 @@ async function sendMessage() {
   removeImage();
 
   const container = document.getElementById('messages');
-  container.appendChild(createMsg('user', text));
+  container.appendChild(createMsg('user', chatBubbleText));
   const aiEl = createMsg('ai', '', true);
   container.appendChild(aiEl);
   const bubble = aiEl.querySelector('.bubble');
