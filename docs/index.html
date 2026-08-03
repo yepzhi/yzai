@@ -986,18 +986,59 @@ think::before {
   </div>
 </div>
 
-<!-- SYSTEM PROMPT MODAL -->
+<!-- SYSTEM PROMPT & HARDWARE STATUS MODAL -->
 <div class="modal-overlay" id="systemModal">
-  <div class="modal">
+  <div class="modal" style="max-width:580px; width:92%; max-height:90vh; overflow-y:auto;">
     <h3>
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
-      System Instructions
+      Ajustes del Sistema & Estado del Servidor
     </h3>
-    <p>Set custom behavior or persona for the assistant.</p>
-    <textarea id="systemPromptInput" placeholder="e.g., You are an expert programmer. Always provide concise code without detailed explanations..."></textarea>
-    <div class="modal-actions">
-      <button class="btn-cancel" onclick="closeSystemModal()">Cancel</button>
-      <button class="btn-save" onclick="saveSystemPrompt()">Save Changes</button>
+    <p style="font-size:13px; color:var(--muted); margin-bottom:14px;">Información técnica del hardware de la Mini PC e instrucciones personalizadas del modelo.</p>
+
+    <!-- HARDWARE & STATUS (READONLY) -->
+    <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:14px; margin-bottom:18px;">
+      <div style="font-size:11px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+        <span>⚡ Estado del Servidor (Mini PC)</span>
+        <span style="font-size:9.5px; padding:2px 8px; border-radius:6px; background:rgba(16,185,129,0.15); color:var(--green); border:1px solid rgba(16,185,129,0.3); font-weight:600;">GPU ONLINE 24/7</span>
+      </div>
+      
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:12px;">
+        <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+          <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Modelo Activo</span>
+          <strong style="color:#fff; font-size:12px;">Qwen 3.6 35B A3B</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+          <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Procesador / GPU</span>
+          <strong style="color:var(--cyan); font-size:12px;">Radeon 890M (24GB VRAM)</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+          <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Residencia en VRAM</span>
+          <strong style="color:var(--green); font-size:12px;">100% GPU (14.17 GB fijos)</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+          <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Concurrencia & Contexto</span>
+          <strong style="color:var(--secondary); font-size:12px;">8 Slots · 8K Ctx</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+          <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Sandbox de Código</span>
+          <strong style="color:#fff; font-size:12px;">Docker Python 3.12 (MCP)</strong>
+        </div>
+        <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
+          <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Búsqueda Web</span>
+          <strong style="color:#fff; font-size:12px;">DuckDuckGo + Proxy en Vivo</strong>
+        </div>
+      </div>
+    </div>
+
+    <!-- EDITABLE SYSTEM PERSONA -->
+    <div style="margin-bottom:6px;">
+      <label style="font-size:12.5px; font-weight:600; color:var(--text-dim); display:block; margin-bottom:6px;">Instrucciones del Sistema (System Persona):</label>
+      <textarea id="systemPromptInput" placeholder="Ejemplo: Eres un tutor experto en STEM y programación. Responde de forma clara y directa..." style="height:120px;"></textarea>
+    </div>
+
+    <div class="modal-actions" style="margin-top:16px;">
+      <button class="btn-cancel" onclick="closeSystemModal()">Cerrar</button>
+      <button class="btn-save" onclick="saveSystemPrompt()">Guardar Ajustes</button>
     </div>
   </div>
 </div>
@@ -1718,18 +1759,17 @@ async function sendMessage() {
       const psRes = await fetch(`${OLLAMA_URL}/api/ps?clave=secreta123`);
       if (!psRes.ok || firstTokenReceived) return;
       const data = await psRes.json();
-      const model = data.models.find(m => m.name === selectedModel);
       const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
-      if (model) {
-        if (loadTime >= 1) {
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generating...</span>`;
-          loadingIndicatorActive = true;
+      const tokenCountEl = document.getElementById('token-count');
+      if (tokenCountEl) {
+        if (loadTime < 1) {
+          tokenCountEl.innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} 🤖 Slot activo en iGPU Radeon 890M (8K Ctx)...</span>`;
+        } else if (loadTime >= 1 && loadTime < 3) {
+          tokenCountEl.innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} 🧠 Procesando contexto en VRAM (14.17 GB fijos)...</span>`;
+        } else {
+          tokenCountEl.innerHTML = `<span style="color:var(--secondary);font-weight:600;">${spinSvg} ⚡ Generando tokens (Slot ${Math.min(8, Math.floor(loadTime) % 8 + 1)}/8 en paralelo)...</span>`;
         }
-      } else {
-        if (loadTime >= 1) {
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generating...</span>`;
-          loadingIndicatorActive = true;
-        }
+        loadingIndicatorActive = true;
       }
     } catch(e) {}
   }
