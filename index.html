@@ -1746,44 +1746,21 @@ async function sendMessage() {
     }, 16); // ~60fps para máxima suavidad visual
   }
 
-  let loadTime = 0;
-  // Only show loading UI if model is NOT already fully in VRAM
-  // We check once immediately – if model is ready (>=85% VRAM), we stay silent
-  // and only start the polling interval if it's actually loading.
-  let loadInterval = null;
   let loadingIndicatorActive = false;
 
-  async function checkModelAndMaybeShowLoading() {
+  function showLoadingStatus() {
     if (firstTokenReceived) return;
-    try {
-      const psRes = await fetch(`${OLLAMA_URL}/api/ps?clave=secreta123`);
-      if (!psRes.ok || firstTokenReceived) return;
-      const data = await psRes.json();
-      const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
-      const tokenCountEl = document.getElementById('token-count');
-      if (tokenCountEl) {
-        if (loadTime < 1) {
-          tokenCountEl.innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} 🤖 Slot activo en iGPU Radeon 890M (8K Ctx)...</span>`;
-        } else if (loadTime >= 1 && loadTime < 3) {
-          tokenCountEl.innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} 🧠 Procesando contexto en VRAM (14.17 GB fijos)...</span>`;
-        } else {
-          tokenCountEl.innerHTML = `<span style="color:var(--secondary);font-weight:600;">${spinSvg} ⚡ Generando tokens (Slot ${Math.min(8, Math.floor(loadTime) % 8 + 1)}/8 en paralelo)...</span>`;
-        }
-        loadingIndicatorActive = true;
-      }
-    } catch(e) {}
+    const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
+    const tokenCountEl = document.getElementById('token-count');
+    if (tokenCountEl) {
+      tokenCountEl.innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} ⚡ Procesando en GPU Radeon 890M (8K Ctx)...</span>`;
+      loadingIndicatorActive = true;
+    }
   }
 
-  // Start polling 500ms after send to avoid flicker on fast responses
   const loadPollStart = setTimeout(() => {
-    if (firstTokenReceived) return;
-    checkModelAndMaybeShowLoading();
-    loadInterval = setInterval(async () => {
-      if (firstTokenReceived) { clearInterval(loadInterval); loadInterval = null; return; }
-      loadTime += 0.5;
-      await checkModelAndMaybeShowLoading();
-    }, 500);
-  }, 500);
+    showLoadingStatus();
+  }, 300);
 
   let retryCount = 0;
   async function attemptFetch() {
@@ -1791,7 +1768,6 @@ async function sendMessage() {
       const chatBody = { 
         model: selectedModel, 
         messages: payload,
-        think: false,
         options: { 
           num_ctx: FIXED_CTX
         },
@@ -1848,8 +1824,6 @@ async function sendMessage() {
             if (!firstTokenReceived) { 
               firstTokenReceived = true;
               clearTimeout(loadPollStart);
-              if (loadInterval) { clearInterval(loadInterval); loadInterval = null; }
-              // Only reset the label if we had shown a loading indicator
               if (loadingIndicatorActive) {
                 document.getElementById('token-count').textContent = 'Generating...';
               }
