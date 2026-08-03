@@ -1896,7 +1896,7 @@ async function sendMessage() {
     const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
     const tokenCountEl = document.getElementById('token-count');
     if (tokenCountEl) {
-      tokenCountEl.innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} ⚡ Procesando en GPU Radeon 890M (8K Ctx)...</span>`;
+      tokenCountEl.innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generando...</span>`;
       loadingIndicatorActive = true;
     }
   }
