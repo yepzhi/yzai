@@ -66,15 +66,21 @@ Environment="HSA_OVERRIDE_GFX_VERSION=11.0.3"
 
 Para que la Mini PC cumpla con su función única y exclusiva (servir IA en caliente con 0 milisegundos de retraso inicial), se instalaron dos scripts de control soberano en `/usr/local/bin/`:
 
-### 1. Script de Precarga en Arranque (`/usr/local/bin/preload-ollama.sh`)
-Se ejecuta 3 segundos después del inicio de `ollama.service`:
+### 1. Script de Precarga Inteligente en Arranque (`/usr/local/bin/preload-ollama.sh`)
+Se ejecuta de forma asíncrona tras el inicio de `ollama.service` (`ExecStartPost`). Realiza un sondeo (polling de hasta 30 segundos) esperando a que los drivers Vulkan/AMD estén listos y el puerto HTTP 11434 responda en un encendido en frío, inyectando inmediatamente el modelo en VRAM al confirmar conectividad:
 ```bash
 #!/bin/bash
-sleep 3
-curl -s -X POST http://localhost:11434/api/generate \
-  -H "Content-Type: application/json" \
-  -d '{"model": "qwen36-yzai:latest", "keep_alive": -1, "options": {"num_ctx": 8192}}' \
-  > /dev/null 2>&1 &
+(
+  for i in {1..30}; do
+    if curl -s http://127.0.0.1:11434/ > /dev/null 2>&1; then
+      break
+    fi
+    sleep 1
+  done
+  curl -s -X POST http://127.0.0.1:11434/api/generate \
+    -H "Content-Type: application/json" \
+    -d '{"model": "qwen36-yzai:latest", "keep_alive": -1, "options": {"num_ctx": 8192}}' > /dev/null 2>&1
+) &
 ```
 
 ### 2. Daemon Watchdog Permanente (`/usr/local/bin/ollama-watchdog.sh`)
