@@ -1497,14 +1497,10 @@ async function sendMessage() {
         const resultsText = results.map((r,i) =>
           `${i+1}. **${r.title}**\n   URL: ${r.url}\n   ${r.snippet}`
         ).join('\n\n');
-        // Inject results as a system context message before the user message
+        // Append web search context directly to the last user message to comply with Jinja template rules
         const todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        const searchContext = {
-          role: 'system',
-          content: `[REAL-TIME WEB INFORMATION - TODAY IS ${todayStr.toUpperCase()}]\nResults for "${searchQuery}":\n\n${resultsText}\n\nCRITICAL: Ignore knowledge cutoff or future years. Use ONLY the information above to accurately answer recent events.`
-        };
-        // Insert before the last user message
-        payload.splice(payload.length - 1, 0, searchContext);
+        const webInfoBlock = `[REAL-TIME WEB INFORMATION - TODAY IS ${todayStr.toUpperCase()}]\nResults for "${searchQuery}":\n\n${resultsText}\n\nCRITICAL: Ignore knowledge cutoff or future years. Use ONLY the information above to accurately answer recent events.`;
+        payload[payload.length - 1].content = `${webInfoBlock}\n\n---\nUser prompt: ${payload[payload.length - 1].content}`;
         document.getElementById('token-count').textContent = 'Generating with live data...';
       }
     } catch(searchErr) {
