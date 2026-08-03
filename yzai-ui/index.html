@@ -1300,6 +1300,14 @@ async function init() {
   await loadModels();
   checkServicesHealth();
   setInterval(checkServicesHealth, 30000);
+  // Precarga silenciosa del modelo en VRAM al abrir la interfaz
+  if (selectedModel) {
+    fetch(`${OLLAMA_URL}/api/generate?clave=secreta123`, {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({ model: selectedModel, keep_alive: -1 })
+    }).catch(() => {});
+  }
 }
 
 let lastOnlineTimestamp = Date.now();
@@ -1810,6 +1818,12 @@ async function sendMessage() {
   const loadPollStart = setTimeout(() => {
     showLoadingStatus();
   }, 300);
+  const vramNoticeTimeout = setTimeout(() => {
+    if (!firstTokenReceived && document.getElementById('token-count')) {
+      const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
+      document.getElementById('token-count').innerHTML = `<span style="color:var(--yellow);font-weight:600;">${spinSvg} ⚡ Cargando modelo en VRAM de GPU (puede tomar ~35s tras inactividad)...</span>`;
+    }
+  }, 3500);
 
   let retryCount = 0;
   async function attemptFetch() {
@@ -1874,6 +1888,7 @@ async function sendMessage() {
             if (!firstTokenReceived) { 
               firstTokenReceived = true;
               clearTimeout(loadPollStart);
+              clearTimeout(vramNoticeTimeout);
               if (loadingIndicatorActive) {
                 document.getElementById('token-count').textContent = 'Generating...';
               }
@@ -2016,32 +2031,68 @@ async function sendMessage() {
     startTypewriterLoop(); // Forzar el drenado final del búfer
     
     clearTimeout(loadPollStart);
+    clearTimeout(vramNoticeTimeout);
     if (liveTimer) clearInterval(liveTimer);
   } catch(e) {
-    if (e.name !== 'AbortError') {
-      const isOfflineErr = e.message.includes('Failed to fetch') || e.message.includes('502') || e.message.includes('521') || e.message.includes('522') || e.message.includes('523') || e.message.includes('524');
-      const errorMsg = isOfflineErr 
-        ? 'AI Server (MiniPC) is offline or unresponsive. Please make sure it is powered on.'
-        : `Connection error: ${esc(e.message)}`;
-
-      if (targetText.trim()) {
-        targetText += `\n\n*(${errorMsg})*`;
-        renderMd(bubble, targetText, targetThinking);
-        messages.push({ role:'ai', content:targetText });
-        saveCurrentConv();
-      } else {
-        bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${errorMsg}</span>`;
-      }
-      document.getElementById('token-count').textContent = isOfflineErr ? 'Server offline / disconnected' : 'Response error';
-    }
     clearTimeout(loadPollStart);
+    clearTimeout(vramNoticeTimeout);
     if (liveTimer) clearInterval(liveTimer);
     if (typewriterTimer) clearInterval(typewriterTimer);
     setStreaming(false);
+
+    if (e.name === 'AbortError' || (abortCtrl && abortCtrl.signal.aborted) || !isStreaming) {
+      const stopAlert = `🛑 Respuesta detenida por el usuario (Stopped by user)`;
+      if (typeof targetText !== 'undefined' && targetText && targetText.trim()) {
+        if (!targetText.includes('Stopped by user')) {
+          targetText += `\n\n*(${stopAlert})*`;
+          renderMd(bubble, targetText, targetThinking);
+          messages.push({ role:'ai', content:targetText });
+          saveCurrentConv();
+        }
+      } else {
+        bubble.innerHTML = `<span style="color:var(--yellow);display:inline-flex;align-items:center;gap:8px;font-weight:500;background:rgba(255, 170, 0, 0.15);padding:8px 12px;border-radius:6px;border:1px solid var(--yellow);">${stopAlert}</span>`;
+        messages.push({ role:'ai', content: `(${stopAlert})` });
+        saveCurrentConv();
+      }
+      document.getElementById('token-count').innerHTML = `<span style="color:var(--yellow);font-weight:600;">${stopAlert}</span>`;
+      return;
+    }
+
+    const isOfflineErr = e.message.includes('Failed to fetch') || e.message.includes('502') || e.message.includes('521') || e.message.includes('522') || e.message.includes('523') || e.message.includes('524');
+    const errorMsg = isOfflineErr 
+      ? 'AI Server (MiniPC) is offline or unresponsive. Please make sure it is powered on.'
+      : `Connection error: ${esc(e.message)}`;
+
+    if (targetText && targetText.trim()) {
+      targetText += `\n\n*(${errorMsg})*`;
+      renderMd(bubble, targetText, targetThinking);
+      messages.push({ role:'ai', content:targetText });
+      saveCurrentConv();
+    } else {
+      bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${errorMsg}</span>`;
+    }
+    document.getElementById('token-count').textContent = isOfflineErr ? 'Server offline / disconnected' : 'Response error';
   }
 }
 
-function stopGeneration() { if (abortCtrl) abortCtrl.abort(); }
+function stopGeneration() {
+  if (abortCtrl) {
+    abortCtrl.abort();
+  }
+  setStreaming(false);
+
+  const stopAlert = `🛑 Respuesta detenida por el usuario (Stopped by user)`;
+  const tokenEl = document.getElementById('token-count');
+  if (tokenEl) {
+    tokenEl.innerHTML = `<span style="color:var(--yellow);font-weight:600;">${stopAlert}</span>`;
+  }
+
+  const msgs = document.querySelectorAll('#messages .msg-bubble');
+  const lastBubble = msgs[msgs.length - 1];
+  if (lastBubble && (lastBubble.innerHTML.includes('spin-svg') || lastBubble.innerHTML.includes('Procesando') || lastBubble.innerHTML.includes('Cargando modelo') || lastBubble.innerHTML.trim() === '')) {
+    lastBubble.innerHTML = `<span style="color:var(--yellow);display:inline-flex;align-items:center;gap:8px;font-weight:500;background:rgba(255, 170, 0, 0.15);padding:8px 12px;border-radius:6px;border:1px solid var(--yellow);">${stopAlert}</span>`;
+  }
+}
 
 function setStreaming(on) {
   isStreaming = on;
