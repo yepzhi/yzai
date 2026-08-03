@@ -1772,14 +1772,14 @@ async function sendMessage() {
       const pendingText = targetText.length - currentText.length;
       
       if (pendingThinking > 0) {
-        // Velocidad adaptativa: si hay mucho acumulado, avanza más rápido
-        const step = Math.min(pendingThinking, Math.ceil(pendingThinking / 5) || 1);
+        // Flujo ultrarrápido y suave para el bloque de razonamiento
+        const step = Math.min(pendingThinking, Math.max(3, Math.ceil(pendingThinking * 0.3)));
         currentThinking += targetThinking.substr(currentThinking.length, step);
         hasChanges = true;
       } else if (pendingText > 0) {
-        const step = pendingText > 12
-          ? pendingText
-          : Math.min(pendingText, Math.ceil(pendingText / 2) || 1);
+        // Efecto Typewriter Ultra Rápido y Normalizado (eliminando bloqueos o saltos de golpe)
+        // Avanza de forma fluida a 60 FPS absorbiendo ráfagas de 30+ tokens/segundo sin perder la animación
+        const step = Math.min(pendingText, Math.max(2, Math.ceil(pendingText * 0.25)));
         currentText += targetText.substr(currentText.length, step);
         hasChanges = true;
       }
