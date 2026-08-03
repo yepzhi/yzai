@@ -1679,9 +1679,7 @@ async function sendMessage() {
   document.getElementById('token-count').textContent = 'Generating...';
 
   const payload = [];
-  // Direct response system directive (ALL THINKING OFF)
-  const defaultSystemPrompt = "Direct Response Mode: Answer directly, clearly, and concisely. Do NOT output <think> tags or reasoning steps under any circumstances.";
-  payload.push({ role:'system', content: systemPrompt ? `${systemPrompt}\n${defaultSystemPrompt}` : defaultSystemPrompt });
+  if (systemPrompt) payload.push({ role:'system', content: systemPrompt });
 
   messages.forEach(m => {
     const msg = { role: m.role==='ai'?'assistant':m.role, content: m.content };
