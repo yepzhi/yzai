@@ -901,7 +901,34 @@ think::before {
   backdrop-filter: blur(12px); animation: fadeIn 0.3s ease;
 }
 .context-alert-bar.amber { background: rgba(245,158,11,0.18); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); }
-.context-alert-bar.red { background: rgba(239,68,68,0.22); color: #f87171; border: 1px solid rgba(239,68,68,0.45); }
+.context-alert-bar.red { background: rgba(239,68,68,0.22); color: #f87171; border: 1px solid rgba(239,68,68,0.45); /* ─── OFFLINE OVERLAY ──────────────────────────────── */
+.offline-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: rgba(3, 3, 5, 0.95);
+  backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  text-align: center; color: var(--text); padding: 2rem;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+.offline-overlay.active { opacity: 1; pointer-events: all; }
+.offline-icon {
+  width: 80px; height: 80px; margin-bottom: 24px;
+  color: var(--red);
+  background: rgba(239, 68, 68, 0.1);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+  animation: pulse-red 2s infinite;
+}
+@keyframes pulse-red { 0%, 100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); } 50% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); } }
+.offline-title { font-size: 28px; font-family: var(--font-display); font-weight: 700; margin-bottom: 12px; }
+.offline-desc { font-size: 16px; color: var(--text-dim); max-width: 400px; line-height: 1.5; margin-bottom: 32px; }
+.offline-btn {
+  padding: 14px 28px; background: var(--surface-solid); border: 1px solid var(--border);
+  color: var(--text); border-radius: 12px; font-weight: 500; cursor: pointer;
+  transition: all 0.2s; display: flex; align-items: center; gap: 8px;
+}
+.offline-btn:hover { background: var(--surface2); }
 </style>
 </head>
 <body>
@@ -1405,9 +1432,12 @@ async function discoverEndpoint() {
       if (Array.isArray(data.models)) { OLLAMA_URL = url; return; }
     } catch(e) {}
   }
+  
+  // Si llegamos aquí, no se encontró ningún endpoint vivo.
+  // Dejamos la URL por defecto para que checkServicesHealth la maneje.
 }
 
-async function checkServicesHealth() {
+async function checkServicesHealth(forceCheck = false) {
   let ollamaOk = false;
   try {
     const res = await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123`);
@@ -1418,13 +1448,16 @@ async function checkServicesHealth() {
   const activeSub = document.getElementById('activeSub');
   const drawerDot = document.getElementById('statusDot');
   const drawerText = document.getElementById('statusText');
+  const offlineOverlay = document.getElementById('offlineOverlay');
 
   if (ollamaOk) {
+    if (offlineOverlay) offlineOverlay.classList.remove('active');
     if (topDot) { topDot.style.background = '#3FB950'; topDot.title = 'Ollama Server Operational and Ready'; }
     if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">🟢 Ollama Server: Ready</span>';
     if (drawerDot) drawerDot.style.background = '#3FB950';
     if (drawerText) drawerText.innerHTML = 'Ollama Server <strong style="color:#3FB950">operational and ready</strong>';
   } else {
+    if (offlineOverlay) offlineOverlay.classList.add('active');
     if (topDot) { topDot.style.background = '#F85149'; topDot.title = 'Offline'; }
     if (activeSub) activeSub.innerHTML = '<span style="color:#F85149;">🔴 Server Offline</span>';
     if (drawerDot) drawerDot.style.background = '#F85149';
@@ -2615,6 +2648,17 @@ function resetInputUI() {
   document.getElementById('sendBtn').style.display = 'block';
   document.getElementById('stopBtn').style.display = 'none';
 }
-</script>
+<!-- OFFLINE OVERLAY -->
+<div id="offlineOverlay" class="offline-overlay">
+  <div class="offline-icon">
+    <svg viewBox="0 0 24 24" width="40" height="40" stroke="currentColor" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+  </div>
+  <h2 class="offline-title">Servidor de IA Apagado</h2>
+  <p class="offline-desc">La interfaz está en línea, pero la Mini PC que procesa los modelos de IA se encuentra actualmente apagada o suspendida. Por favor, enciéndela para continuar.</p>
+  <button class="offline-btn" onclick="checkServicesHealth(true)">
+    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+    Reintentar Conexión
+  </button>
+</div>
 </body>
 </html>
