@@ -40,18 +40,23 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
-  --bg: #030305;
-  --bg-gradient: radial-gradient(circle at 50% 0%, #150f2e 0%, #030305 60%);
-  --surface: rgba(20, 20, 25, 0.6);
-  --surface-solid: #111116;
-  --surface2: rgba(255, 255, 255, 0.03);
-  --border: rgba(255, 255, 255, 0.06);
-  --border-light: rgba(255, 255, 255, 0.12);
-  --glass: rgba(255, 255, 255, 0.02);
+  --bg: #05060f;
+  --bg-gradient: radial-gradient(circle at 50% -10%, #1e1346 0%, #0c1033 45%, #05060f 85%);
+  --surface: rgba(18, 20, 36, 0.65);
+  --surface-solid: #0d0f1f;
+  --surface2: rgba(255, 255, 255, 0.04);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-light: rgba(255, 255, 255, 0.15);
+  --glass: rgba(255, 255, 255, 0.03);
   
   --primary: #8b5cf6;
   --primary-hover: #a78bfa;
-  --secondary: #ec4899;
+  --secondary: #d97706;
+  --gold: #f59e0b;
+  --gold-glow: rgba(245, 158, 11, 0.35);
+  --electric-blue: #3b82f6;
+  --royal-blue: #1d4ed8;
+  --deep-purple: #7c3aed;
   --cyan: #06b6d4;
   --green: #10b981;
   --red: #ef4444;
@@ -95,13 +100,13 @@ body {
   overflow: hidden;
 }
 .orb {
-  position: absolute; border-radius: 50%; filter: blur(80px);
-  opacity: 0.4; mix-blend-mode: screen;
-  animation: float 20s infinite ease-in-out alternate;
+  position: absolute; border-radius: 50%; filter: blur(85px);
+  opacity: 0.45; mix-blend-mode: screen;
+  animation: float 22s infinite ease-in-out alternate;
 }
-.orb-1 { width: 400px; height: 400px; background: var(--primary); top: -100px; left: -100px; animation-delay: 0s; }
-.orb-2 { width: 300px; height: 300px; background: var(--secondary); bottom: -50px; right: -50px; animation-delay: -5s; animation-duration: 25s; }
-.orb-3 { width: 350px; height: 350px; background: var(--cyan); top: 40%; left: 60%; opacity: 0.2; animation-delay: -10s; }
+.orb-1 { width: 440px; height: 440px; background: #7c3aed; top: -120px; left: -100px; animation-delay: 0s; }
+.orb-2 { width: 340px; height: 340px; background: #f59e0b; bottom: -60px; right: -60px; opacity: 0.32; animation-delay: -6s; animation-duration: 26s; }
+.orb-3 { width: 380px; height: 380px; background: #2563eb; top: 35%; left: 55%; opacity: 0.28; animation-delay: -12s; }
 
 @keyframes float {
   0% { transform: translate(0, 0) scale(1); }
@@ -911,40 +916,120 @@ think::before {
 /* ─── REALTIME VOICE OVERLAY ("MODO VOZ LIVE") ────── */
 .voice-live-overlay {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  background: radial-gradient(circle at center, #0f0e1a 0%, #06060a 100%);
+  background: radial-gradient(circle at 50% 15%, rgba(245, 158, 11, 0.14) 0%, rgba(99, 102, 241, 0.2) 30%, rgba(13, 10, 38, 0.96) 70%, #050510 100%);
   z-index: 10000; display: none; flex-direction: column;
-  align-items: center; justify-content: space-between; padding: 50px 24px;
-  opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(25px);
+  align-items: center; justify-content: space-between; padding: 40px 24px;
+  opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(30px);
 }
 .voice-live-overlay.active { display: flex; opacity: 1; }
 .voice-live-header { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 500px; }
-.voice-live-status { font-size: 14px; font-weight: 700; color: #10b981; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1px; }
-.voice-live-close { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #fff; width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; transition: all 0.2s; font-size: 18px; }
-.voice-live-close:hover { background: rgba(239,68,68,0.3); border-color: #ef4444; transform: scale(1.05); }
+.voice-live-status { 
+  font-size: 13px; font-weight: 700; color: #fbbf24; display: flex; align-items: center; gap: 10px; 
+  text-transform: uppercase; letter-spacing: 1.2px; font-family: var(--font-display);
+}
+.voice-status-indicator {
+  position: relative; width: 12px; height: 12px; display: flex; align-items: center; justify-content: center;
+}
+.voice-status-indicator .status-core {
+  width: 8px; height: 8px; border-radius: 50%; background: #fbbf24;
+  box-shadow: 0 0 10px #fbbf24;
+}
+.voice-status-indicator .pulse-ring {
+  position: absolute; inset: -4px; border-radius: 50%; border: 1.5px solid #fbbf24;
+  animation: statusPulse 2s infinite cubic-bezier(0.24, 0, 0.38, 1);
+}
+@keyframes statusPulse { 0% { transform: scale(0.6); opacity: 1; } 100% { transform: scale(1.9); opacity: 0; } }
+
+.voice-live-close { 
+  background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--text-dim); 
+  width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
+  cursor: pointer; transition: all 0.25s ease;
+}
+.voice-live-close:hover { background: rgba(239,68,68,0.25); border-color: rgba(239,68,68,0.5); color: #fff; transform: scale(1.08); }
 
 .voice-visualizer-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; width: 100%; }
+
 .voice-plasma-orb {
   width: 190px; height: 190px; border-radius: 50%;
-  background: radial-gradient(circle, rgba(16,185,129,0.85) 0%, rgba(6,182,212,0.65) 45%, rgba(139,92,246,0.35) 80%, transparent 100%);
-  box-shadow: 0 0 65px rgba(16,185,129,0.45), inset 0 0 35px rgba(255,255,255,0.6);
-  transition: all 0.3s ease; animation: orbIdle 4s infinite ease-in-out;
+  background: radial-gradient(circle at 35% 35%, #fbbf24 0%, #d97706 25%, #7c3aed 60%, #1e1b4b 95%);
+  box-shadow: 0 0 70px rgba(245, 158, 11, 0.35), 0 0 100px rgba(124, 58, 237, 0.45), inset 0 0 35px rgba(255,255,255,0.6);
+  transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1); animation: orbIdle 4s infinite ease-in-out;
   display: flex; align-items: center; justify-content: center;
+  cursor: pointer; user-select: none;
+}
+.voice-plasma-orb.listening {
+  background: radial-gradient(circle at 35% 35%, #fef08a 0%, #f59e0b 28%, #3b82f6 68%, #1e1b4b 100%);
+  box-shadow: 0 0 95px rgba(245, 158, 11, 0.65), 0 0 130px rgba(59, 130, 246, 0.55), inset 0 0 45px rgba(255,255,255,0.9);
+  transform: scale(1.18);
+  animation: orbPulseListening 0.8s infinite alternate ease-in-out;
 }
 .voice-plasma-orb.thinking {
-  background: radial-gradient(circle, rgba(139,92,246,0.95) 0%, rgba(236,72,153,0.75) 50%, transparent 100%);
-  box-shadow: 0 0 85px rgba(139,92,246,0.65); animation: orbSpin 1.2s infinite linear;
+  background: radial-gradient(circle, #c084fc 0%, #6366f1 50%, #1e1b4b 100%);
+  box-shadow: 0 0 90px rgba(192, 132, 252, 0.65), 0 0 120px rgba(99, 102, 241, 0.5); 
+  animation: orbSpin 1.2s infinite linear;
 }
 .voice-plasma-orb.speaking {
-  background: radial-gradient(circle, rgba(236,72,153,0.95) 0%, rgba(6,182,212,0.85) 50%, rgba(16,185,129,0.5) 100%);
-  box-shadow: 0 0 110px rgba(236,72,153,0.75); animation: orbPulse 0.4s infinite alternate ease-in-out;
-  transform: scale(1.15);
+  background: radial-gradient(circle at 35% 35%, #f59e0b 0%, #ec4899 40%, #6366f1 80%, #0f172a 100%);
+  box-shadow: 0 0 110px rgba(245, 158, 11, 0.5), 0 0 130px rgba(236, 72, 153, 0.65); 
+  animation: orbPulse 0.4s infinite alternate ease-in-out;
+  transform: scale(1.14);
 }
-@keyframes orbIdle { 0%, 100% { transform: scale(1) translate(0, 0); } 50% { transform: scale(1.08) translate(0, -6px); box-shadow: 0 0 80px rgba(6,182,212,0.5); } }
+@keyframes orbIdle { 0%, 100% { transform: scale(1) translate(0, 0); } 50% { transform: scale(1.08) translate(0, -6px); box-shadow: 0 0 80px rgba(245, 158, 11, 0.4), 0 0 110px rgba(124, 58, 237, 0.4); } }
+@keyframes orbPulseListening { 0% { transform: scale(1.14); } 100% { transform: scale(1.24); filter: brightness(1.25); } }
 @keyframes orbSpin { 0% { transform: rotate(0deg) scale(0.95); } 50% { transform: rotate(180deg) scale(1.05); } 100% { transform: rotate(360deg) scale(0.95); } }
-@keyframes orbPulse { 0% { transform: scale(0.96); filter: brightness(1); } 100% { transform: scale(1.22); filter: brightness(1.35); } }
+@keyframes orbPulse { 0% { transform: scale(0.98); filter: brightness(1); } 100% { transform: scale(1.22); filter: brightness(1.35); } }
 
-.voice-live-subtitle { max-width: 520px; text-align: center; font-size: 17px; color: #fff; line-height: 1.5; min-height: 54px; font-weight: 500; margin-top: 38px; padding: 0 16px; text-shadow: 0 2px 10px rgba(0,0,0,0.6); }
-.voice-live-hint { font-size: 12.5px; color: var(--text-dim); text-align: center; margin-top: 14px; font-family: var(--font-mono); font-weight: 500; }
+.voice-live-subtitle { 
+  max-width: 520px; text-align: center; font-size: 16.5px; color: #fff; line-height: 1.55; 
+  min-height: 52px; font-weight: 500; margin-top: 36px; padding: 0 16px; 
+  text-shadow: 0 2px 12px rgba(0,0,0,0.7); 
+}
+.voice-live-hint { 
+  font-size: 13px; color: #f59e0b; text-align: center; margin-top: 10px; 
+  font-family: var(--font-display); font-weight: 600; letter-spacing: 0.3px;
+}
+
+/* Push to Talk Button in Voice Live Overlay */
+.voice-ptt-btn {
+  width: 100%; max-width: 380px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(99, 102, 241, 0.2) 100%);
+  border: 1.5px solid rgba(245, 158, 11, 0.4);
+  color: #fff; padding: 16px 24px; border-radius: 20px;
+  display: flex; align-items: center; justify-content: center; gap: 14px;
+  cursor: pointer; user-select: none;
+  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  -webkit-tap-highlight-color: transparent;
+}
+.voice-ptt-btn:hover {
+  border-color: rgba(245, 158, 11, 0.7);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(99, 102, 241, 0.3) 100%);
+  box-shadow: 0 12px 40px rgba(245, 158, 11, 0.25);
+  transform: translateY(-2px);
+}
+.voice-ptt-btn.holding {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #7c3aed 100%);
+  border-color: #fef08a;
+  transform: scale(0.97);
+  box-shadow: 0 0 45px rgba(245, 158, 11, 0.7), inset 0 0 15px rgba(255, 255, 255, 0.5);
+  color: #000;
+}
+.voice-ptt-btn.holding .voice-ptt-title { color: #000; font-weight: 800; }
+.voice-ptt-btn.holding .voice-ptt-sub { color: rgba(0,0,0,0.8); }
+.voice-ptt-btn.holding .voice-ptt-icon-wrap svg { stroke: #000; }
+
+.voice-ptt-icon-wrap {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+.voice-ptt-btn.holding .voice-ptt-icon-wrap {
+  background: rgba(0, 0, 0, 0.15); border-color: rgba(0, 0, 0, 0.25);
+}
+.voice-ptt-labels { display: flex; flex-direction: column; text-align: left; }
+.voice-ptt-title { font-size: 14.5px; font-weight: 700; font-family: var(--font-display); letter-spacing: 0.2px; }
+.voice-ptt-sub { font-size: 11.5px; color: var(--text-dim); margin-top: 1px; }
 
 /* ─── CONTEXT WARNING BENCHMARK ───────────────────── */
 .context-alert-bar {
@@ -1235,21 +1320,36 @@ think::before {
 <div id="voiceLiveOverlay" class="voice-live-overlay">
   <div class="voice-live-header">
     <div class="voice-live-status" id="voiceLiveStatus">
-      <span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#10b981;"></span>
-      <span id="voiceLiveStatusText">🎙️ Escuchando...</span>
+      <div class="voice-status-indicator" id="voiceStatusIndicator">
+        <span class="pulse-ring"></span>
+        <span class="status-core"></span>
+      </div>
+      <span id="voiceLiveStatusText">Modo Voz Activo</span>
     </div>
-    <button class="voice-live-close" onclick="toggleVoiceMode()" title="Salir del Modo Voz">✕</button>
+    <button class="voice-live-close" onclick="toggleVoiceMode()" title="Salir del Modo Voz" aria-label="Cerrar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+    </button>
   </div>
   <div class="voice-visualizer-container">
-    <div class="voice-plasma-orb" id="voicePlasmaOrb">
-      <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.85;"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+    <div class="voice-plasma-orb" id="voicePlasmaOrb" title="Toca o mantén presionado para hablar">
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.95; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
     </div>
-    <div class="voice-live-subtitle" id="voiceLiveSubtitle">Habla con libertad... YZAI te responderá en tiempo real</div>
-    <div class="voice-live-hint" id="voiceLiveHint">El sistema enviará automáticamente en cuanto detecte silencio</div>
+    <div class="voice-live-subtitle" id="voiceLiveSubtitle">Habla a tu ritmo, presiona sin soltar para hablar y suelta para enviar.</div>
+    <div class="voice-live-hint" id="voiceLiveHint">Presiona sin soltar para hablar y suelta el botón para enviar</div>
   </div>
-  <div style="width:100%; max-width:500px; display:flex; justify-content:center; gap:16px;">
-    <button onclick="toggleMic()" id="voiceOverlayMicBtn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); color:#fff; padding:12px 28px; border-radius:100px; font-size:14px; font-weight:600; cursor:pointer; transition:all 0.2s;">
-      🎙️ Pausar Micrófono
+  <div style="width:100%; max-width:500px; display:flex; justify-content:center; padding-bottom:12px;">
+    <button id="voiceOverlayMicBtn" class="voice-ptt-btn">
+      <div class="voice-ptt-icon-wrap">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+          <line x1="12" y1="19" x2="12" y2="22"/>
+        </svg>
+      </div>
+      <div class="voice-ptt-labels">
+        <span class="voice-ptt-title" id="voicePttTitle">Mantén presionado para hablar</span>
+        <span class="voice-ptt-sub" id="voicePttSub">Suelta el botón para enviar tu mensaje</span>
+      </div>
     </button>
   </div>
 </div>
@@ -1493,6 +1593,7 @@ async function init() {
   await discoverEndpoint();
   await loadModels();
   checkServicesHealth();
+  setupPushToTalk();
   setInterval(checkServicesHealth, 30000);
   // Precarga silenciosa del modelo en VRAM al abrir la interfaz
   if (selectedModel) {
@@ -2531,8 +2632,60 @@ function updateVoiceLiveUI(state, statusText, subtitleText) {
   if (!orb) return;
   
   orb.className = 'voice-plasma-orb';
-  if (state === 'thinking') orb.classList.add('thinking');
+  if (state === 'listening') orb.classList.add('listening');
+  else if (state === 'thinking') orb.classList.add('thinking');
   else if (state === 'speaking') orb.classList.add('speaking');
+}
+
+let isHoldingPushToTalk = false;
+
+function setupPushToTalk() {
+  const btn = document.getElementById('voiceOverlayMicBtn');
+  const orb = document.getElementById('voicePlasmaOrb');
+  if (!btn) return;
+
+  function onPointerDown(e) {
+    if (e) e.preventDefault();
+    if (isStreaming) return;
+    if (synthesis && synthesis.speaking) synthesis.cancel();
+    isHoldingPushToTalk = true;
+    btn.classList.add('holding');
+    const pttTitle = document.getElementById('voicePttTitle');
+    const pttSub = document.getElementById('voicePttSub');
+    if (pttTitle) pttTitle.textContent = 'Escuchando tu voz...';
+    if (pttSub) pttSub.textContent = 'Suelta el botón para enviar';
+    updateVoiceLiveUI('listening', 'Escuchando...', 'Habla con libertad, suelta el botón para enviar...');
+    startMic();
+  }
+
+  function onPointerUp(e) {
+    if (!isHoldingPushToTalk) return;
+    isHoldingPushToTalk = false;
+    btn.classList.remove('holding');
+    const pttTitle = document.getElementById('voicePttTitle');
+    const pttSub = document.getElementById('voicePttSub');
+    if (pttTitle) pttTitle.textContent = 'Mantén presionado para hablar';
+    if (pttSub) pttSub.textContent = 'Suelta el botón para enviar tu mensaje';
+    
+    stopMic();
+    const promptInput = document.getElementById('prompt');
+    if (promptInput && promptInput.value.trim() && !isStreaming) {
+      setTimeout(() => {
+        sendMessage();
+      }, 150);
+    }
+  }
+
+  btn.addEventListener('mousedown', onPointerDown);
+  btn.addEventListener('touchstart', onPointerDown, { passive: false });
+
+  window.addEventListener('mouseup', onPointerUp);
+  window.addEventListener('touchend', onPointerUp);
+
+  if (orb) {
+    orb.addEventListener('mousedown', onPointerDown);
+    orb.addEventListener('touchstart', onPointerDown, { passive: false });
+  }
 }
 
 function initSpeechRecognition() {
@@ -2555,9 +2708,7 @@ function initSpeechRecognition() {
       p.placeholder = "Escuchando tu voz... habla ahora";
       autoResize(p);
     }
-    const overlayMicBtn = document.getElementById('voiceOverlayMicBtn');
-    if (overlayMicBtn) overlayMicBtn.textContent = '⏸️ Pausar Micrófono';
-    updateVoiceLiveUI('listening', '🎙️ Escuchando tus palabras...', 'Habla a tu ritmo, el mensaje se enviará al detectar silencio...');
+    updateVoiceLiveUI('listening', 'Escuchando...', 'Habla con libertad, suelta para enviar...');
   };
   rec.onresult = (event) => {
     let transcript = '';
@@ -2571,10 +2722,10 @@ function initSpeechRecognition() {
       autoResize(input);
     }
     
-    updateVoiceLiveUI('listening', '🎙️ Capturándote en vivo...', `"${transcript}"`);
+    updateVoiceLiveUI('listening', 'Capturando voz...', `"${transcript}"`);
     
-    // Si la frase finalizó en Modo Voz, auto-enviar de inmediato
-    if (event.results[0].isFinal && isVoiceModeActive && !isStreaming) {
+    // Si no está en Push-to-Talk y la frase finalizó, auto-enviar
+    if (!isHoldingPushToTalk && event.results[0].isFinal && isVoiceModeActive && !isStreaming) {
       setTimeout(() => {
         if (input.value.trim() !== '' && !isStreaming) sendMessage();
       }, 550);
@@ -2619,8 +2770,6 @@ function stopMic() {
     if (!p.value) p.placeholder = "Type a message...";
     autoResize(p);
   }
-  const overlayMicBtn = document.getElementById('voiceOverlayMicBtn');
-  if (overlayMicBtn) overlayMicBtn.textContent = '🎙️ Activar Micrófono';
   if (recognition) {
     try { recognition.stop(); } catch (e) { /* silent */ }
   }
@@ -2636,7 +2785,7 @@ function toggleVoiceMode() {
     if (txt) txt.textContent = 'Modo Voz: ON';
     if (overlay) overlay.classList.add('active');
     VoiceQueue.clear();
-    startMic();
+    updateVoiceLiveUI('idle', 'Modo Voz Activo', 'Presiona sin soltar el botón para hablar y suelta para enviar.');
   } else {
     if (btn) btn.classList.remove('active');
     if (txt) txt.textContent = 'Modo Voz';
