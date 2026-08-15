@@ -1397,8 +1397,7 @@ const ICONS = {
 };
 
 const MODEL_META = {
-  'qwen36-yzai:latest': { badge:'Pro', cls:'badge-purple', desc:'@yepzhi AI, 27B MoE.', speed:'~8 t/s' },
-  'moondream:latest': { badge:'Visión', cls:'badge-cyan', desc:'Moondream Vision (Análisis de imágenes ultrarrápido).', speed:'~35 t/s' }
+  'qwen36-yzai:latest': { badge:'Pro', cls:'badge-purple', desc:'@yepzhi AI, 27B MoE.', speed:'~8 t/s' }
 };
 
 // ── CONFIG & STATE ─────────────────────────────────────────
@@ -1654,7 +1653,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · 27B MoE (8K)`);
+    setStatus(true, `Server Live · @yepzhi AI, 27B MoE (8K)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -2223,13 +2222,10 @@ async function sendMessage() {
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom(true);
 
-  // ── Vision Perception Bridge (Moondream OCR -> 27B MoE Deep Reasoning) ──
+  // ── Vision Perception Bridge (Behind the scenes OCR/Vision -> 27B MoE Deep Reasoning) ──
   if (imageAttached) {
-    const statusMsg = isRxModeActive 
-      ? 'Procesando estudio radiológico y extrayendo semiología visual…' 
-      : 'Extrayendo OCR y analizando imagen visualmente…';
-    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> ${statusMsg}</span>`;
-    document.getElementById('token-count').textContent = isRxModeActive ? 'Analizando imagenología médica...' : 'Extracting OCR & visual details...';
+    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Analizando...</span>`;
+    document.getElementById('token-count').textContent = 'Analizando...';
     
     let visionInstruction = 'Transcribe with high precision all text, code, tables, data, diagrams, and visual objects in this image. If it contains code or an error, copy it verbatim.';
     if (isRxModeActive) {
@@ -2261,13 +2257,14 @@ async function sendMessage() {
             ? `[DATOS DE IMAGENOLOGÍA & REGISTRO VISUAL EXTRAÍDO DEL ESTUDIO ADJUNTO]\n${visualText}\n\n[INSTRUCCIÓN]: El usuario ha adjuntado el estudio de imagenología médica descrito arriba. Procede con el informe de análisis estructurado doctoral completo siguiendo la estructura obligatoria de 8 puntos.`
             : `[CONTENIDO VISUAL & OCR EXTRAÍDO DE LA IMAGEN ADJUNTA]\n${visualText}\n\n[INSTRUCCIÓN]: El usuario adjuntó una imagen con el contenido descrito arriba. Utiliza toda tu capacidad analítica y de razonamiento profundo para responder detalladamente a su consulta.`;
           
-          payload[payload.length - 1].content = `${visionBlock}\n\n---\nDatos clínicos / Consulta del usuario: ${payload[payload.length - 1].content}`;
+          payload[payload.length - 1].content = `${visionBlock}\n\n---\nConsulta / Datos clínicos: ${payload[payload.length - 1].content}`;
           delete payload[payload.length - 1].images;
         }
       }
     } catch(vErr) {
       console.warn('[vision-pipeline]', vErr);
     }
+    document.getElementById('token-count').textContent = 'Generando...';
     bubble.innerHTML = '<span class="cursor"></span>';
   }
 
