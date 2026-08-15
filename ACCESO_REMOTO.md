@@ -6,57 +6,81 @@ Este documento contiene toda la información de red, credenciales de SSH, puerto
 
 ## 1. Conexión SSH (Acceso por Terminal)
 
-En tu Mac (`~/.ssh/config`) existen 3 alias configurados para conectarte al Mini PC según la ubicación:
+En tu Mac (`~/.ssh/config`) están configurados los alias para conectarse al Mini PC **desde cualquier lugar** o dentro de la red local:
 
-### 🌐 A. Acceso Global Remoto vía Cloudflare Tunnel (Recomendado fuera de casa)
-Funciona desde cualquier lugar con conexión a internet, sin importar si estás en WiFi pública, datos móviles o fuera de la red local.
-
-```bash
-ssh yzai-cf
-```
-
-* Configuración interna en `~/.ssh/config`:
-  ```sshconfig
-  Host yzai-cf
-      HostName ssh.yzai.yepzhi.com
-      User yepzhi
-      ProxyCommand cloudflared access ssh --hostname %h
-      IdentityFile ~/.ssh/id_ed25519
-      StrictHostKeyChecking no
-  ```
-
----
-
-### 🔒 B. Acceso Remoto vía Tailscale Mesh VPN
-Para conectarte cuando tienes la app de Tailscale activa en tu Mac o iPhone.
+### 🌐 A. Acceso Global Remoto vía Cloudflare Tunnel (Recomendado — En cualquier lugar)
+Funciona desde cualquier parte del mundo (casa, oficina, datos móviles o WiFi pública) sin necesidad de VPN ni Tailscale:
 
 ```bash
 ssh yzai
+# O explícitamente:
+ssh yzai-cf
 ```
 
-* IP de Tailscale: `100.91.157.110` (o `100.x.x.x`)
-* Usuario: `yepzhi`
-* Configuración interna en `~/.ssh/config`:
+* **Hostname de Cloudflare:** `ssh-yzai.yepzhi.com` (Subdominio de 1 nivel cubierto por el SSL Universal de Cloudflare).
+* **Configuración en `~/.ssh/config` del Mac:**
   ```sshconfig
   Host yzai
-      HostName 100.91.157.110
+      HostName ssh-yzai.yepzhi.com
       User yepzhi
+      ProxyCommand /opt/homebrew/bin/cloudflared access ssh --hostname %h
       IdentityFile ~/.ssh/id_ed25519
-      ProxyCommand nc -X 5 -x localhost:1055 %h %p
+      StrictHostKeyChecking no
+
+  Host yzai-cf
+      HostName ssh-yzai.yepzhi.com
+      User yepzhi
+      ProxyCommand /opt/homebrew/bin/cloudflared access ssh --hostname %h
+      IdentityFile ~/.ssh/id_ed25519
       StrictHostKeyChecking no
   ```
 
 ---
 
-### 🏠 C. Acceso en Red Local (LAN / WiFi de Casa)
-Para conectarte cuando estés en la misma red WiFi/LAN local.
+### 🏠 B. Acceso en Red Local (LAN / WiFi de Casa)
+Para conectarte cuando tu Mac y el Mini PC estén en la misma red local:
 
 ```bash
+# Vía mDNS:
 ssh yzai-local
+
+# Vía IP directa:
+ssh yzai-ip
 ```
 
-* Host local: `yzai.local` (o IP `192.168.1.230`)
-* Usuario: `yepzhi`
+* **Configuración en `~/.ssh/config`:**
+  ```sshconfig
+  Host yzai-local
+      HostName yzai.local
+      User yepzhi
+      IdentityFile ~/.ssh/id_ed25519
+      StrictHostKeyChecking no
+
+  Host yzai-ip
+      HostName 192.168.1.127
+      User yepzhi
+      IdentityFile ~/.ssh/id_ed25519
+      StrictHostKeyChecking no
+  ```
+
+---
+
+### 🔒 C. Acceso vía Tailscale Mesh VPN
+Para conectarte cuando ambas máquinas tengan Tailscale activo:
+
+```bash
+ssh yzai-tailscale
+```
+
+* **IP Tailscale:** `100.91.157.110`
+* **Configuración en `~/.ssh/config`:**
+  ```sshconfig
+  Host yzai-tailscale
+      HostName 100.91.157.110
+      User yepzhi
+      IdentityFile ~/.ssh/id_ed25519
+      StrictHostKeyChecking no
+  ```
 
 ---
 
@@ -70,7 +94,7 @@ ssh yzai-local
 | **Ollama API** | `http://api-yzai.yepzhi.com` | API REST para Qwen3.6-35B |
 | **ComfyUI** | `http://img-yzai.yepzhi.com` | Generación de imágenes/video (FLUX.2 Klein) |
 | **Search Proxy** | `http://search-yzai.yepzhi.com` | Proxy de búsqueda DuckDuckGo |
-| **SSH Tunnel** | `ssh.yzai.yepzhi.com` | Enrutamiento SSH vía Cloudflare |
+| **SSH Tunnel** | `ssh-yzai.yepzhi.com` | Enrutamiento SSH vía Cloudflare |
 
 ### 🏠 Red Local / SSH Directo
 | Servicio | Puerto Local | URL Local |
