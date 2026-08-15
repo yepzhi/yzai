@@ -1176,7 +1176,7 @@ think::before {
       </div>
     </div>
     <div id="contextAlertBar" class="context-alert-bar">
-      <span id="contextAlertText">⚠️ Alerta de Memoria Contextual</span>
+      <span id="contextAlertText">Alerta de Memoria Contextual</span>
       <button onclick="newChat()" style="background:none;border:none;color:#fff;text-decoration:underline;font-weight:700;cursor:pointer;font-size:12px;">Nuevo Chat</button>
     </div>
     <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Context: 8K · 8 Slots Ready</div>
@@ -1265,8 +1265,8 @@ think::before {
     <!-- HARDWARE & STATUS (READONLY) -->
     <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:14px; margin-bottom:18px;">
       <div style="font-size:11px; font-weight:700; color:var(--text-dim); text-transform:uppercase; letter-spacing:0.6px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
-        <span>⚡ Estado del Servidor (Mini PC)</span>
-        <span style="font-size:9.5px; padding:2px 8px; border-radius:6px; background:rgba(16,185,129,0.15); color:var(--green); border:1px solid rgba(16,185,129,0.3); font-weight:600;">GPU ONLINE 24/7</span>
+        <span>Estado del Servidor (Mini PC)</span>
+        <span style="font-size:9.5px; padding:2px 8px; border-radius:6px; background:rgba(16,185,129,0.15); color:var(--green); border:1px solid rgba(16,185,129,0.3); font-weight:600;">ONLINE 24/7</span>
       </div>
       
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:12px;">
@@ -1570,7 +1570,7 @@ async function checkServicesHealth(forceCheck = false) {
 
   if (ollamaOk) {
     if (topDot) { topDot.style.background = '#3FB950'; topDot.title = 'Server Live · 27B MoE Ready'; }
-    if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">🟢 27B MoE: Ready</span>';
+    if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">27B MoE: Ready</span>';
     if (drawerDot) drawerDot.style.background = '#3FB950';
     if (drawerText) drawerText.innerHTML = 'AI Server <strong style="color:#3FB950">operational and ready</strong>';
   } else {
@@ -2451,16 +2451,16 @@ async function sendMessage() {
     setStreaming(false);
 
     if (e.name === 'AbortError' || (abortCtrl && abortCtrl.signal.aborted) || !isStreaming) {
-      const stopAlert = `🛑 Respuesta detenida por el usuario (Stopped by user)`;
+      const stopAlert = 'Respuesta detenida por el usuario';
       if (typeof targetText !== 'undefined' && targetText && targetText.trim()) {
-        if (!targetText.includes('Stopped by user')) {
+        if (!targetText.includes(stopAlert)) {
           targetText += `\n\n*(${stopAlert})*`;
           renderMd(bubble, targetText, targetThinking);
           messages.push({ role:'ai', content:targetText });
           saveCurrentConv();
         }
       } else {
-        bubble.innerHTML = `<span style="color:var(--yellow);display:inline-flex;align-items:center;gap:8px;font-weight:500;background:rgba(255, 170, 0, 0.15);padding:8px 12px;border-radius:6px;border:1px solid var(--yellow);">${stopAlert}</span>`;
+        bubble.innerHTML = `<span style="color:var(--yellow);display:inline-flex;align-items:center;gap:8px;font-weight:500;background:rgba(255, 170, 0, 0.12);padding:8px 12px;border-radius:8px;border:1px solid rgba(255, 170, 0, 0.3);">${stopAlert}</span>`;
         messages.push({ role:'ai', content: `(${stopAlert})` });
         saveCurrentConv();
       }
@@ -2470,8 +2470,8 @@ async function sendMessage() {
 
     const isOfflineErr = e.message.includes('Failed to fetch') || e.message.includes('502') || e.message.includes('521') || e.message.includes('522') || e.message.includes('523') || e.message.includes('524');
     const errorMsg = isOfflineErr 
-      ? 'AI Server (MiniPC) is offline or unresponsive. Please make sure it is powered on.'
-      : `Connection error: ${esc(e.message)}`;
+      ? 'Servidor desconectado o no responde. Por favor verifica que esté encendido.'
+      : `Error de conexión: ${esc(e.message)}`;
 
     if (targetText && targetText.trim()) {
       targetText += `\n\n*(${errorMsg})*`;
@@ -2481,7 +2481,7 @@ async function sendMessage() {
     } else {
       bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${errorMsg}</span>`;
     }
-    document.getElementById('token-count').textContent = isOfflineErr ? 'Server offline / disconnected' : 'Response error';
+    document.getElementById('token-count').textContent = isOfflineErr ? 'Servidor desconectado' : 'Error en respuesta';
   }
 }
 
@@ -2493,16 +2493,10 @@ function stopGeneration() {
   if (typeof stopMic === 'function') stopMic();
   setStreaming(false);
 
-  const stopAlert = `🛑 Respuesta detenida por el usuario (Stopped by user)`;
+  const stopAlert = 'Respuesta detenida por el usuario';
   const tokenEl = document.getElementById('token-count');
   if (tokenEl) {
     tokenEl.innerHTML = `<span style="color:var(--yellow);font-weight:600;">${stopAlert}</span>`;
-  }
-
-  const msgs = document.querySelectorAll('#messages .msg-bubble');
-  const lastBubble = msgs[msgs.length - 1];
-  if (lastBubble && (lastBubble.innerHTML.includes('spin-svg') || lastBubble.innerHTML.includes('Procesando') || lastBubble.innerHTML.includes('Cargando modelo') || lastBubble.innerHTML.trim() === '')) {
-    lastBubble.innerHTML = `<span style="color:var(--yellow);display:inline-flex;align-items:center;gap:8px;font-weight:500;background:rgba(255, 170, 0, 0.15);padding:8px 12px;border-radius:6px;border:1px solid var(--yellow);">${stopAlert}</span>`;
   }
 }
 
@@ -2532,11 +2526,11 @@ function checkContextUsage() {
   if (percent >= 90) {
     alertBar.className = 'context-alert-bar red';
     alertBar.style.display = 'flex';
-    alertText.innerHTML = `🔴 <strong>Memoria al límite (${percent}% de 8K)</strong>: Los mensajes antiguos se comprimirán. Te recomendamos iniciar un <em>New Chat</em>.`;
+    alertText.innerHTML = `<strong>Memoria al límite (${percent}% de 8K)</strong>: Los mensajes antiguos se comprimirán. Te recomendamos iniciar un <em>Nuevo Chat</em>.`;
   } else if (percent >= 70) {
     alertBar.className = 'context-alert-bar amber';
     alertBar.style.display = 'flex';
-    alertText.innerHTML = `⚠️ <strong>Memoria cerca del límite (${percent}% de 8K)</strong>: Sugerimos iniciar un <em>New Chat</em> para máxima velocidad.`;
+    alertText.innerHTML = `<strong>Memoria cerca del límite (${percent}% de 8K)</strong>: Sugerimos iniciar un <em>Nuevo Chat</em> para máxima velocidad.`;
   } else {
     alertBar.style.display = 'none';
   }
@@ -2569,7 +2563,7 @@ const VoiceQueue = {
 
     if (!this.queue.length) {
       if (this.isStreamComplete && !isStreaming && isVoiceModeActive) {
-        updateVoiceLiveUI('listening', '🟢 Listo para escucharte...', 'Reabriendo micrófono...');
+        updateVoiceLiveUI('listening', 'Listo para escucharte', 'Reabriendo micrófono...');
         setTimeout(() => {
           if (!isStreaming && isVoiceModeActive && !this.isPlaying && (!synthesis || !synthesis.speaking)) {
             startMic();
