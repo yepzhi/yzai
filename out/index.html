@@ -799,18 +799,38 @@ think::before {
   box-shadow: 0 0 14px rgba(16,185,129,0.25);
 }
 
-.rx-mode-pill {
-  display: flex; align-items: center; gap: 6px;
-  background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.25);
-  padding: 6px 12px; border-radius: 100px; color: #38bdf8;
-  font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
-  margin-right: 6px; font-family: var(--font-body);
+.img-phd-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-dim, #cbd5e1);
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: var(--font-body);
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  white-space: nowrap;
+  margin-right: 4px;
+  flex-shrink: 0;
 }
-.rx-mode-pill:hover { background: rgba(6, 182, 212, 0.18); border-color: rgba(6, 182, 212, 0.5); color: #fff; transform: translateY(-1px); }
-.rx-mode-pill.active {
-  background: linear-gradient(135deg, rgba(6, 182, 212, 0.3) 0%, rgba(59, 130, 246, 0.3) 100%);
-  border-color: #38bdf8; color: #fff;
-  box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
+.img-phd-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+.img-phd-btn.active {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #10b981;
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+}
+.img-phd-btn.active svg {
+  stroke: #10b981;
 }
 
 .input-hint {
@@ -917,8 +937,8 @@ think::before {
   }
   .model-pill-sub { display: none !important; }
   .model-pill-name { font-size: 12.5px; line-height: 1.2; }
-  .voice-mode-pill span, .rx-mode-pill span { display: none; }
-  .voice-mode-pill, .rx-mode-pill { 
+  .voice-mode-pill span { display: none; }
+  .voice-mode-pill { 
     width: 38px; height: 38px; padding: 0; justify-content: center; 
     border-radius: 14px; margin-right: 2px;
   }
@@ -1142,11 +1162,6 @@ think::before {
       <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
     </div>
 
-    <button class="rx-mode-pill" id="rxModeBtn" onclick="toggleRxMode()" title="Activar Modo Imagenología RX (Análisis Experto de Radiografías, Tomografías, Resonancias y Estudios Médicos)">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="3"/></svg>
-      <span id="rxModeText">Imagen RX</span>
-    </button>
-
     <button class="voice-mode-pill" id="voiceModeBtn" onclick="toggleVoiceMode()" title="Activar Modo Voz (Conversación continua sin manos con micrófono automático y altavoz TTS)">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
       <span id="voiceModeText">Modo Voz</span>
@@ -1208,6 +1223,10 @@ think::before {
       <div class="attach-menu-wrapper" style="position:relative; display:flex; align-items:center;">
         <button class="attach-btn" id="attachBtn" onclick="toggleAttachMenu(event)" aria-label="Attach" title="Adjuntar Archivos y Visión" style="color:var(--text-muted); transition: color 0.2s;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <button class="img-phd-btn" id="imgPhdBtn" onclick="toggleRxMode()" title="Activar / Desactivar Modo Imagenología Médica (PhD)">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/></svg>
+          <span>Img PhD mode</span>
         </button>
         <div class="attach-menu" id="attachMenu">
           <div class="attach-menu-header">
@@ -2115,30 +2134,27 @@ let isRxModeActive = false;
 
 function toggleRxMode(forceVal) {
   isRxModeActive = typeof forceVal === 'boolean' ? forceVal : !isRxModeActive;
-  const btn = document.getElementById('rxModeBtn');
-  const txt = document.getElementById('rxModeText');
+  const btn = document.getElementById('imgPhdBtn');
   const p = document.getElementById('prompt');
+  const tokenEl = document.getElementById('token-count');
   
   if (isRxModeActive) {
     if (btn) btn.classList.add('active');
-    if (txt) txt.textContent = 'RX Activo';
     if (p) {
-      p.placeholder = 'Adjunta una imagen radiológica o estudio médico (Rx, TC, RM, Ecografía, PDF)...';
+      p.placeholder = 'Modo Img PhD activo: adjunta estudio médico o escribe tu consulta...';
       autoResize(p);
     }
-    const tokenEl = document.getElementById('token-count');
     if (tokenEl && !currentImageBase64 && !currentAttachedDoc) {
-      tokenEl.innerHTML = '<span style="color:var(--cyan);font-weight:600;">Modo Imagenología RX activo · Adjunta una imagen o PDF</span>';
-    }
-    if (!currentImageBase64 && !currentAttachedDoc) {
-      triggerFileInput('image/*,application/pdf');
+      tokenEl.innerHTML = '<span style="color:var(--green);font-weight:600;">Modo Img PhD activo · Adjunta imagen o PDF</span>';
     }
   } else {
     if (btn) btn.classList.remove('active');
-    if (txt) txt.textContent = 'Imagen RX';
-    if (p && p.placeholder.includes('radiológica')) {
+    if (p && p.placeholder.includes('Img PhD')) {
       p.placeholder = 'Type a message...';
       autoResize(p);
+    }
+    if (tokenEl && tokenEl.innerHTML.includes('Modo Img PhD')) {
+      tokenEl.textContent = 'Context: 8K · 8 Slots Ready';
     }
   }
 }
