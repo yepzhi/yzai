@@ -791,12 +791,26 @@ think::before {
   background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
   padding: 6px 12px; border-radius: 100px; color: var(--text-dim);
   font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
-  margin-right: 8px; font-family: var(--font-sans);
+  margin-right: 6px; font-family: var(--font-sans);
 }
 .voice-mode-pill:hover { background: rgba(255,255,255,0.09); color: #fff; transform: translateY(-1px); }
 .voice-mode-pill.active {
   background: rgba(16,185,129,0.18); border-color: rgba(16,185,129,0.5); color: #10b981;
   box-shadow: 0 0 14px rgba(16,185,129,0.25);
+}
+
+.rx-mode-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(6, 182, 212, 0.08); border: 1px solid rgba(6, 182, 212, 0.25);
+  padding: 6px 12px; border-radius: 100px; color: #38bdf8;
+  font-size: 12px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+  margin-right: 6px; font-family: var(--font-body);
+}
+.rx-mode-pill:hover { background: rgba(6, 182, 212, 0.18); border-color: rgba(6, 182, 212, 0.5); color: #fff; transform: translateY(-1px); }
+.rx-mode-pill.active {
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.3) 0%, rgba(59, 130, 246, 0.3) 100%);
+  border-color: #38bdf8; color: #fff;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.4);
 }
 
 .input-hint {
@@ -903,8 +917,8 @@ think::before {
   }
   .model-pill-sub { display: none !important; }
   .model-pill-name { font-size: 12.5px; line-height: 1.2; }
-  .voice-mode-pill span { display: none; }
-  .voice-mode-pill { 
+  .voice-mode-pill span, .rx-mode-pill span { display: none; }
+  .voice-mode-pill, .rx-mode-pill { 
     width: 38px; height: 38px; padding: 0; justify-content: center; 
     border-radius: 14px; margin-right: 2px;
   }
@@ -1128,6 +1142,11 @@ think::before {
       <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
     </div>
 
+    <button class="rx-mode-pill" id="rxModeBtn" onclick="toggleRxMode()" title="Activar Modo Imagenología RX (Análisis Experto de Radiografías, Tomografías, Resonancias y Estudios Médicos)">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="3"/></svg>
+      <span id="rxModeText">Imagen RX</span>
+    </button>
+
     <button class="voice-mode-pill" id="voiceModeBtn" onclick="toggleVoiceMode()" title="Activar Modo Voz (Conversación continua sin manos con micrófono automático y altavoz TTS)">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
       <span id="voiceModeText">Modo Voz</span>
@@ -1192,9 +1211,18 @@ think::before {
         </button>
         <div class="attach-menu" id="attachMenu">
           <div class="attach-menu-header">
-            <span>Archivos Admitidos</span>
-            <span class="attach-menu-badge">Visión + Docs + Código</span>
+            <span class="attach-menu-badge">Visión + Docs + RX</span>
           </div>
+          <div class="attach-menu-item" onclick="toggleRxMode(true); triggerFileInput('image/*,application/pdf');">
+            <div class="attach-item-icon" style="background:rgba(6,182,212,0.2);color:#38bdf8;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="3"/></svg>
+            </div>
+            <div class="attach-item-info">
+              <div class="attach-item-title" style="color:#38bdf8;font-weight:700;">Modo Imagenología RX (PhD)</div>
+              <div class="attach-item-desc">Radiografías, TAC, RM, Ecografías o Informes PDF Médicos</div>
+            </div>
+          </div>
+          <div class="attach-menu-divider"></div>
           <div class="attach-menu-item" onclick="triggerFileInput('image/*')">
             <div class="attach-item-icon" style="background:rgba(236,72,153,0.15);color:var(--secondary);">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
@@ -2016,20 +2044,125 @@ function extractSearchQuery(text) {
   return q || text;
 }
 
+// ── RX IMAGING DOCTOR MODE SYSTEM PROMPT ──────────────────
+const RX_DOCTOR_SYSTEM_PROMPT = `# ROL DEL SISTEMA: Analista Experto en Imagenología Médica (Nivel Doctorado/Investigación)
+
+## 1. Identidad y postura profesional
+Actúas como un especialista en imagenología médica y física radiológica con formación doctoral (PhD) y trayectoria en investigación aplicada. Tu análisis debe reflejar el rigor de un investigador senior en radiología/imagenología: preciso, sistemático, jerarquizado por probabilidad diagnóstica y siempre consciente de sus propios límites de certeza.
+No adoptas un tono divulgativo ni conversacional casual. Respondes como lo haría un informe de interconsulta entre especialistas: técnico, estructurado y verificable.
+
+## 2. Alcance de la modalidad de imagen
+Debes ser capaz de adaptar tu marco de análisis según la modalidad recibida:
+- Radiografía convencional (Rx)
+- Tomografía computarizada (TC)
+- Resonancia magnética (RM)
+- Ultrasonido / ecografía
+- Medicina nuclear (gammagrafía, PET)
+- Fluoroscopia
+- Mamografía / densitometría ósea
+- Imágenes de radiofrecuencia (RF) asociadas a RM u otros sistemas de adquisición
+
+Si la modalidad no es identificable con certeza a partir de la imagen o los metadatos proporcionados, decláralo explícitamente antes de continuar el análisis.
+
+## 3. Variables obligatorias a considerar en cada análisis
+### 3.1 Variables técnicas de adquisición
+- Proyección/incidencia (AP, PA, lateral, oblicua, axial, coronal, sagital, etc.)
+- Parámetros técnicos disponibles (kVp, mAs, secuencia de pulso, ventana/nivel, etc.)
+- Calidad técnica de la imagen: contraste, nitidez, penetración, rotación, artefactos, presencia de elementos externos (catéteres, prótesis, marcapasos, etc.)
+- Limitaciones técnicas que puedan afectar la sensibilidad del análisis
+
+### 3.2 Variables del contexto clínico (solo si son proporcionadas)
+- Edad, sexo, biotipo
+- Motivo del estudio / sospecha clínica
+- Antecedentes relevantes aportados por el usuario
+
+Nunca asumas ni inventes datos clínicos que no te hayan sido proporcionados. Si son necesarios para afinar el diagnóstico diferencial y no están disponibles, indícalo como una limitante del análisis.
+
+### 3.3 Variables anatómicas y semiológicas
+- Región anatómica y estructuras visibles
+- Densidad/atenuación/intensidad de señal según la modalidad
+- Morfología, tamaño, bordes, localización y relación con estructuras adyacentes
+- Simetría/asimetría respecto a estructuras contralaterales u homólogas
+- Presencia, ausencia o alteración de patrones anatómicos esperados
+
+## 4. Estructura obligatoria de la respuesta
+Cada análisis debe entregarse en este formato:
+1. **Modalidad y proyección identificada**
+2. **Calidad técnica de la imagen** (adecuada / limitada / no diagnóstica, y por qué)
+3. **Hallazgos descriptivos** (semiología pura, sin interpretación aún)
+4. **Interpretación** (correlación de hallazgos con posibles entidades)
+5. **Diagnóstico(s) diferencial(es) jerarquizado(s)** por probabilidad, con el razonamiento semiológico que sustenta cada uno
+6. **Nivel de certeza** de cada hallazgo e hipótesis (alto / moderado / bajo, con justificación)
+7. **Líneas de correlación clínica o de investigación aplicables** (p. ej. qué estudio complementario, biomarcador o línea metodológica se relaciona con el hallazgo, sin citar papers, autores o cifras específicas que no puedas verificar)
+8. **Recomendación de siguiente paso diagnóstico** (correlación clínica, estudio complementario, seguimiento, etc.)
+
+## 5. Reglas estrictas contra alucinación
+- Nunca inventes hallazgos que no sean visualmente sustentables en la imagen descrita.
+- Nunca cites estudios, papers, autores, porcentajes o estadísticas específicas a menos que tengas certeza verificable de su exactitud. Ante la duda, generaliza sin inventar cifras ("la literatura reporta una asociación conocida entre X y Y", en lugar de inventar un porcentaje o referencia).
+- Si la imagen es ambigua, de baja calidad o insuficiente para un análisis confiable, decláralo explícitamente en lugar de forzar una conclusión.
+- Distingue siempre entre "hallazgo objetivo" (lo que se observa) e "interpretación" (lo que se infiere), sin mezclarlos como si fueran lo mismo.
+- Ante hallazgos incidentales fuera del motivo de consulta, repórtalos igualmente con el mismo rigor.
+
+## 6. Advertencia obligatoria (incluir SIEMPRE al final de cada respuesta)
+> ⚠️ **Aviso:** Este análisis es generado por un modelo de lenguaje con fines de apoyo técnico al análisis de imagen. No sustituye el juicio clínico de un profesional de la salud certificado, no consulta fuentes externas ni bases de investigación en tiempo real, y no debe utilizarse como único fundamento para decisiones diagnósticas o terapéuticas.
+
+## 7. Restricciones de comportamiento
+- No emitas diagnósticos definitivos como si fueran hechos confirmados; usa lenguaje probabilístico ("compatible con", "sugestivo de", "no se puede descartar").
+- No omitas la advertencia del punto 6 bajo ninguna circunstancia.
+- No generes contenido fuera del ámbito de análisis de imagen (no des tratamiento, dosis de fármacos, ni asesoría legal).
+- Si el usuario solicita una opinión más allá de lo que la imagen permite sustentar, indícalo con claridad en vez de especular.`;
+
+let isRxModeActive = false;
+
+function toggleRxMode(forceVal) {
+  isRxModeActive = typeof forceVal === 'boolean' ? forceVal : !isRxModeActive;
+  const btn = document.getElementById('rxModeBtn');
+  const txt = document.getElementById('rxModeText');
+  const p = document.getElementById('prompt');
+  
+  if (isRxModeActive) {
+    if (btn) btn.classList.add('active');
+    if (txt) txt.textContent = 'RX Activo';
+    if (p) {
+      p.placeholder = 'Adjunta una imagen radiológica o estudio médico (Rx, TC, RM, Ecografía, PDF)...';
+      autoResize(p);
+    }
+    const tokenEl = document.getElementById('token-count');
+    if (tokenEl && !currentImageBase64 && !currentAttachedDoc) {
+      tokenEl.innerHTML = '<span style="color:var(--cyan);font-weight:600;">Modo Imagenología RX activo · Adjunta una imagen o PDF</span>';
+    }
+    if (!currentImageBase64 && !currentAttachedDoc) {
+      triggerFileInput('image/*,application/pdf');
+    }
+  } else {
+    if (btn) btn.classList.remove('active');
+    if (txt) txt.textContent = 'Imagen RX';
+    if (p && p.placeholder.includes('radiológica')) {
+      p.placeholder = 'Type a message...';
+      autoResize(p);
+    }
+  }
+}
+
 // ── CHAT ───────────────────────────────────────────────────
 let isImagineMode = false;
 
 async function sendMessage() {
   const input = document.getElementById('prompt');
   let text  = input.value.trim();
-  if (!text) return;
+  if (!text && !currentImageBase64 && !currentAttachedDoc) return;
+  if (!text && (currentImageBase64 || currentAttachedDoc)) {
+    text = isRxModeActive 
+      ? 'Por favor realiza el análisis estructurado de imagenología médica y física radiológica de este estudio adjunto.'
+      : 'Por favor analiza en detalle el contenido de este archivo adjunto.';
+  }
   checkContextUsage();
   if (isVoiceModeActive && typeof VoiceQueue !== 'undefined') {
     VoiceQueue.clear();
     updateVoiceLiveUI('thinking', 'Pensando...', 'Generando...');
   }
   if (isImagineMode) {
-    toggleImagineMode(); // Reset to normal text chat mode for subsequent messages
+    toggleImagineMode();
     generateImage(text);
     return;
   }
@@ -2037,13 +2170,22 @@ async function sendMessage() {
   if (!selectedModel) selectedModel = 'qwen36-yzai:latest';
   if (!checkRateLimit()) return;
 
+  // Si está en Modo RX y no hay estudio adjunto, avisar y abrir selector
+  if (isRxModeActive && !currentImageBase64 && !currentAttachedDoc) {
+    triggerFileInput('image/*,application/pdf');
+    const tokenEl = document.getElementById('token-count');
+    if (tokenEl) tokenEl.innerHTML = '<span style="color:var(--yellow);font-weight:600;">Por favor adjunta la imagen o PDF para el análisis RX</span>';
+  }
+
   input.value = ''; autoResize(input);
   document.getElementById('welcome')?.remove();
   document.getElementById('token-count').textContent = 'Generando...';
 
   const payload = [];
   let effectiveSysPrompt = systemPrompt || '';
-  if (isVoiceModeActive) {
+  if (isRxModeActive) {
+    effectiveSysPrompt = effectiveSysPrompt ? `${effectiveSysPrompt}\n\n${RX_DOCTOR_SYSTEM_PROMPT}` : RX_DOCTOR_SYSTEM_PROMPT;
+  } else if (isVoiceModeActive) {
     const voiceInstruction = 'Estás en modo de conversación de voz en tiempo real. Responde siempre de manera concisa, natural, conversacional y fluida (máximo 2 o 3 oraciones claras). Evita listas largas, código o tablas a menos que el usuario lo solicite expresamente.';
     effectiveSysPrompt = effectiveSysPrompt ? `${effectiveSysPrompt}\n\n${voiceInstruction}` : voiceInstruction;
   }
@@ -2051,7 +2193,7 @@ async function sendMessage() {
 
   messages.forEach(m => {
     const msg = { role: m.role==='ai'?'assistant':m.role, content: m.content };
-    if (m.images) msg.images = m.images; // base64 in API only, never shown as text
+    if (m.images) msg.images = m.images;
     payload.push(msg);
   });
 
@@ -2068,7 +2210,7 @@ async function sendMessage() {
   let imageAttached = null;
   if (currentImageBase64) {
     imageAttached = currentImageBase64;
-    userMsg.images = [currentImageBase64]; // sent to Ollama API only
+    userMsg.images = [currentImageBase64];
   }
   payload.push(userMsg);
   messages.push(userMsg);
@@ -2081,10 +2223,19 @@ async function sendMessage() {
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom(true);
 
-  // ── Vision Perception Bridge (Moondream OCR -> Qwen 35B Deep Reasoning) ──
+  // ── Vision Perception Bridge (Moondream OCR -> 27B MoE Deep Reasoning) ──
   if (imageAttached) {
-    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Extrayendo OCR y analizando imagen visualmente…</span>`;
-    document.getElementById('token-count').textContent = 'Extracting OCR & visual details...';
+    const statusMsg = isRxModeActive 
+      ? 'Procesando estudio radiológico y extrayendo semiología visual…' 
+      : 'Extrayendo OCR y analizando imagen visualmente…';
+    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> ${statusMsg}</span>`;
+    document.getElementById('token-count').textContent = isRxModeActive ? 'Analizando imagenología médica...' : 'Extracting OCR & visual details...';
+    
+    let visionInstruction = 'Transcribe with high precision all text, code, tables, data, diagrams, and visual objects in this image. If it contains code or an error, copy it verbatim.';
+    if (isRxModeActive) {
+      visionInstruction = 'Analyze this radiological/medical study with maximum detail: describe all visible anatomical structures, radiographic densities/attenuation, projection, orientation, text labels, markers (R/L), technical quality, and any visible anomalies, lesions, fractures, or foreign objects verbatim.';
+    }
+
     try {
       const vRes = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
         method: 'POST',
@@ -2094,7 +2245,7 @@ async function sendMessage() {
           messages: [
             {
               role: 'user',
-              content: 'Transcribe with high precision all text, code, tables, data, diagrams, and visual objects in this image. If it contains code or an error, copy it verbatim.',
+              content: visionInstruction,
               images: [imageAttached]
             }
           ],
@@ -2106,9 +2257,11 @@ async function sendMessage() {
         const vData = await vRes.json();
         const visualText = vData.message?.content || '';
         if (visualText) {
-          const visionBlock = `[CONTENIDO VISUAL & OCR EXTRAÍDO DE LA IMAGEN ADJUNTA]\n${visualText}\n\n[INSTRUCCIÓN]: El usuario adjuntó una imagen con el contenido descrito arriba. Utiliza toda tu capacidad analítica y de razonamiento profundo para responder detalladamente a su consulta.`;
-          payload[payload.length - 1].content = `${visionBlock}\n\n---\nPrompt del usuario: ${payload[payload.length - 1].content}`;
-          // Delete raw images so Qwen text-only LLM doesn't reject the payload
+          const visionBlock = isRxModeActive
+            ? `[DATOS DE IMAGENOLOGÍA & REGISTRO VISUAL EXTRAÍDO DEL ESTUDIO ADJUNTO]\n${visualText}\n\n[INSTRUCCIÓN]: El usuario ha adjuntado el estudio de imagenología médica descrito arriba. Procede con el informe de análisis estructurado doctoral completo siguiendo la estructura obligatoria de 8 puntos.`
+            : `[CONTENIDO VISUAL & OCR EXTRAÍDO DE LA IMAGEN ADJUNTA]\n${visualText}\n\n[INSTRUCCIÓN]: El usuario adjuntó una imagen con el contenido descrito arriba. Utiliza toda tu capacidad analítica y de razonamiento profundo para responder detalladamente a su consulta.`;
+          
+          payload[payload.length - 1].content = `${visionBlock}\n\n---\nDatos clínicos / Consulta del usuario: ${payload[payload.length - 1].content}`;
           delete payload[payload.length - 1].images;
         }
       }
@@ -2202,6 +2355,11 @@ async function sendMessage() {
         clearInterval(typewriterTimer);
         typewriterTimer = null;
         
+        // Garantizar que la advertencia médica obligatoria esté presente en modo RX
+        if (isRxModeActive && targetText && !targetText.includes('No sustituye el juicio clínico') && !targetText.includes('profesional de la salud certificado')) {
+          targetText += '\n\n> ⚠️ **Aviso:** Este análisis es generado por un modelo de lenguaje con fines de apoyo técnico al análisis de imagen. No sustituye el juicio clínico de un profesional de la salud certificado, no consulta fuentes externas ni bases de investigación en tiempo real, y no debe utilizarse como único fundamento para decisiones diagnósticas o terapéuticas.';
+        }
+
         renderMd(bubble, targetText || '…', targetThinking);
         bubble.querySelectorAll('.cursor').forEach(el => el.remove());
 
