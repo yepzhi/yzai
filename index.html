@@ -566,6 +566,52 @@ think::before {
   color: var(--text-dim, #d4d4d8);
 }
 
+/* ─── FLOATING SUPPORT BUTTON ────────────────────── */
+.floating-support-btn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 99;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 16px;
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--text-dim);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+.floating-support-btn svg {
+  color: #22c55e;
+  transition: transform 0.25s ease;
+}
+.floating-support-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5);
+}
+.floating-support-btn:hover svg {
+  transform: scale(1.15);
+}
+@media (max-width: 768px) {
+  .floating-support-btn {
+    bottom: 84px;
+    right: 14px;
+    padding: 6px 12px;
+    font-size: 11.5px;
+  }
+}
+
 /* ─── FLOATING INPUT BAR ─────────────────────────── */
 .input-wrapper {
   position: absolute; bottom: 0; left: 0; right: 0;
@@ -2026,12 +2072,13 @@ async function sendMessage() {
         hasChanges = true;
       }
       
-      // REALTIME TTS CHUNKING: Hablar en tiempo real palabra/frase por frase (< 300ms latencia)
+      // REALTIME TTS CHUNKING: Hablar oraciones completas y fluidas (sin cortar palabras a medias)
       if (isVoiceModeActive && currentText.length > lastSpeakIdx && typeof VoiceQueue !== 'undefined') {
         const unparsed = currentText.slice(lastSpeakIdx);
-        const match = unparsed.match(/.*?([.;,?!]\s|\n|$)/);
-        if (match && match[0].trim().length > 12) {
-          const chunkToSpeak = unparsed.slice(0, match.index + match[0].length);
+        // Only match completed sentence or paragraph delimiters: [.!?:] followed by whitespace
+        const match = unparsed.match(/([\s\S]*?[.!?:](\s+|\n)|[\s\S]*?\n\n)/);
+        if (match && match[0].trim().length >= 15) {
+          const chunkToSpeak = match[0];
           lastSpeakIdx += chunkToSpeak.length;
           VoiceQueue.push(chunkToSpeak);
         }
@@ -2051,9 +2098,11 @@ async function sendMessage() {
         // Enviar resto del texto que haya quedado pendiente en la cola de voz
         if (isVoiceModeActive && typeof VoiceQueue !== 'undefined') {
           if (targetText.length > lastSpeakIdx) {
-            VoiceQueue.push(targetText.slice(lastSpeakIdx));
+            const tail = targetText.slice(lastSpeakIdx).trim();
+            if (tail) VoiceQueue.push(tail);
             lastSpeakIdx = targetText.length;
           }
+          VoiceQueue.isStreamComplete = true;
           if (!VoiceQueue.isPlaying) VoiceQueue.playNext();
         }
 
@@ -2401,47 +2450,67 @@ let synthesis = window.speechSynthesis || null;
 const VoiceQueue = {
   queue: [],
   isPlaying: false,
+  isStreamComplete: false,
   push(text) {
-    const clean = text.replace(/```[\s\S]*?```/g, ' [código omitido] ').replace(/[#*`~_]|(-\s)|(\d+\.\s)/g, '').replace(/https?:\/\/[^\s]+/g, '').trim();
-    if (!clean) return;
+    const clean = text
+      .replace(/```[\s\S]*?```/g, ' [código omitido] ')
+      .replace(/`([^`]+)`/g, '$1')
+      .replace(/https?:\/\/[^\s]+/g, '')
+      .replace(/[#*_~\[\]\(\)]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+    if (!clean || clean.length < 2) return;
     this.queue.push(clean);
     this.playNext();
   },
   playNext() {
-    if (this.isPlaying || !this.queue.length || !synthesis || !isVoiceModeActive) {
-      if (!this.queue.length && !this.isPlaying && isVoiceModeActive && !isStreaming) {
-        updateVoiceLiveUI('listening', '🟢 Listo para escucharte...', 'Reabriendo micrófono automáticamente...');
+    if (this.isPlaying || !synthesis || !isVoiceModeActive) return;
+
+    if (!this.queue.length) {
+      if (this.isStreamComplete && !isStreaming && isVoiceModeActive) {
+        updateVoiceLiveUI('listening', '🟢 Listo para escucharte...', 'Reabriendo micrófono...');
         setTimeout(() => {
-          if (!isStreaming && isVoiceModeActive) startMic();
-        }, 350);
+          if (!isStreaming && isVoiceModeActive && !this.isPlaying && (!synthesis || !synthesis.speaking)) {
+            startMic();
+          }
+        }, 450);
       }
       return;
     }
+
     this.isPlaying = true;
     const chunk = this.queue.shift();
     const utterance = new SpeechSynthesisUtterance(chunk);
     utterance.lang = 'es-MX';
-    utterance.rate = 1.06;
+    utterance.rate = 1.05;
     
     const voices = synthesis.getVoices();
-    const esVoice = voices.find(v => v.lang.includes('es') && (v.name.includes('Natural') || v.name.includes('Siri') || v.name.includes('Paulina') || v.name.includes('Jorge') || v.name.includes('Monica'))) || voices.find(v => v.lang.includes('es'));
+    const esVoice = voices.find(v => v.lang.includes('es') && (v.name.includes('Natural') || v.name.includes('Siri') || v.name.includes('Paulina') || v.name.includes('Jorge') || v.name.includes('Monica') || v.name.includes('Helena') || v.name.includes('Sabina'))) || voices.find(v => v.lang.includes('es'));
     if (esVoice) utterance.voice = esVoice;
     
     updateVoiceLiveUI('speaking', '🔊 YZAI respondiendo en vivo...', `"${chunk}"`);
     
-    utterance.onend = () => {
+    const onFinish = () => {
+      this.isPlaying = false;
+      setTimeout(() => {
+        this.playNext();
+      }, 70);
+    };
+
+    utterance.onend = onFinish;
+    utterance.onerror = onFinish;
+    
+    try {
+      synthesis.speak(utterance);
+    } catch (e) {
       this.isPlaying = false;
       this.playNext();
-    };
-    utterance.onerror = () => {
-      this.isPlaying = false;
-      this.playNext();
-    };
-    synthesis.speak(utterance);
+    }
   },
   clear() {
     this.queue = [];
     this.isPlaying = false;
+    this.isStreamComplete = false;
     if (synthesis && synthesis.speaking) synthesis.cancel();
   }
 };
@@ -2697,6 +2766,17 @@ function resetInputUI() {
   document.getElementById('sendBtn').style.display = 'block';
   document.getElementById('stopBtn').style.display = 'none';
 }
+</script>
+
+<!-- FLOATING TRANSPARENT SUPPORT BUTTON -->
+<a href="https://wa.me/message/6O4USI5SGF3IA1" target="_blank" rel="noopener" class="floating-support-btn" title="Soporte y Asistencia Técnica">
+  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10"></circle>
+    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3M12 17h.01"></path>
+  </svg>
+  <span>Support</span>
+</a>
+
 <!-- OFFLINE OVERLAY -->
 <div id="offlineOverlay" class="offline-overlay">
   <div class="offline-icon">
