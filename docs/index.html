@@ -2008,6 +2008,43 @@ async function sendMessage() {
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom(true);
 
+  // ── Vision Perception Bridge (Moondream OCR -> Qwen 35B Deep Reasoning) ──
+  if (imageAttached) {
+    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Extrayendo OCR y analizando imagen visualmente…</span>`;
+    document.getElementById('token-count').textContent = 'Extracting OCR & visual details...';
+    try {
+      const vRes = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          model: 'moondream:latest',
+          messages: [
+            {
+              role: 'user',
+              content: 'Transcribe with high precision all text, code, tables, data, diagrams, and visual objects in this image. If it contains code or an error, copy it verbatim.',
+              images: [imageAttached]
+            }
+          ],
+          stream: false,
+          options: { temperature: 0.1 }
+        })
+      });
+      if (vRes.ok) {
+        const vData = await vRes.json();
+        const visualText = vData.message?.content || '';
+        if (visualText) {
+          const visionBlock = `[CONTENIDO VISUAL & OCR EXTRAÍDO DE LA IMAGEN ADJUNTA]\n${visualText}\n\n[INSTRUCCIÓN]: El usuario adjuntó una imagen con el contenido descrito arriba. Utiliza toda tu capacidad analítica y de razonamiento profundo para responder detalladamente a su consulta.`;
+          payload[payload.length - 1].content = `${visionBlock}\n\n---\nPrompt del usuario: ${payload[payload.length - 1].content}`;
+          // Delete raw images so Qwen text-only LLM doesn't reject the payload
+          delete payload[payload.length - 1].images;
+        }
+      }
+    } catch(vErr) {
+      console.warn('[vision-pipeline]', vErr);
+    }
+    bubble.innerHTML = '<span class="cursor"></span>';
+  }
+
   // ── Proactive AI Contextual Web Search Injection ──
   // Si se detecta intención de búsqueda, usamos la IA local (0.3s) para sintetizar una búsqueda consciente del contexto
   if (needsWebSearch(text)) {
@@ -2134,8 +2171,8 @@ async function sendMessage() {
   let retryCount = 0;
   async function attemptFetch() {
     try {
-      let modelForCall = selectedModel;
-      if (userMsg.images && userMsg.images.length > 0) {
+      let modelForCall = selectedModel || 'qwen36-yzai:latest';
+      if (payload[payload.length - 1]?.images?.length) {
         if (!modelForCall.includes('moondream') && !modelForCall.includes('vision') && !modelForCall.includes('minicpm') && !modelForCall.includes('llava')) {
           modelForCall = 'moondream:latest';
         }
