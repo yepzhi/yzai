@@ -1066,7 +1066,7 @@ think::before {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z" fill="url(#aiGrad)"/><circle cx="12" cy="12" r="2.5" fill="#ffffff" opacity="0.9"/></svg>
       </div>
       <div class="model-pill-info">
-        <div class="model-pill-name" id="activeName">QWEN 3.6 (35B MOE)</div>
+        <div class="model-pill-name" id="activeName">27B MOE</div>
         <div class="model-pill-sub" id="activeSub">Context: 8K · 8 Slots Ready</div>
       </div>
       <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
@@ -1220,7 +1220,7 @@ think::before {
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:12px;">
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Modelo Activo</span>
-          <strong style="color:#fff; font-size:12px;">Qwen 3.6 35B A3B</strong>
+          <strong style="color:#fff; font-size:12px;">27B MoE</strong>
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Procesador / GPU</span>
@@ -1299,7 +1299,7 @@ const ICONS = {
 };
 
 const MODEL_META = {
-  'qwen36-yzai:latest': { badge:'Pro', cls:'badge-purple', desc:'Qwen 3.6 35B A3B Uncensored MoE.', speed:'~8 t/s' },
+  'qwen36-yzai:latest': { badge:'Pro', cls:'badge-purple', desc:'27B MoE Uncensored.', speed:'~8 t/s' },
   'moondream:latest': { badge:'Visión', cls:'badge-cyan', desc:'Moondream Vision (Análisis de imágenes ultrarrápido).', speed:'~35 t/s' }
 };
 
@@ -1309,7 +1309,7 @@ const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
 let selectedModel = 'qwen36-yzai:latest';
 const FIXED_CTX   = 8192; // 8K 8-slot GPU Optimized
-let selectedModelDesc = 'Qwen 3.6 35B A3B (GPU 8K Ctx · 8 Slots)';
+let selectedModelDesc = '27B MoE (GPU 8K Ctx · 8 Slots)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -1558,7 +1558,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · Qwen 3.6 35B A3B (8K)`);
+    setStatus(true, `Server Live · 27B MoE (8K)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -1591,7 +1591,7 @@ function setStatus(ok, text) {
 
 function updateModelHeader() {
   const activeName = document.getElementById('activeName');
-  if (activeName) activeName.textContent = 'QWEN 3.6 (35B MOE)';
+  if (activeName) activeName.textContent = '27B MOE';
   const activeSub = document.getElementById('activeSub');
   if (activeSub) activeSub.textContent = 'Context: 8K · 8 Slots Ready';
   const tokenCount = document.getElementById('token-count');
