@@ -962,9 +962,9 @@ think::before {
   animation: orbPulseListening 0.8s infinite alternate ease-in-out;
 }
 .voice-plasma-orb.thinking {
-  background: radial-gradient(circle, #c084fc 0%, #6366f1 50%, #0c0827 100%);
-  box-shadow: 0 0 90px rgba(192, 132, 252, 0.65), 0 0 120px rgba(99, 102, 241, 0.5); 
-  animation: orbSpin 1.2s infinite linear;
+  background: radial-gradient(circle at 45% 45%, #c084fc 0%, #6366f1 45%, #1e1b4b 100%);
+  box-shadow: 0 0 90px rgba(192, 132, 252, 0.65), 0 0 130px rgba(99, 102, 241, 0.55); 
+  animation: orbThinkingGlow 2s infinite ease-in-out;
 }
 .voice-plasma-orb.speaking {
   background: radial-gradient(circle at 35% 35%, #c084fc 0%, #8b5cf6 40%, #3b82f6 80%, #0c0827 100%);
@@ -974,7 +974,11 @@ think::before {
 }
 @keyframes orbIdle { 0%, 100% { transform: scale(1) translate(0, 0); } 50% { transform: scale(1.08) translate(0, -6px); box-shadow: 0 0 80px rgba(168, 85, 247, 0.4), 0 0 110px rgba(99, 102, 241, 0.4); } }
 @keyframes orbPulseListening { 0% { transform: scale(1.14); } 100% { transform: scale(1.24); filter: brightness(1.25); } }
-@keyframes orbSpin { 0% { transform: rotate(0deg) scale(0.95); } 50% { transform: rotate(180deg) scale(1.05); } 100% { transform: rotate(360deg) scale(0.95); } }
+@keyframes orbThinkingGlow {
+  0% { transform: scale(1); filter: brightness(1); box-shadow: 0 0 70px rgba(192, 132, 252, 0.45), 0 0 100px rgba(99, 102, 241, 0.4); }
+  50% { transform: scale(1.06); filter: brightness(1.2); box-shadow: 0 0 100px rgba(192, 132, 252, 0.75), 0 0 140px rgba(99, 102, 241, 0.65); }
+  100% { transform: scale(1); filter: brightness(1); box-shadow: 0 0 70px rgba(192, 132, 252, 0.45), 0 0 100px rgba(99, 102, 241, 0.4); }
+}
 @keyframes orbPulse { 0% { transform: scale(0.98); filter: brightness(1); } 100% { transform: scale(1.22); filter: brightness(1.35); } }
 
 .voice-live-subtitle { 
@@ -2038,7 +2042,12 @@ async function sendMessage() {
   document.getElementById('token-count').textContent = 'Generando...';
 
   const payload = [];
-  if (systemPrompt) payload.push({ role:'system', content: systemPrompt });
+  let effectiveSysPrompt = systemPrompt || '';
+  if (isVoiceModeActive) {
+    const voiceInstruction = 'Estás en modo de conversación de voz en tiempo real. Responde siempre de manera concisa, natural, conversacional y fluida (máximo 2 o 3 oraciones claras). Evita listas largas, código o tablas a menos que el usuario lo solicite expresamente.';
+    effectiveSysPrompt = effectiveSysPrompt ? `${effectiveSysPrompt}\n\n${voiceInstruction}` : voiceInstruction;
+  }
+  if (effectiveSysPrompt) payload.push({ role:'system', content: effectiveSysPrompt });
 
   messages.forEach(m => {
     const msg = { role: m.role==='ai'?'assistant':m.role, content: m.content };
@@ -2583,7 +2592,7 @@ const VoiceQueue = {
     const esVoice = voices.find(v => v.lang.includes('es') && (v.name.includes('Natural') || v.name.includes('Siri') || v.name.includes('Paulina') || v.name.includes('Jorge') || v.name.includes('Monica') || v.name.includes('Helena') || v.name.includes('Sabina'))) || voices.find(v => v.lang.includes('es'));
     if (esVoice) utterance.voice = esVoice;
     
-    updateVoiceLiveUI('speaking', '🔊 YZAI respondiendo en vivo...', `"${chunk}"`);
+    updateVoiceLiveUI('speaking', 'YZAI respondiendo en vivo...', `"${chunk}"`);
     
     const onFinish = () => {
       this.isPlaying = false;
