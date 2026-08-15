@@ -271,11 +271,17 @@ body {
 .messages-wrapper {
   flex: 1; overflow-y: auto; overflow-x: hidden;
   -webkit-overflow-scrolling: touch; scrollbar-width: none;
-  scroll-behavior: smooth;
   mask-image: linear-gradient(to bottom, transparent, black 10px, black 100%);
   -webkit-mask-image: linear-gradient(to bottom, transparent, black 10px, black 100%);
 }
 .messages-wrapper::-webkit-scrollbar { display: none; }
+.chat-img-thumb {
+  max-width: 280px; max-height: 280px; width: auto; height: auto;
+  border-radius: 12px; margin-bottom: 10px; display: block;
+  border: 1px solid var(--border-light);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+  object-fit: cover;
+}
 .messages {
   padding: 20px 16px 120px;
   display: flex; flex-direction: column; gap: 24px;
@@ -1247,7 +1253,8 @@ const ICONS = {
 };
 
 const MODEL_META = {
-  'qwen36-yzai:latest': { badge:'Pro', cls:'badge-purple', desc:'Qwen 3.6 35B A3B Uncensored MoE.', speed:'~8 t/s' }
+  'qwen36-yzai:latest': { badge:'Pro', cls:'badge-purple', desc:'Qwen 3.6 35B A3B Uncensored MoE.', speed:'~8 t/s' },
+  'moondream:latest': { badge:'Visión', cls:'badge-cyan', desc:'Moondream Vision (Análisis de imágenes ultrarrápido).', speed:'~35 t/s' }
 };
 
 // ── CONFIG & STATE ─────────────────────────────────────────
@@ -1615,10 +1622,10 @@ function renderMessages() {
   el.innerHTML = '';
   if (!messages.length) { el.innerHTML = welcomeHTML(); return; }
   messages.forEach(m => { 
-    if (m.role !== 'system') el.appendChild(createMsg(m.role, m.content, false)); 
+    if (m.role !== 'system') el.appendChild(createMsg(m.role, m.content, false, m.images || [])); 
   });
   checkContextUsage();
-  scrollBottom();
+  scrollBottom(true);
 }
 
 function welcomeHTML() {
@@ -1637,7 +1644,7 @@ function welcomeHTML() {
   </div>`;
 }
 
-function createMsg(role, content, streaming=false) {
+function createMsg(role, content, streaming=false, images=[]) {
   const div = document.createElement('div');
   div.className = `msg ${role}`;
 
@@ -1651,8 +1658,21 @@ function createMsg(role, content, streaming=false) {
   const bubble = document.createElement('div');
   bubble.className = 'bubble';
 
-  if (streaming) bubble.innerHTML = '<span class="cursor"></span>';
-  else renderMd(bubble, content);
+  if (images && images.length) {
+    images.forEach(imgBase64 => {
+      const imgEl = document.createElement('img');
+      imgEl.className = 'chat-img-thumb';
+      imgEl.src = `data:image/jpeg;base64,${imgBase64}`;
+      bubble.appendChild(imgEl);
+    });
+  }
+
+  if (streaming) bubble.innerHTML += '<span class="cursor"></span>';
+  else {
+    const textDiv = document.createElement('div');
+    renderMd(textDiv, content);
+    bubble.appendChild(textDiv);
+  }
 
   const time = document.createElement('div');
   time.className = 'msg-time';
@@ -1926,7 +1946,9 @@ async function sendMessage() {
   }
 
   const userMsg = { role:'user', content: userTextForApi };
+  let imageAttached = null;
   if (currentImageBase64) {
+    imageAttached = currentImageBase64;
     userMsg.images = [currentImageBase64]; // sent to Ollama API only
   }
   payload.push(userMsg);
@@ -1934,7 +1956,7 @@ async function sendMessage() {
   removeImage();
 
   const container = document.getElementById('messages');
-  container.appendChild(createMsg('user', chatBubbleText));
+  container.appendChild(createMsg('user', chatBubbleText, false, imageAttached ? [imageAttached] : []));
   const aiEl = createMsg('ai', '', true);
   container.appendChild(aiEl);
   const bubble = aiEl.querySelector('.bubble');
@@ -2063,8 +2085,14 @@ async function sendMessage() {
   let retryCount = 0;
   async function attemptFetch() {
     try {
+      let modelForCall = selectedModel;
+      if (userMsg.images && userMsg.images.length > 0) {
+        if (!modelForCall.includes('moondream') && !modelForCall.includes('vision') && !modelForCall.includes('minicpm') && !modelForCall.includes('llava')) {
+          modelForCall = 'moondream:latest';
+        }
+      }
       const chatBody = { 
-        model: selectedModel, 
+        model: modelForCall, 
         messages: payload,
         options: { 
           num_ctx: FIXED_CTX
@@ -2549,11 +2577,32 @@ function autoResize(el) {
   const maxH = el.classList.contains('listening-input') ? 300 : 150;
   el.style.height = Math.min(el.scrollHeight, maxH) + 'px'; 
 }
+let userScrolledUp = false;
+
+function initScrollTracker() {
+  const m = document.getElementById('messages-wrapper');
+  if (!m) return;
+  m.addEventListener('scroll', () => {
+    const distFromBottom = m.scrollHeight - m.scrollTop - m.clientHeight;
+    if (distFromBottom > 70) {
+      userScrolledUp = true;
+    } else {
+      userScrolledUp = false;
+    }
+  }, { passive: true });
+}
+document.addEventListener('DOMContentLoaded', initScrollTracker);
+initScrollTracker();
+
 function scrollBottom(force = false)  { 
   const m=document.getElementById('messages-wrapper'); 
   if (!m) return;
-  const isNearBottom = m.scrollHeight - m.scrollTop - m.clientHeight < 100;
-  if (force || isNearBottom) {
+  if (force) {
+    userScrolledUp = false;
+    m.scrollTop = m.scrollHeight;
+    return;
+  }
+  if (!userScrolledUp) {
     m.scrollTop = m.scrollHeight;
   }
 }
