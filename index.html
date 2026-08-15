@@ -1374,8 +1374,8 @@ let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
 let selectedModel = 'qwen36-yzai:latest';
-const FIXED_CTX   = 8192; // 8K 8-slot GPU Optimized
-let selectedModelDesc = '27B MoE (GPU 8K Ctx · 8 Slots)';
+const FIXED_CTX   = 8192; // 8K 8-slot Optimized
+let selectedModelDesc = '27B MoE (8K Ctx · 8 Slots)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -2022,7 +2022,7 @@ async function sendMessage() {
   checkContextUsage();
   if (isVoiceModeActive && typeof VoiceQueue !== 'undefined') {
     VoiceQueue.clear();
-    updateVoiceLiveUI('thinking', '🧠 YZAI pensando...', 'Conectando con GPU en tiempo real...');
+    updateVoiceLiveUI('thinking', 'Pensando...', 'Generando...');
   }
   if (isImagineMode) {
     toggleImagineMode(); // Reset to normal text chat mode for subsequent messages
@@ -2035,7 +2035,7 @@ async function sendMessage() {
 
   input.value = ''; autoResize(input);
   document.getElementById('welcome')?.remove();
-  document.getElementById('token-count').textContent = 'Generating...';
+  document.getElementById('token-count').textContent = 'Generando...';
 
   const payload = [];
   if (systemPrompt) payload.push({ role:'system', content: systemPrompt });
