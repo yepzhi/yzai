@@ -2141,20 +2141,14 @@ function toggleRxMode(forceVal) {
   if (isRxModeActive) {
     if (btn) btn.classList.add('active');
     if (p) {
-      p.placeholder = 'Modo Img PhD activo: adjunta estudio médico o escribe tu consulta...';
+      p.placeholder = 'Modo Img PhD activo (puedes chatear o adjuntar estudio médico)...';
       autoResize(p);
-    }
-    if (tokenEl && !currentImageBase64 && !currentAttachedDoc) {
-      tokenEl.innerHTML = '<span style="color:var(--green);font-weight:600;">Modo Img PhD activo · Adjunta imagen o PDF</span>';
     }
   } else {
     if (btn) btn.classList.remove('active');
-    if (p && p.placeholder.includes('Img PhD')) {
+    if (p && p.placeholder.includes('Modo Img PhD')) {
       p.placeholder = 'Type a message...';
       autoResize(p);
-    }
-    if (tokenEl && tokenEl.innerHTML.includes('Modo Img PhD')) {
-      tokenEl.textContent = 'Context: 8K · 8 Slots Ready';
     }
   }
 }
@@ -2184,13 +2178,6 @@ async function sendMessage() {
   if (isStreaming) return;
   if (!selectedModel) selectedModel = 'qwen36-yzai:latest';
   if (!checkRateLimit()) return;
-
-  // Si está en Modo RX y no hay estudio adjunto, avisar y abrir selector
-  if (isRxModeActive && !currentImageBase64 && !currentAttachedDoc) {
-    triggerFileInput('image/*,application/pdf');
-    const tokenEl = document.getElementById('token-count');
-    if (tokenEl) tokenEl.innerHTML = '<span style="color:var(--yellow);font-weight:600;">Por favor adjunta la imagen o PDF para el análisis RX</span>';
-  }
 
   input.value = ''; autoResize(input);
   document.getElementById('welcome')?.remove();
