@@ -1619,19 +1619,20 @@ function processFile(file) {
 function handleFileSelect(e) {
   const file = e.target.files?.[0];
   if (!file) return;
-  document.getElementById('fileInput').value = '';
   processFile(file);
+  setTimeout(() => {
+    try { document.getElementById('fileInput').value = ''; } catch(err){}
+  }, 500);
 }
 
 // ── DRAG & DROP & CLIPBOARD LISTENERS ───────────────────────
 let dragCounter = 0;
+const dropOverlay = document.getElementById('dragDropOverlay');
+
 window.addEventListener('dragenter', (e) => {
   e.preventDefault();
   dragCounter++;
-  const dropOverlay = document.getElementById('dragDropOverlay');
-  if (e.dataTransfer?.types?.includes('Files') && dropOverlay) {
-    dropOverlay.classList.add('active');
-  }
+  if (dropOverlay) dropOverlay.classList.add('active');
 });
 
 window.addEventListener('dragleave', (e) => {
@@ -1639,7 +1640,6 @@ window.addEventListener('dragleave', (e) => {
   dragCounter--;
   if (dragCounter <= 0) {
     dragCounter = 0;
-    const dropOverlay = document.getElementById('dragDropOverlay');
     if (dropOverlay) dropOverlay.classList.remove('active');
   }
 });
@@ -1649,10 +1649,27 @@ window.addEventListener('dragover', (e) => {
   if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
 });
 
+if (dropOverlay) {
+  dropOverlay.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+  });
+  dropOverlay.addEventListener('drop', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter = 0;
+    dropOverlay.classList.remove('active');
+    const files = e.dataTransfer?.files;
+    if (files && files.length > 0) {
+      processFile(files[0]);
+    }
+  });
+}
+
 window.addEventListener('drop', (e) => {
   e.preventDefault();
   dragCounter = 0;
-  const dropOverlay = document.getElementById('dragDropOverlay');
   if (dropOverlay) dropOverlay.classList.remove('active');
   const files = e.dataTransfer?.files;
   if (files && files.length > 0) {
@@ -1664,7 +1681,7 @@ document.addEventListener('paste', (e) => {
   const items = e.clipboardData?.items;
   if (!items) return;
   for (let i = 0; i < items.length; i++) {
-    if (items[i].kind === 'file') {
+    if (items[i].kind === 'file' || items[i].type.startsWith('image/')) {
       const file = items[i].getAsFile();
       if (file) {
         processFile(file);
