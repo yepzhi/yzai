@@ -741,13 +741,13 @@ think::before {
 .msg-img { max-width: 100%; border-radius: 12px; margin-bottom: 12px; display: block; border: 1px solid rgba(255,255,255,0.1); }
 #prompt {
   flex: 1; background: none; border: none; outline: none;
-  color: #fff; font-size: 18px; font-family: var(--font-body);
+  color: #fff; font-size: 14.5px; font-family: var(--font-body);
   resize: none; max-height: 180px; line-height: 1.45; min-height: 32px;
-  padding: 8px 4px; scrollbar-width: none; transition: font-size 0.2s ease, max-height 0.2s ease;
+  padding: 8px 6px; scrollbar-width: none; transition: font-size 0.2s ease, max-height 0.2s ease;
 }
-#prompt::placeholder { color: var(--muted); opacity: 0.85; transition: color 0.2s; }
+#prompt::placeholder { color: var(--muted); opacity: 0.85; transition: color 0.2s; font-size: 13.5px; }
 #prompt.listening-input {
-  font-size: 22px !important; /* +20% más grande en dictado */
+  font-size: 17px !important;
   font-weight: 600; color: #10b981; max-height: 320px;
 }
 #prompt.listening-input::placeholder { color: #10b981; font-weight: 600; opacity: 0.85; }
@@ -799,35 +799,45 @@ think::before {
   box-shadow: 0 0 14px rgba(16,185,129,0.25);
 }
 
+.input-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+  padding: 0 4px;
+}
+
 .img-phd-btn {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   background: rgba(255, 255, 255, 0.05);
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--text-dim, #cbd5e1);
-  padding: 5px 10px;
-  border-radius: 8px;
+  padding: 5px 12px;
+  border-radius: 100px;
   font-size: 11px;
   font-weight: 600;
-  font-family: var(--font-body);
+  font-family: var(--font-sans);
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
   white-space: nowrap;
-  margin-right: 4px;
-  flex-shrink: 0;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
 }
 .img-phd-btn:hover {
   background: rgba(255, 255, 255, 0.1);
   color: #fff;
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.22);
+  transform: translateY(-1px);
 }
 .img-phd-btn.active {
   background: rgba(16, 185, 129, 0.18);
   border-color: rgba(16, 185, 129, 0.5);
   color: #10b981;
-  box-shadow: 0 0 12px rgba(16, 185, 129, 0.3);
+  box-shadow: 0 0 14px rgba(16, 185, 129, 0.3);
 }
 .img-phd-btn.active svg {
   stroke: #10b981;
@@ -835,7 +845,7 @@ think::before {
 
 .input-hint {
   text-align: center; font-size: 11px; color: var(--muted); font-weight: 500;
-  margin-top: 12px; font-family: var(--font-mono); pointer-events: all;
+  margin-top: 0; font-family: var(--font-mono); pointer-events: all;
   background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 100px; backdrop-filter: blur(4px);
 }
 
@@ -962,7 +972,7 @@ think::before {
   .bubble { font-size: 14px; }
   .input-wrapper { padding: 20px 24px calc(28px + var(--safe-b, 0px)); }
   .input-container { padding: 12px 18px; border-radius: 24px; }
-  #prompt { font-size: 18px; }
+  #prompt { font-size: 15px; }
   .top-bar { padding: 16px 24px; }
   .menu-btn { display: none; }
 }
@@ -1267,16 +1277,21 @@ think::before {
       <span id="contextAlertText">Alerta de Memoria Contextual</span>
       <button onclick="newChat()" style="background:none;border:none;color:#fff;text-decoration:underline;font-weight:700;cursor:pointer;font-size:12px;">Nuevo Chat</button>
     </div>
-    <div class="input-hint" id="token-count" style="margin-top:0; margin-bottom:12px;">Context: 8K · 8 Slots Ready</div>
+
+    <!-- Elegant top toolbar above the input container -->
+    <div class="input-top-bar">
+      <button class="img-phd-btn" id="imgPhdBtn" onclick="toggleRxMode()" title="Activar / Desactivar Modo Imagenología Médica (PhD)">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/></svg>
+        <span>Img PhD mode</span>
+      </button>
+      <div class="input-hint" id="token-count">Context: 8K · 8 Slots Ready</div>
+    </div>
+
     <div class="input-container">
       <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.jsx,.tsx,.py,.sh,.bash,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r" style="display:none" onchange="handleFileSelect(event)">
       <div class="attach-menu-wrapper" style="position:relative; display:flex; align-items:center;">
         <button class="attach-btn" id="attachBtn" onclick="toggleAttachMenu(event)" aria-label="Attach" title="Adjuntar Archivos y Visión" style="color:var(--text-muted); transition: color 0.2s;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
-        </button>
-        <button class="img-phd-btn" id="imgPhdBtn" onclick="toggleRxMode()" title="Activar / Desactivar Modo Imagenología Médica (PhD)">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/></svg>
-          <span>Img PhD mode</span>
         </button>
         <div class="attach-menu" id="attachMenu">
           <div class="attach-menu-header">
