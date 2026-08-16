@@ -317,16 +317,33 @@ body {
 .welcome h2 { font-family: var(--font-display); font-size: 32px; font-weight: 800; color: #fff; margin-bottom: 12px; letter-spacing: -0.5px; }
 .welcome h2 span { background: linear-gradient(to right, var(--cyan), var(--primary)); -webkit-background-clip: text; color: transparent; }
 .welcome p { font-size: 15px; line-height: 1.6; color: var(--text-dim); max-width: 340px; font-weight: 400; }
-.chip-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 32px; width: 100%; max-width: 440px; }
-.chip {
-  padding: 16px; border-radius: 16px;
-  border: 1px solid var(--border); background: var(--surface);
-  font-size: 14px; color: var(--text-dim); font-weight: 500; cursor: pointer;
-  text-align: left; transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-  backdrop-filter: blur(10px);
+.bilingual-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  padding: 8px 16px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-dim);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  margin-top: 24px;
+  letter-spacing: 0.2px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.25);
+  transition: all 0.2s ease;
 }
-.chip:hover { border-color: var(--primary); background: rgba(139,92,246,0.05); color: #fff; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
-.chip:active { transform: translateY(0) scale(0.98); }
+.bilingual-badge:hover {
+  background: rgba(255, 255, 255, 0.07);
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+.bilingual-badge svg {
+  color: var(--cyan);
+  flex-shrink: 0;
+}
 
 /* Message bubbles - Apple Glassmorphism */
 .msg { display: flex; gap: 14px; animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); min-width: 0; width: 100%; }
@@ -1246,11 +1263,9 @@ think::before {
         </div>
         <h2>Welcome to <span>yzai</span></h2>
         <p>Your premium, 100% private AI assistant powered by local hardware.</p>
-        <div class="chip-grid">
-          <button class="chip" onclick="sendSuggestion(this)">Explain quantum computing</button>
-          <button class="chip" onclick="sendSuggestion(this)">Write a Python script</button>
-          <button class="chip" onclick="sendSuggestion(this)">Help me debug my code</button>
-          <button class="chip" onclick="sendSuggestion(this)">Summarize this document</button>
+        <div class="bilingual-badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          <span>Bilingüe · Español &amp; English · Escribe en el idioma que prefieras</span>
         </div>
       </div>
     </div>
@@ -1946,11 +1961,9 @@ function welcomeHTML() {
     </div>
     <h2>Welcome to <span>yzai</span></h2>
     <p>Your premium, 100% private AI assistant powered by local hardware.</p>
-    <div class="chip-grid">
-      <button class="chip" onclick="sendSuggestion(this)">Explain a complex topic</button>
-      <button class="chip" onclick="sendSuggestion(this)">Write a React component</button>
-      <button class="chip" onclick="sendSuggestion(this)">Analyze this code</button>
-      <button class="chip" onclick="sendSuggestion(this)">Draft a professional email</button>
+    <div class="bilingual-badge">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      <span>Bilingüe · Español &amp; English · Escribe en el idioma que prefieras</span>
     </div>
   </div>`;
 }
