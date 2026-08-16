@@ -2329,6 +2329,7 @@ async function sendMessage() {
   }
   if (effectiveSysPrompt) payload.push({ role:'system', content: effectiveSysPrompt });
 
+  // Dump history — strip raw images so Qwen (text-only) never chokes on base64 blobs
   messages.forEach(m => {
     payload.push({ role: m.role==='ai'?'assistant':m.role, content: m.content });
   });
@@ -2342,15 +2343,23 @@ async function sendMessage() {
     removeAttachedDoc();
   }
 
-  let imageAttached = null;
-  if (currentImageBase64) {
-    imageAttached = currentImageBase64;
+  // Capture any freshly attached image BEFORE removeImage() clears it
+  let imageAttached = currentImageBase64 || null;
+
+  // If no NEW image but the latest history turn had one, grab it for re-analysis
+  if (!imageAttached) {
+    for (let i = messages.length - 1; i >= 0; i--) {
+      if (messages[i].images && messages[i].images.length > 0) {
+        imageAttached = messages[i].images[0];
+        break;
+      }
+    }
   }
-  
+
   const userMsgForHistory = { role:'user', content: userTextForApi };
-  if (imageAttached) userMsgForHistory.images = [imageAttached];
+  if (currentImageBase64) userMsgForHistory.images = [currentImageBase64];
   messages.push(userMsgForHistory);
-  
+
   payload.push({ role:'user', content: userTextForApi });
   removeImage();
 
