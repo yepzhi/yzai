@@ -2247,7 +2247,8 @@ El análisis debe entregarse estrictamente en este formato estructurado:
 
 ### 4.2 Cuando la consulta es conversacional, teórica o sin imagen adjunta:
 - Responde a la pregunta directamente con tu máximo nivel de conocimiento doctoral en imagenología médica, física de radiaciones y radiología clínica.
-- NUNCA inventes que estás viendo una imagen o diagrama si el usuario no ha adjuntado ninguna.
+- IMPORTANTE: Si el mensaje de contexto contiene un bloque «DATÔS DE IMAGENOLOGÍA» o «CONTENIDO VISUAL» o «IMAGEN ADJUNTA» o «[IMAGEN MÉDICA ADJUNTA POR EL USUARIO]», significa que SÍ hay una imagen adjunta y debes analizarla con la estructura de 8 puntos del 4.1.
+- Solo aplica respuesta sin imagen si no existe ningún marcador de imagen o bloque visual en el contexto del mensaje.
 - Explica con claridad y precisión tus capacidades técnicas (análisis de Rx convencional, TAC multicorte, Resonancia Magnética multiparamétrica, Ecografía Doppler, PET-CT, etc.) e indica que cuando el usuario guste puede adjuntar el estudio para un informe semiológico completo.
 
 ## 5. Reglas estrictas contra alucinación
@@ -2372,9 +2373,20 @@ async function sendMessage() {
 
   // ── Vision Perception Bridge (Behind the scenes OCR/Vision -> 27B MoE Deep Reasoning) ──
   if (imageAttached) {
+    // ── Inject image-present marker into system slot IMMEDIATELY so the model
+    // never falls into the "no image" branch regardless of moondream timing/failures
+    const imgMarker = isRxModeActive
+      ? '[IMAGEN MÉDICA ADJUNTA: SÍ hay un estudio de imagenología adjunto en esta consulta. Procede obligatoriamente con el informe estructurado de 8 puntos (sección 4.1).]'
+      : '[IMAGEN ADJUNTA: El usuario ha adjuntado una imagen a esta consulta. Analiza su contenido en detalle.]';
+    if (payload.length > 0 && payload[0].role === 'system') {
+      payload[0].content += '\n\n' + imgMarker;
+    } else {
+      payload.unshift({ role: 'system', content: imgMarker });
+    }
+
     bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Analizando...</span>`;
     document.getElementById('token-count').textContent = 'Analizando...';
-    
+
     let visionInstruction = 'Transcribe with high precision all text, code, tables, data, diagrams, and visual objects in this image. If it contains code or an error, copy it verbatim.';
     if (isRxModeActive) {
       visionInstruction = 'Analyze this radiological/medical study with maximum detail: describe all visible anatomical structures, radiographic densities/attenuation, projection, orientation, text labels, markers (R/L), technical quality, and any visible anomalies, lesions, fractures, or foreign objects verbatim.';
