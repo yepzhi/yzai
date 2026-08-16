@@ -1507,13 +1507,20 @@ const IMG_MAX_PX = 1024;
 
 function processFile(file) {
   if (!file) return;
-  const ext = file.name.split('.').pop().toLowerCase();
+  const ext = (file.name || '').split('.').pop().toLowerCase();
+  const isImg = (file.type && file.type.startsWith('image/')) || ['png','jpg','jpeg','webp','gif','bmp','tiff','svg','heic','heif'].includes(ext);
 
   // ── 1. IMAGES → resize+compress, base64 stored internally ──
-  if (file.type.startsWith('image/')) {
+  if (isImg) {
     document.getElementById('token-count').textContent = 'Procesando imagen...';
     const reader = new FileReader();
     reader.onload = (ev) => {
+      const rawData = ev.target.result;
+      currentImageBase64 = rawData.split(',')[1];
+      document.getElementById('imgPreview').src = rawData;
+      document.getElementById('imgPreviewContainer').style.display = 'block';
+      document.getElementById('token-count').textContent = 'Imagen lista';
+
       const img = new Image();
       img.onload = () => {
         let w = img.naturalWidth, h = img.naturalHeight;
@@ -1523,14 +1530,15 @@ function processFile(file) {
         }
         const canvas = document.createElement('canvas');
         canvas.width = w; canvas.height = h;
-        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
-        currentImageBase64 = canvas.toDataURL('image/jpeg', 0.82).split(',')[1];
-        document.getElementById('imgPreview').src = canvas.toDataURL('image/jpeg', 0.82);
-        document.getElementById('imgPreviewContainer').style.display = 'block';
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const jpegData = canvas.toDataURL('image/jpeg', 0.85);
+        currentImageBase64 = jpegData.split(',')[1];
+        document.getElementById('imgPreview').src = jpegData;
         const kb = Math.round(currentImageBase64.length * 0.75 / 1024);
         document.getElementById('token-count').textContent = `Imagen lista (${w}x${h}px, ~${kb}KB)`;
       };
-      img.src = ev.target.result;
+      img.src = rawData;
     };
     reader.readAsDataURL(file);
     return;
@@ -2373,10 +2381,15 @@ async function sendMessage() {
             : `[CONTENIDO VISUAL & OCR EXTRAÍDO DE LA IMAGEN ADJUNTA]\n${visualText}\n\n[INSTRUCCIÓN]: El usuario adjuntó una imagen con el contenido descrito arriba. Utiliza toda tu capacidad analítica y de razonamiento profundo para responder detalladamente a su consulta.`;
           
           payload[payload.length - 1].content = `${visionBlock}\n\n---\nConsulta / Datos clínicos: ${payload[payload.length - 1].content}`;
+        } else {
+          payload[payload.length - 1].content = `[IMAGEN MÉDICA ADJUNTA POR EL USUARIO]\n\n---\nConsulta / Datos clínicos: ${payload[payload.length - 1].content}`;
         }
+      } else {
+        payload[payload.length - 1].content = `[IMAGEN MÉDICA ADJUNTA POR EL USUARIO]\n\n---\nConsulta / Datos clínicos: ${payload[payload.length - 1].content}`;
       }
     } catch(vErr) {
       console.warn('[vision-pipeline]', vErr);
+      payload[payload.length - 1].content = `[IMAGEN MÉDICA ADJUNTA POR EL USUARIO]\n\n---\nConsulta / Datos clínicos: ${payload[payload.length - 1].content}`;
     }
     document.getElementById('token-count').textContent = 'Generando...';
     bubble.innerHTML = '<span class="cursor"></span>';
