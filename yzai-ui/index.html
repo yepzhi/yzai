@@ -294,8 +294,8 @@ body {
 .welcome {
   flex: 1; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
-  text-align: center; padding: 40px 20px;
-  animation: fadeIn 0.8s ease-out; margin: auto 0;
+  text-align: center; padding: 20px 20px 80px;
+  animation: fadeIn 0.8s ease-out; margin: 0 auto;
 }
 @keyframes fadeIn { from{opacity:0; transform:translateY(20px)} to{opacity:1; transform:translateY(0)} }
 .welcome-icon {
@@ -1019,10 +1019,18 @@ think::before {
 /* ─── REALTIME VOICE OVERLAY ("MODO VOZ LIVE") ────── */
 .voice-live-overlay {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  height: 100dvh;
   background: radial-gradient(circle at 50% 15%, rgba(99, 102, 241, 0.28) 0%, rgba(20, 12, 48, 0.96) 60%, #03020a 100%);
   z-index: 10000; display: none; flex-direction: column;
-  align-items: center; justify-content: space-between; padding: 40px 24px;
+  align-items: center; justify-content: space-between;
+  padding: calc(var(--safe-t, 0px) + 24px) 20px calc(var(--safe-b, 0px) + 36px);
   opacity: 0; transition: opacity 0.3s ease; backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+}
+@media (max-width: 768px) {
+  .voice-live-overlay {
+    padding: calc(var(--safe-t, 0px) + 16px) 16px calc(var(--safe-b, 0px) + 42px);
+  }
 }
 .voice-live-overlay.active { display: flex; opacity: 1; }
 .voice-live-header { display: flex; align-items: center; justify-content: space-between; width: 100%; max-width: 500px; }
@@ -1265,7 +1273,7 @@ think::before {
         <p>Your premium, 100% private AI assistant powered by local hardware.</p>
         <div class="bilingual-badge">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          <span>Bilingüe · Español &amp; English · Escribe en el idioma que prefieras</span>
+          <span>Español &amp; English · Escribe en el idioma que prefieras</span>
         </div>
       </div>
     </div>
@@ -1963,7 +1971,7 @@ function welcomeHTML() {
     <p>Your premium, 100% private AI assistant powered by local hardware.</p>
     <div class="bilingual-badge">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-      <span>Bilingüe · Español &amp; English · Escribe en el idioma que prefieras</span>
+      <span>Español &amp; English · Escribe en el idioma que prefieras</span>
     </div>
   </div>`;
 }
