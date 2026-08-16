@@ -589,13 +589,13 @@ think::before {
 /* ─── FLOATING SUPPORT BUTTON ────────────────────── */
 .floating-support-btn {
   position: fixed;
-  bottom: 96px;
+  bottom: 24px;
   right: 24px;
   z-index: 99;
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  padding: 6px 14px;
+  padding: 7px 15px;
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(16px);
@@ -625,7 +625,7 @@ think::before {
 }
 @media (max-width: 768px) {
   .floating-support-btn {
-    bottom: 98px;
+    bottom: 96px;
     right: 14px;
     padding: 5px 12px;
     font-size: 11px;
@@ -818,11 +818,13 @@ think::before {
 }
 
 .input-top-bar {
+  width: 100%;
+  max-width: 880px;
+  margin: 0 auto 8px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 8px;
-  margin-bottom: 8px;
   padding: 0 4px;
   pointer-events: all;
   position: relative;
@@ -866,9 +868,21 @@ think::before {
 }
 
 .input-hint {
-  text-align: center; font-size: 11px; color: var(--muted); font-weight: 500;
-  margin-top: 0; font-family: var(--font-mono); pointer-events: all;
-  background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 100px; backdrop-filter: blur(4px);
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 500;
+  margin: 0 auto 8px;
+  font-family: var(--font-mono);
+  pointer-events: all;
+  background: rgba(0,0,0,0.5);
+  padding: 4px 14px;
+  border-radius: 100px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  width: fit-content;
+  max-width: 90vw;
 }
 
 /* ─── DRAG & DROP OVERLAY ───────────────────────── */
@@ -1306,13 +1320,15 @@ think::before {
       <button onclick="newChat()" style="background:none;border:none;color:#fff;text-decoration:underline;font-weight:700;cursor:pointer;font-size:12px;">Nuevo Chat</button>
     </div>
 
-    <!-- Elegant top toolbar above the input container -->
+    <!-- Centered Context / Slot Status Badge (cleanly elevated above toolbar) -->
+    <div class="input-hint" id="token-count">Context: 8K · 8 Slots Ready</div>
+
+    <!-- Centered Toolbar for Mode toggles (aligned with input container width) -->
     <div class="input-top-bar">
       <button class="img-phd-btn" id="imgPhdBtn" onclick="toggleRxMode()" title="Activar / Desactivar Modo Imagenología Médica (PhD)">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/></svg>
         <span>Img PhD mode</span>
       </button>
-      <div class="input-hint" id="token-count">Context: 8K · 8 Slots Ready</div>
     </div>
 
     <div class="input-container">
