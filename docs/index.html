@@ -2305,9 +2305,7 @@ async function sendMessage() {
   if (effectiveSysPrompt) payload.push({ role:'system', content: effectiveSysPrompt });
 
   messages.forEach(m => {
-    const msg = { role: m.role==='ai'?'assistant':m.role, content: m.content };
-    if (m.images) msg.images = m.images;
-    payload.push(msg);
+    payload.push({ role: m.role==='ai'?'assistant':m.role, content: m.content });
   });
 
   let userTextForApi = text;
@@ -2319,14 +2317,16 @@ async function sendMessage() {
     removeAttachedDoc();
   }
 
-  const userMsg = { role:'user', content: userTextForApi };
   let imageAttached = null;
   if (currentImageBase64) {
     imageAttached = currentImageBase64;
-    userMsg.images = [currentImageBase64];
   }
-  payload.push(userMsg);
-  messages.push(userMsg);
+  
+  const userMsgForHistory = { role:'user', content: userTextForApi };
+  if (imageAttached) userMsgForHistory.images = [imageAttached];
+  messages.push(userMsgForHistory);
+  
+  payload.push({ role:'user', content: userTextForApi });
   removeImage();
 
   const container = document.getElementById('messages');
@@ -2373,7 +2373,6 @@ async function sendMessage() {
             : `[CONTENIDO VISUAL & OCR EXTRAÍDO DE LA IMAGEN ADJUNTA]\n${visualText}\n\n[INSTRUCCIÓN]: El usuario adjuntó una imagen con el contenido descrito arriba. Utiliza toda tu capacidad analítica y de razonamiento profundo para responder detalladamente a su consulta.`;
           
           payload[payload.length - 1].content = `${visionBlock}\n\n---\nConsulta / Datos clínicos: ${payload[payload.length - 1].content}`;
-          delete payload[payload.length - 1].images;
         }
       }
     } catch(vErr) {
@@ -2514,12 +2513,7 @@ async function sendMessage() {
   let retryCount = 0;
   async function attemptFetch() {
     try {
-      let modelForCall = selectedModel || 'qwen36-yzai:latest';
-      if (payload[payload.length - 1]?.images?.length) {
-        if (!modelForCall.includes('moondream') && !modelForCall.includes('vision') && !modelForCall.includes('minicpm') && !modelForCall.includes('llava')) {
-          modelForCall = 'moondream:latest';
-        }
-      }
+      const modelForCall = selectedModel || 'qwen36-yzai:latest';
       const chatBody = { 
         model: modelForCall, 
         messages: payload,
