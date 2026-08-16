@@ -839,6 +839,45 @@ think::before {
   background: rgba(0,0,0,0.4); padding: 4px 12px; border-radius: 100px; backdrop-filter: blur(4px);
 }
 
+/* ─── DRAG & DROP OVERLAY ───────────────────────── */
+.drag-drop-overlay {
+  position: fixed; inset: 0; z-index: 99999;
+  background: rgba(3, 2, 10, 0.85);
+  backdrop-filter: blur(20px);
+  display: flex; align-items: center; justify-content: center;
+  pointer-events: none; opacity: 0; transition: opacity 0.25s ease, visibility 0.25s ease;
+  visibility: hidden;
+}
+.drag-drop-overlay.active {
+  opacity: 1; pointer-events: all; visibility: visible;
+}
+.drag-drop-box {
+  border: 2px dashed rgba(59, 130, 246, 0.7);
+  background: radial-gradient(circle, rgba(59, 130, 246, 0.15) 0%, rgba(124, 58, 237, 0.08) 100%);
+  box-shadow: 0 0 50px rgba(59, 130, 246, 0.3), inset 0 0 30px rgba(59, 130, 246, 0.12);
+  border-radius: 28px; padding: 48px 64px; text-align: center;
+  transform: scale(0.92); transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  max-width: 90vw;
+}
+.drag-drop-overlay.active .drag-drop-box {
+  transform: scale(1);
+}
+.drag-drop-icon {
+  color: #38bdf8; margin-bottom: 16px; display: inline-flex;
+  animation: floatPulse 2s ease-in-out infinite;
+}
+@keyframes floatPulse {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+.drag-drop-title {
+  font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px;
+  font-family: var(--font-body);
+}
+.drag-drop-subtitle {
+  font-size: 13.5px; color: var(--text-dim, #94a3b8); font-weight: 500;
+}
+
 /* ─── MODEL BOTTOM SHEET ─────────────────────────── */
 .sheet-overlay {
   position: fixed; inset: 0; z-index: 60;
@@ -1139,6 +1178,17 @@ think::before {
   <div class="drawer-status">
     <div class="status-dot" id="statusDot"></div>
     <span id="statusText">Connecting…</span>
+  </div>
+</div>
+
+<!-- DRAG & DROP OVERLAY -->
+<div id="dragDropOverlay" class="drag-drop-overlay">
+  <div class="drag-drop-box">
+    <div class="drag-drop-icon">
+      <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+    </div>
+    <div class="drag-drop-title">Suelta tu archivo aquí</div>
+    <div class="drag-drop-subtitle">PDF, Radiografías, Imágenes, Código o Documentos</div>
   </div>
 </div>
 
@@ -1455,11 +1505,8 @@ const PDF_MAX_CHARS = 80_000;
 // Image: max dimension before compressing
 const IMG_MAX_PX = 1024;
 
-function handleFileSelect(e) {
-  const file = e.target.files[0];
+function processFile(file) {
   if (!file) return;
-  document.getElementById('fileInput').value = '';
-
   const ext = file.name.split('.').pop().toLowerCase();
 
   // ── 1. IMAGES → resize+compress, base64 stored internally ──
@@ -1560,6 +1607,64 @@ function handleFileSelect(e) {
   };
   reader.readAsText(file, 'UTF-8');
 }
+
+function handleFileSelect(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  document.getElementById('fileInput').value = '';
+  processFile(file);
+}
+
+// ── DRAG & DROP & CLIPBOARD LISTENERS ───────────────────────
+let dragCounter = 0;
+window.addEventListener('dragenter', (e) => {
+  e.preventDefault();
+  dragCounter++;
+  const dropOverlay = document.getElementById('dragDropOverlay');
+  if (e.dataTransfer?.types?.includes('Files') && dropOverlay) {
+    dropOverlay.classList.add('active');
+  }
+});
+
+window.addEventListener('dragleave', (e) => {
+  e.preventDefault();
+  dragCounter--;
+  if (dragCounter <= 0) {
+    dragCounter = 0;
+    const dropOverlay = document.getElementById('dragDropOverlay');
+    if (dropOverlay) dropOverlay.classList.remove('active');
+  }
+});
+
+window.addEventListener('dragover', (e) => {
+  e.preventDefault();
+  if (e.dataTransfer) e.dataTransfer.dropEffect = 'copy';
+});
+
+window.addEventListener('drop', (e) => {
+  e.preventDefault();
+  dragCounter = 0;
+  const dropOverlay = document.getElementById('dragDropOverlay');
+  if (dropOverlay) dropOverlay.classList.remove('active');
+  const files = e.dataTransfer?.files;
+  if (files && files.length > 0) {
+    processFile(files[0]);
+  }
+});
+
+document.addEventListener('paste', (e) => {
+  const items = e.clipboardData?.items;
+  if (!items) return;
+  for (let i = 0; i < items.length; i++) {
+    if (items[i].kind === 'file') {
+      const file = items[i].getAsFile();
+      if (file) {
+        processFile(file);
+        break;
+      }
+    }
+  }
+});
 
 function removeImage() {
   currentImageBase64 = null;
