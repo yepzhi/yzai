@@ -1261,7 +1261,7 @@ think::before {
       </div>
       <div class="model-pill-info">
         <div class="model-pill-name" id="activeName">@yepzhi AI, 27B MoE</div>
-        <div class="model-pill-sub" id="activeSub">Context: 8K · 8 Slots Ready</div>
+        <div class="model-pill-sub" id="activeSub">Context: 8K · 5 Slots Ready</div>
       </div>
       <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
     </div>
@@ -1321,7 +1321,7 @@ think::before {
     </div>
 
     <!-- Centered Context / Slot Status Badge (cleanly elevated above toolbar) -->
-    <div class="input-hint" id="token-count">Context: 8K · 8 Slots Ready</div>
+    <div class="input-hint" id="token-count">Context: 8K · 5 Slots Ready</div>
 
     <!-- Centered Toolbar for Mode toggles (aligned with input container width) -->
     <div class="input-top-bar">
@@ -1897,10 +1897,10 @@ function updateModelHeader() {
   const activeName = document.getElementById('activeName');
   if (activeName) activeName.textContent = '@yepzhi AI, 27B MoE';
   const activeSub = document.getElementById('activeSub');
-  if (activeSub) activeSub.textContent = 'Context: 8K · 8 Slots Ready';
+  if (activeSub) activeSub.textContent = 'Context: 8K · 5 Slots Ready';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 8K · 8 Slots Ready';
+    tokenCount.textContent = 'Context: 8K · 5 Slots Ready';
   }
 }
 
