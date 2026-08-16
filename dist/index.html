@@ -2389,7 +2389,7 @@ async function sendMessage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'moondream:latest',
+          model: 'minicpm-v:8b',
           messages: [
             {
               role: 'user',
@@ -2399,7 +2399,7 @@ async function sendMessage() {
           ],
           keep_alive: -1,
           stream: false,
-          options: { temperature: 0.1 }
+          options: { temperature: 0.05, num_predict: 1024 }
         })
       });
       if (vRes.ok) {
