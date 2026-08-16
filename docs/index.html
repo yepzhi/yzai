@@ -621,6 +621,7 @@ think::before {
   padding: 16px 16px calc(24px + var(--safe-b, 0px));
   background: linear-gradient(to top, rgba(3,3,5,0.98) 40%, rgba(3,3,5,0.85) 75%, transparent);
   pointer-events: none; z-index: 30; display: flex; flex-direction: column; align-items: center;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .input-container {
   width: 100%; max-width: 880px; pointer-events: all;
@@ -3166,14 +3167,45 @@ document.getElementById('prompt').addEventListener('keydown', e => {
   if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
 });
 
-// Fix for iOS Safari / iPadOS Keyboard hiding input bar
+// Mobile / iOS Safari keyboard handling without black screen or jumping
+const promptInput = document.getElementById('prompt');
+if (promptInput) {
+  promptInput.addEventListener('focus', () => {
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    setTimeout(() => {
+      window.scrollTo(0, 0);
+      scrollBottom(true);
+    }, 80);
+  });
+  promptInput.addEventListener('blur', () => {
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+    const iw = document.querySelector('.input-wrapper');
+    if (iw) iw.style.transform = 'none';
+  });
+}
+
 if (window.visualViewport) {
-  window.visualViewport.addEventListener('resize', () => {
+  const syncViewport = () => {
+    window.scrollTo(0, 0);
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
     const iw = document.querySelector('.input-wrapper');
     if (!iw) return;
-    const offset = window.innerHeight - window.visualViewport.height - window.visualViewport.offsetTop;
-    iw.style.paddingBottom = Math.max(offset + 24, 24) + 'px';
+    const keyboardHeight = window.innerHeight - window.visualViewport.height;
+    if (keyboardHeight > 60) {
+      iw.style.transform = `translateY(${-keyboardHeight}px)`;
+    } else {
+      iw.style.transform = 'none';
+    }
     scrollBottom();
+  };
+  window.visualViewport.addEventListener('resize', syncViewport);
+  window.visualViewport.addEventListener('scroll', () => {
+    window.scrollTo(0, 0);
   });
 }
 
