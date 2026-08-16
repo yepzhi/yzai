@@ -1502,8 +1502,8 @@ const TEXT_EXTENSIONS = ['txt','md','markdown','json','jsonl','csv','tsv',
 
 // PDF: max chars to extract (~80K ≈ 20K tokens)
 const PDF_MAX_CHARS = 80_000;
-// Image: max dimension before compressing
-const IMG_MAX_PX = 1024;
+// Image: max dimension before compressing (higher = more detail for moondream OCR)
+const IMG_MAX_PX = 1536;
 
 function processFile(file) {
   if (!file) return;
@@ -1532,11 +1532,12 @@ function processFile(file) {
         canvas.width = w; canvas.height = h;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, w, h);
-        const jpegData = canvas.toDataURL('image/jpeg', 0.85);
+        const jpegData = canvas.toDataURL('image/jpeg', 0.92);
         currentImageBase64 = jpegData.split(',')[1];
         document.getElementById('imgPreview').src = jpegData;
         const kb = Math.round(currentImageBase64.length * 0.75 / 1024);
-        document.getElementById('token-count').textContent = `Imagen lista (${w}x${h}px, ~${kb}KB)`;
+        document.getElementById('token-count').textContent = `Imagen lista — ${w}×${h}px, ~${kb}KB`;
+        document.getElementById('sendBtn').disabled = false;
       };
       img.src = rawData;
     };
@@ -2344,18 +2345,9 @@ async function sendMessage() {
     removeAttachedDoc();
   }
 
-  // Capture any freshly attached image BEFORE removeImage() clears it
-  let imageAttached = currentImageBase64 || null;
-
-  // If no NEW image but the latest history turn had one, grab it for re-analysis
-  if (!imageAttached) {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      if (messages[i].images && messages[i].images.length > 0) {
-        imageAttached = messages[i].images[0];
-        break;
-      }
-    }
-  }
+  // Capture ONLY the freshly attached image - never re-use old history images
+  // (re-using causes wrong image analysis across turns)
+  const imageAttached = currentImageBase64 || null;
 
   const userMsgForHistory = { role:'user', content: userTextForApi };
   if (currentImageBase64) userMsgForHistory.images = [currentImageBase64];
