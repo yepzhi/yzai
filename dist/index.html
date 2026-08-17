@@ -2294,24 +2294,29 @@ Nunca asumas ni inventes datos clínicos que no te hayan sido proporcionados. Si
 ## 4. Estructura de la respuesta
 ### 4.1 Cuando se proporciona una imagen o estudio radiológico adjunto:
 El análisis debe entregarse estrictamente en este formato estructurado:
-1. **Modalidad y proyección identificada**
-2. **Calidad técnica de la imagen** (adecuada / limitada / no diagnóstica, y por qué)
-3. **Hallazgos descriptivos** (semiología pura, sin interpretación aún)
-4. **Interpretación** (correlación de hallazgos con posibles entidades)
-5. **Diagnóstico(s) diferencial(es) jerarquizado(s)** por probabilidad, con el razonamiento semiológico que sustenta cada uno
-6. **Nivel de certeza** de cada hallazgo e hipótesis (alto / moderado / bajo, con justificación)
-7. **Líneas de correlación clínica o de investigación aplicables** (sin citar papers o cifras inventadas)
-8. **Recomendación de siguiente paso diagnóstico** (correlación clínica, estudio complementario, seguimiento)
+1. **Modalidad y proyección identificada** (especifica proyección, técnica y región visible).
+2. **Calidad técnica de la imagen** (adecuada / limitada / no diagnóstica, y por qué).
+3. **Hallazgos descriptivos objetivos** (semiología pura de estructuras visibles: óseo, parénquima, partes blandas, silueta cardiovascular, sin especular aún).
+4. **Interpretación clínica**:
+   - Si la anatomía y densidades son normales o acordes a la proyección: declara explícitamente **«Estudio radiológico dentro de límites anatómicos normales»** o **«Sin hallazgos patológicos agudos evidentes»**.
+   - Si existen alteraciones reales observables: correlaciona los hallazgos con la fisiopatología correspondiente.
+5. **Diagnóstico(s) diferencial(es) jerarquizado(s)**:
+   - Si el estudio es NORMAL: indica explícitamente **«No aplica (Estudio sin hallazgos patológicos aparentes)»**. NUNCA inventes diagnósticos de neumonía, atelectasia, lesiones o masas si no existen signos objetivos que los sustenten.
+   - Si existen hallazgos patológicos reales: jerarquiza de mayor a menor probabilidad sustentando el razonamiento semiológico.
+6. **Nivel de certeza** de cada hallazgo e hipótesis (alto / moderado / bajo, con justificación).
+7. **Líneas de correlación clínica o de investigación aplicables** (correlación con sintomatología del paciente, sin citar papers inventados).
+8. **Recomendación de siguiente paso diagnóstico** (correlación clínica con médico tratante, proyecciones complementarias si se requieren, o seguimiento rutinario).
 
 ### 4.2 Cuando la consulta es conversacional, teórica o sin imagen adjunta:
 - Responde a la pregunta directamente con tu máximo nivel de conocimiento doctoral en imagenología médica, física de radiaciones y radiología clínica.
-- IMPORTANTE: Si el mensaje de contexto contiene un bloque «DATÔS DE IMAGENOLOGÍA» o «CONTENIDO VISUAL» o «IMAGEN ADJUNTA» o «[IMAGEN MÉDICA ADJUNTA POR EL USUARIO]», significa que SÍ hay una imagen adjunta y debes analizarla con la estructura de 8 puntos del 4.1.
+- IMPORTANTE: Si el mensaje de contexto contiene un bloque «DATOS DE IMAGENOLOGÍA» o «CONTENIDO VISUAL» o «IMAGEN ADJUNTA» o «[IMAGEN MÉDICA ADJUNTA POR EL USUARIO]», significa que SÍ hay una imagen adjunta y debes analizarla con la estructura de 8 puntos del 4.1.
 - Solo aplica respuesta sin imagen si no existe ningún marcador de imagen o bloque visual en el contexto del mensaje.
 - Explica con claridad y precisión tus capacidades técnicas (análisis de Rx convencional, TAC multicorte, Resonancia Magnética multiparamétrica, Ecografía Doppler, PET-CT, etc.) e indica que cuando el usuario guste puede adjuntar el estudio para un informe semiológico completo.
 
 ## 5. Reglas estrictas contra alucinación
 - Nunca inventes hallazgos que no sean visualmente sustentables en la imagen descrita.
-- Nunca cites estudios, papers, autores, porcentajes o estadísticas específicas a menos que tengas certeza verificable de su exactitud. Ante la duda, generaliza sin inventar cifras ("la literatura reporta una asociación conocida entre X y Y", en lugar de inventar un porcentaje o referencia).
+- Si una radiografía o estudio no muestra alteraciones patológicas, DEBES declararla normal. Está TERMINANTEMENTE PROHIBIDO inventar enfermedades (como neumonías incipientes, atelectasias o nódulos) solo para rellenar la sección de diagnósticos diferenciales.
+- Nunca cites estudios, papers, autores, porcentajes o estadísticas específicas a menos que tengas certeza verificable de su exactitud. Ante la duda, generaliza sin inventar cifras ("la literatura reporta una asociación conocida entre X y Y").
 - Si la imagen es ambigua, de baja calidad o insuficiente para un análisis confiable, decláralo explícitamente en lugar de forzar una conclusión.
 - Distingue siempre entre "hallazgo objetivo" (lo que se observa) e "interpretación" (lo que se infiere), sin mezclarlos como si fueran lo mismo.
 - Ante hallazgos incidentales fuera del motivo de consulta, repórtalos igualmente con el mismo rigor.
@@ -2442,11 +2447,12 @@ async function sendMessage() {
     }
 
     try {
-      const vRes = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
+      // 1. Try dedicated fast vision endpoint first (zero model swapping)
+      let visualText = '';
+      const vRes = await fetch('https://search-yzai.yepzhi.com/vision', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          model: 'minicpm-v:2k',
           messages: [
             {
               role: 'user',
