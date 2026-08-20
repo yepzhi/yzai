@@ -1525,16 +1525,20 @@ const ICONS = {
 };
 
 const MODEL_META = {
-  'qwen36-yzai:latest': { badge:'Pro', cls:'badge-purple', desc:'@yepzhi AI, 27B MoE.', speed:'~8 t/s' }
+  'qwen38-uncensored:latest': { badge:'27B Max', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored (Hybrid Attention · 8K Ctx)', speed:'~4 t/s' },
+  'qwen38-27b:latest': { badge:'27B', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored', speed:'~4 t/s' },
+  'qwen38:latest': { badge:'27B', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored', speed:'~4 t/s' },
+  'qwen36-yzai:latest': { badge:'Pro', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored (Aliased)', speed:'~4 t/s' },
+  'minicpm-v:8b': { badge:'Vision', cls:'badge-blue', desc:'MiniCPM-V 8B Multimodal', speed:'~12 t/s' }
 };
 
 // ── CONFIG & STATE ─────────────────────────────────────────
 let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
-let selectedModel = 'qwen36-yzai:latest';
-const FIXED_CTX   = 8192; // 8K 8-slot Optimized
-let selectedModelDesc = '@yepzhi AI, 27B MoE (8K Ctx · 8 Slots)';
+let selectedModel = 'qwen38-uncensored:latest';
+const FIXED_CTX   = 8192; // 8K Hybrid Attention Optimized
+let selectedModelDesc = 'Qwen 3.8 27B Uncensored (8K Ctx · Hybrid Attention)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -1854,7 +1858,7 @@ async function loadModels() {
     if (models.length) {
       const qwenModel = models.find(m => {
         const lower = m.name.toLowerCase();
-        return lower.includes('qwen36-yzai') || lower.includes('qwen3.6');
+        return lower.includes('qwen38-uncensored') || lower.includes('qwen38') || lower.includes('qwen3.8') || lower.includes('qwen36-yzai');
       }) || models.find(m => m.name.toLowerCase().includes('qwen')) || models[0];
       if (qwenModel) {
         selectedModel = qwenModel.name;
@@ -1862,7 +1866,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · @yepzhi AI, 27B MoE (8K)`);
+    setStatus(true, `Server Live · Qwen 3.8 27B Uncensored (8K)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -1895,12 +1899,12 @@ function setStatus(ok, text) {
 
 function updateModelHeader() {
   const activeName = document.getElementById('activeName');
-  if (activeName) activeName.textContent = '@yepzhi AI, 27B MoE';
+  if (activeName) activeName.textContent = 'Qwen 3.8 27B Uncensored';
   const activeSub = document.getElementById('activeSub');
-  if (activeSub) activeSub.textContent = 'Context: 8K · 5 Slots Ready';
+  if (activeSub) activeSub.textContent = 'Context: 8K · Hybrid Attention (GPU 100%)';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 8K · 5 Slots Ready';
+    tokenCount.textContent = 'Context: 8K · Hybrid Attention (GPU 100%)';
   }
 }
 
@@ -1908,7 +1912,7 @@ function renderSheetModels(models) {}
 function pickModelWithPassword(name) {}
 function updateCtxDisplay() { updateModelHeader(); }
 function pickModel(name, silent) {
-  selectedModel = name || 'qwen36-yzai:latest';
+  selectedModel = name || 'qwen38-uncensored:latest';
   updateModelHeader();
 }
 
