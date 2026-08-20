@@ -1260,8 +1260,8 @@ think::before {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z" fill="url(#aiGrad)"/><circle cx="12" cy="12" r="2.5" fill="#ffffff" opacity="0.9"/></svg>
       </div>
       <div class="model-pill-info">
-        <div class="model-pill-name" id="activeName">@yepzhi AI, 27B MoE</div>
-        <div class="model-pill-sub" id="activeSub">Context: 8K · 5 Slots Ready</div>
+        <div class="model-pill-name" id="activeName">@yepzhi AI · Qwen 3.8 27B</div>
+        <div class="model-pill-sub" id="activeSub"><span style="color:#3FB950;font-weight:600;">Qwen 3.8 27B: Ready</span></div>
       </div>
       <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
     </div>
@@ -1432,7 +1432,7 @@ think::before {
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:12px;">
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Modelo Activo</span>
-          <strong style="color:#fff; font-size:12px;">@yepzhi AI, 27B MoE</strong>
+          <strong style="color:#fff; font-size:12px;">Qwen 3.8 27B Uncensored</strong>
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Procesador / GPU</span>
@@ -1440,11 +1440,11 @@ think::before {
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Residencia en VRAM</span>
-          <strong style="color:var(--green); font-size:12px;">100% GPU (14.17 GB fijos)</strong>
+          <strong style="color:var(--green); font-size:12px;">100% GPU (18 GB fijos)</strong>
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Concurrencia & Contexto</span>
-          <strong style="color:var(--secondary); font-size:12px;">8 Slots · 8K Ctx</strong>
+          <strong style="color:var(--secondary); font-size:12px;">Hybrid Attention · 8K Ctx</strong>
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Sandbox de Código</span>
@@ -1525,16 +1525,20 @@ const ICONS = {
 };
 
 const MODEL_META = {
-  'qwen36-yzai:latest': { badge:'Pro', cls:'badge-purple', desc:'@yepzhi AI, 27B MoE.', speed:'~8 t/s' }
+  'qwen38-uncensored:latest': { badge:'27B Max', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored (Hybrid Attention · 8K Ctx)', speed:'~4 t/s' },
+  'qwen38-27b:latest': { badge:'27B', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored', speed:'~4 t/s' },
+  'qwen38:latest': { badge:'27B', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored', speed:'~4 t/s' },
+  'qwen36-yzai:latest': { badge:'Pro', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored (Aliased)', speed:'~4 t/s' },
+  'minicpm-v:8b': { badge:'Vision', cls:'badge-blue', desc:'MiniCPM-V 8B Multimodal', speed:'~12 t/s' }
 };
 
 // ── CONFIG & STATE ─────────────────────────────────────────
 let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
-let selectedModel = 'qwen36-yzai:latest';
-const FIXED_CTX   = 8192; // 8K 8-slot Optimized
-let selectedModelDesc = '@yepzhi AI, 27B MoE (8K Ctx · 8 Slots)';
+let selectedModel = 'qwen38-uncensored:latest';
+const FIXED_CTX   = 8192; // 8K Hybrid Attention Optimized
+let selectedModelDesc = 'Qwen 3.8 27B Uncensored (8K Ctx · Hybrid Attention)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -1809,8 +1813,8 @@ async function checkServicesHealth(forceCheck = false) {
   const drawerText = document.getElementById('statusText');
 
   if (ollamaOk) {
-    if (topDot) { topDot.style.background = '#3FB950'; topDot.title = 'Server Live · @yepzhi AI, 27B MoE Ready'; }
-    if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">@yepzhi AI, 27B MoE: Ready</span>';
+    if (topDot) { topDot.style.background = '#3FB950'; topDot.title = 'Server Live · Qwen 3.8 27B Ready'; }
+    if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Qwen 3.8 27B: Ready</span>';
     if (drawerDot) drawerDot.style.background = '#3FB950';
     if (drawerText) drawerText.innerHTML = 'AI Server <strong style="color:#3FB950">operational and ready</strong>';
   } else {
@@ -1854,7 +1858,7 @@ async function loadModels() {
     if (models.length) {
       const qwenModel = models.find(m => {
         const lower = m.name.toLowerCase();
-        return lower.includes('qwen36-yzai') || lower.includes('qwen3.6');
+        return lower.includes('qwen38-uncensored') || lower.includes('qwen38') || lower.includes('qwen3.8') || lower.includes('qwen36-yzai');
       }) || models.find(m => m.name.toLowerCase().includes('qwen')) || models[0];
       if (qwenModel) {
         selectedModel = qwenModel.name;
@@ -1862,7 +1866,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · @yepzhi AI, 27B MoE (8K)`);
+    setStatus(true, `Server Live · Qwen 3.8 27B Uncensored (8K)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -1895,12 +1899,12 @@ function setStatus(ok, text) {
 
 function updateModelHeader() {
   const activeName = document.getElementById('activeName');
-  if (activeName) activeName.textContent = '@yepzhi AI, 27B MoE';
+  if (activeName) activeName.textContent = '@yepzhi AI · Qwen 3.8 27B';
   const activeSub = document.getElementById('activeSub');
-  if (activeSub) activeSub.textContent = 'Context: 8K · 5 Slots Ready';
+  if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Qwen 3.8 27B: Ready</span>';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 8K · 5 Slots Ready';
+    tokenCount.textContent = 'Context: 8K · Hybrid Attention (GPU 100%)';
   }
 }
 
@@ -1908,7 +1912,7 @@ function renderSheetModels(models) {}
 function pickModelWithPassword(name) {}
 function updateCtxDisplay() { updateModelHeader(); }
 function pickModel(name, silent) {
-  selectedModel = name || 'qwen36-yzai:latest';
+  selectedModel = name || 'qwen38-uncensored:latest';
   updateModelHeader();
 }
 
@@ -2425,7 +2429,7 @@ async function sendMessage() {
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom(true);
 
-  // ── Vision Perception Bridge (Behind the scenes OCR/Vision -> 27B MoE Deep Reasoning) ──
+  // ── Vision Perception Bridge (Behind the scenes OCR/Vision -> Qwen 3.8 27B Deep Reasoning) ──
   if (imageAttached) {
     // ── Inject image-present marker into system slot IMMEDIATELY so the model
     // never falls into the "no image" branch regardless of moondream timing/failures

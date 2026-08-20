@@ -2429,7 +2429,7 @@ async function sendMessage() {
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom(true);
 
-  // ── Vision Perception Bridge (Behind the scenes OCR/Vision -> 27B MoE Deep Reasoning) ──
+  // ── Vision Perception Bridge (Behind the scenes OCR/Vision -> Qwen 3.8 27B Deep Reasoning) ──
   if (imageAttached) {
     // ── Inject image-present marker into system slot IMMEDIATELY so the model
     // never falls into the "no image" branch regardless of moondream timing/failures
