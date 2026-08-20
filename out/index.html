@@ -2429,67 +2429,19 @@ async function sendMessage() {
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom(true);
 
-  // ── Vision Perception Bridge (Behind the scenes OCR/Vision -> Qwen 3.8 27B Deep Reasoning) ──
+  // ── Native Multimodal Vision (Qwen 3.8 Direct Vision Feed) ──
   if (imageAttached) {
-    // ── Inject image-present marker into system slot IMMEDIATELY so the model
-    // never falls into the "no image" branch regardless of moondream timing/failures
-    const imgMarker = isRxModeActive
-      ? '[IMAGEN MÉDICA ADJUNTA: SÍ hay un estudio de imagenología adjunto en esta consulta. Procede obligatoriamente con el informe estructurado de 8 puntos (sección 4.1).]'
-      : '[IMAGEN ADJUNTA: El usuario ha adjuntado una imagen a esta consulta. Analiza su contenido en detalle.]';
-    if (payload.length > 0 && payload[0].role === 'system') {
-      payload[0].content += '\n\n' + imgMarker;
-    } else {
-      payload.unshift({ role: 'system', content: imgMarker });
-    }
+    // Attach image directly to the last user message for native Ollama multimodal vision
+    payload[payload.length - 1].images = [imageAttached];
 
-    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Analizando...</span>`;
-    document.getElementById('token-count').textContent = 'Analizando...';
-
-    let visionInstruction = 'Transcribe with high precision all text, code, tables, data, diagrams, and visual objects in this image. If it contains code or an error, copy it verbatim.';
     if (isRxModeActive) {
-      visionInstruction = 'Analyze this radiological/medical study with maximum detail: describe all visible anatomical structures, radiographic densities/attenuation, projection, orientation, text labels, markers (R/L), technical quality, and any visible anomalies, lesions, fractures, or foreign objects verbatim.';
-    }
-
-    try {
-      // 1. Try dedicated fast vision endpoint first (zero model swapping)
-      let visualText = '';
-      const vRes = await fetch('https://search-yzai.yepzhi.com/vision', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          messages: [
-            {
-              role: 'user',
-              content: visionInstruction,
-              images: [imageAttached]
-            }
-          ],
-          keep_alive: -1,
-          stream: false,
-          options: { temperature: 0.05, num_predict: 1024, num_ctx: 2048 }
-        })
-      });
-      if (vRes.ok) {
-        const vData = await vRes.json();
-        const visualText = vData.message?.content || '';
-        if (visualText) {
-          const visionBlock = isRxModeActive
-            ? `[DATOS DE IMAGENOLOGÍA & REGISTRO VISUAL EXTRAÍDO DEL ESTUDIO ADJUNTO]\n${visualText}\n\n[INSTRUCCIÓN]: El usuario ha adjuntado el estudio de imagenología médica descrito arriba. Procede con el informe de análisis estructurado doctoral completo siguiendo la estructura obligatoria de 8 puntos.`
-            : `[CONTENIDO VISUAL & OCR EXTRAÍDO DE LA IMAGEN ADJUNTA]\n${visualText}\n\n[INSTRUCCIÓN]: El usuario adjuntó una imagen con el contenido descrito arriba. Utiliza toda tu capacidad analítica y de razonamiento profundo para responder detalladamente a su consulta.`;
-          
-          payload[payload.length - 1].content = `${visionBlock}\n\n---\nConsulta / Datos clínicos: ${payload[payload.length - 1].content}`;
-        } else {
-          payload[payload.length - 1].content = `[IMAGEN MÉDICA ADJUNTA POR EL USUARIO]\n\n---\nConsulta / Datos clínicos: ${payload[payload.length - 1].content}`;
-        }
+      const rxMarker = '[MODO IMAGENOLOGÍA MÉDICA (PhD) ACTIVO: Analiza el estudio de imagenología adjunto con rigor doctoral y formato estructurado.]';
+      if (payload.length > 0 && payload[0].role === 'system') {
+        payload[0].content += '\n\n' + rxMarker;
       } else {
-        payload[payload.length - 1].content = `[IMAGEN MÉDICA ADJUNTA POR EL USUARIO]\n\n---\nConsulta / Datos clínicos: ${payload[payload.length - 1].content}`;
+        payload.unshift({ role: 'system', content: rxMarker });
       }
-    } catch(vErr) {
-      console.warn('[vision-pipeline]', vErr);
-      payload[payload.length - 1].content = `[IMAGEN MÉDICA ADJUNTA POR EL USUARIO]\n\n---\nConsulta / Datos clínicos: ${payload[payload.length - 1].content}`;
     }
-    document.getElementById('token-count').textContent = 'Generando...';
-    bubble.innerHTML = '<span class="cursor"></span>';
   }
 
   // ── Proactive AI Contextual Web Search Injection ──
