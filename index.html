@@ -1525,10 +1525,12 @@ const ICONS = {
 };
 
 const MODEL_META = {
+  'gemma4-26b-uncensored:latest': { badge:'26B MoE', cls:'badge-purple', desc:'Gemma 4 26B-A4B Uncensored (MoE · 4B Active · MTP)', speed:'~22 t/s' },
+  'gemma4:latest': { badge:'26B MoE', cls:'badge-purple', desc:'Gemma 4 26B-A4B Uncensored', speed:'~22 t/s' },
   'qwen38-uncensored:latest': { badge:'27B Max', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored (Hybrid Attention · 8K Ctx)', speed:'~4 t/s' },
   'qwen38-27b:latest': { badge:'27B', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored', speed:'~4 t/s' },
   'qwen38:latest': { badge:'27B', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored', speed:'~4 t/s' },
-  'qwen36-yzai:latest': { badge:'Pro', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored (Aliased)', speed:'~4 t/s' },
+  'qwen36-yzai:latest': { badge:'Pro', cls:'badge-purple', desc:'@yepzhi AI Model (Aliased)', speed:'~22 t/s' },
   'minicpm-v:8b': { badge:'Vision', cls:'badge-blue', desc:'MiniCPM-V 8B Multimodal', speed:'~12 t/s' }
 };
 
@@ -1536,9 +1538,9 @@ const MODEL_META = {
 let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
-let selectedModel = 'qwen38-uncensored:latest';
-const FIXED_CTX   = 8192; // 8K Hybrid Attention Optimized
-let selectedModelDesc = 'Qwen 3.8 27B Uncensored (8K Ctx · Hybrid Attention)';
+let selectedModel = 'gemma4-26b-uncensored:latest';
+const FIXED_CTX   = 8192; // 8K MoE / Hybrid Attention
+let selectedModelDesc = 'Gemma 4 26B-A4B MoE Uncensored (8K Ctx · 4B Active MTP)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -1856,17 +1858,18 @@ async function loadModels() {
     allModels = models;
 
     if (models.length) {
-      const qwenModel = models.find(m => {
+      const preferredModel = models.find(m => {
         const lower = m.name.toLowerCase();
-        return lower.includes('qwen38-uncensored') || lower.includes('qwen38') || lower.includes('qwen3.8') || lower.includes('qwen36-yzai');
-      }) || models.find(m => m.name.toLowerCase().includes('qwen')) || models[0];
-      if (qwenModel) {
-        selectedModel = qwenModel.name;
+        return lower.includes('gemma4') || lower.includes('qwen38-uncensored') || lower.includes('qwen38') || lower.includes('qwen36-yzai');
+      }) || models[0];
+      if (preferredModel) {
+        selectedModel = preferredModel.name;
       }
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · Qwen 3.8 27B Uncensored (8K)`);
+    const isGemma = (selectedModel || '').toLowerCase().includes('gemma');
+    setStatus(true, `Server Live · ${isGemma ? 'Gemma 4 26B MoE (A4B)' : 'Qwen 3.8 27B'} (8K)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -1898,13 +1901,15 @@ function setStatus(ok, text) {
 }
 
 function updateModelHeader() {
+  const isGemma = (selectedModel || '').toLowerCase().includes('gemma');
   const activeName = document.getElementById('activeName');
-  if (activeName) activeName.textContent = '@yepzhi AI · Qwen 3.8 27B';
+  if (activeName) activeName.textContent = isGemma ? '@yepzhi AI · Gemma 4 26B MoE' : '@yepzhi AI · Qwen 3.8 27B';
   const activeSub = document.getElementById('activeSub');
-  if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Qwen 3.8 27B: Ready</span>';
+  const modelSub = isGemma ? 'Gemma 4 MoE (A4B): Ready' : 'Qwen 3.8 27B: Ready';
+  if (activeSub) activeSub.innerHTML = `<span style="color:#3FB950;font-weight:600;">${modelSub}</span>`;
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 8K · Hybrid Attention (GPU 100%)';
+    tokenCount.textContent = isGemma ? 'Context: 8K · MoE 4B Active (100% GPU)' : 'Context: 8K · 3 Slots Ready (100% GPU)';
   }
 }
 
@@ -1912,7 +1917,7 @@ function renderSheetModels(models) {}
 function pickModelWithPassword(name) {}
 function updateCtxDisplay() { updateModelHeader(); }
 function pickModel(name, silent) {
-  selectedModel = name || 'qwen38-uncensored:latest';
+  selectedModel = name || 'gemma4-26b-uncensored:latest';
   updateModelHeader();
 }
 
