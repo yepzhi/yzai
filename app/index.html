@@ -1444,7 +1444,7 @@ think::before {
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Concurrencia & Contexto</span>
-          <strong style="color:var(--secondary); font-size:12px;">MoE 4B Active · 8K Ctx (MTP)</strong>
+          <strong style="color:var(--secondary); font-size:12px;">MoE 4B Active · 32K Ctx (7 Slots)</strong>
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Sandbox de Código</span>
@@ -1534,8 +1534,8 @@ let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
 let selectedModel = 'gemma4-26b-uncensored:latest';
-const FIXED_CTX   = 8192; // 8K MoE / Hybrid Attention
-let selectedModelDesc = 'Gemma 4 26B-A4B MoE Uncensored (8K Ctx · 4B Active MTP)';
+const FIXED_CTX   = 32768; // 32K MoE / Hybrid SWA (50+ páginas)
+let selectedModelDesc = 'Gemma 4 26B-A4B MoE Uncensored (32K Ctx · 7 Slots)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -1549,7 +1549,7 @@ let currentAttachedDoc = null; // stored internally, NEVER dumped into prompt te
 function removeAttachedDoc() {
   currentAttachedDoc = null;
   document.getElementById('docPreviewContainer').style.display = 'none';
-  document.getElementById('token-count').textContent = 'Context: 8K · Ready';
+  document.getElementById('token-count').textContent = 'Context: 32K · Ready';
 }
 
 const esc = (str) => String(str).replace(/[&<>"']/g, match => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
@@ -1863,7 +1863,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · Gemma 4 26B MoE (A4B) (8K)`);
+    setStatus(true, `Server Live · Gemma 4 26B MoE (32K · 7 Slots)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -1901,7 +1901,7 @@ function updateModelHeader() {
   if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Gemma 4 MoE (A4B): Ready</span>';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 8K · MoE 4B Active (100% GPU)';
+    tokenCount.textContent = 'Context: 32K · 7 Slots (100% GPU)';
   }
 }
 
