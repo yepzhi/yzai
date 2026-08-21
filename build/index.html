@@ -1321,7 +1321,7 @@ think::before {
     </div>
 
     <!-- Centered Context / Slot Status Badge (cleanly elevated above toolbar) -->
-    <div class="input-hint" id="token-count">Context: 8K · 3 Slots Ready (100% GPU)</div>
+    <div class="input-hint" id="token-count">Context: 16K · 5 Slots Ready (100% GPU)</div>
 
     <!-- Centered Toolbar for Mode toggles (aligned with input container width) -->
     <div class="input-top-bar">
@@ -1444,7 +1444,7 @@ think::before {
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Concurrencia & Contexto</span>
-          <strong style="color:var(--secondary); font-size:12px;">MoE 4B Active · 32K Ctx (7 Slots)</strong>
+          <strong style="color:var(--secondary); font-size:12px;">MoE 4B Active · 16K Ctx (5 Slots)</strong>
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Sandbox de Código</span>
@@ -1534,8 +1534,8 @@ let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
 let selectedModel = 'gemma4-26b-uncensored:latest';
-const FIXED_CTX   = 32768; // 32K MoE / Hybrid SWA (50+ páginas)
-let selectedModelDesc = 'Gemma 4 26B-A4B MoE Uncensored (32K Ctx · 7 Slots)';
+const FIXED_CTX   = 16384; // 16K MoE / Hybrid SWA (32+ páginas)
+let selectedModelDesc = 'Gemma 4 26B-A4B MoE Uncensored (16K Ctx · 5 Slots)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -1549,7 +1549,7 @@ let currentAttachedDoc = null; // stored internally, NEVER dumped into prompt te
 function removeAttachedDoc() {
   currentAttachedDoc = null;
   document.getElementById('docPreviewContainer').style.display = 'none';
-  document.getElementById('token-count').textContent = 'Context: 32K · Ready';
+  document.getElementById('token-count').textContent = 'Context: 16K · Ready';
 }
 
 const esc = (str) => String(str).replace(/[&<>"']/g, match => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
@@ -1863,7 +1863,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · Gemma 4 26B MoE (32K · 7 Slots)`);
+    setStatus(true, `Server Live · Gemma 4 26B MoE (16K · 5 Slots)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -1901,7 +1901,7 @@ function updateModelHeader() {
   if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Gemma 4 MoE (A4B): Ready</span>';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 32K · 7 Slots (100% GPU)';
+    tokenCount.textContent = 'Context: 16K · 5 Slots (100% GPU)';
   }
 }
 
