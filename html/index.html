@@ -3341,11 +3341,11 @@ function resetInputUI() {
   const ORB_COLORS = [
     [[139,92,246],[99,102,241]],   // purple → indigo
     [[59,130,246],[6,182,212]],    // blue → cyan
-    [[124,58,237],[139,92,246]],   // deep-purple → primary
+    [[168,85,247],[236,72,153]],   // violet → pink
   ];
   const orbs = ORB_COLORS.map((c, i) => ({
-    x: 0, y: 0, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.2,
-    r: 280 + i*60, colors: c, phase: i*1.8
+    x: 0, y: 0, vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.3,
+    r: 320 + i*80, colors: c, phase: i*1.8
   }));
 
   function resize() {
@@ -3355,7 +3355,7 @@ function resetInputUI() {
     canvas.style.width = W+'px'; canvas.style.height = H+'px';
     ctx.scale(dpr,dpr);
     dots = [];
-    const sp = 42;
+    const sp = 38;
     for (let r=0; r<Math.ceil(H/sp)+1; r++)
       for (let c=0; c<Math.ceil(W/sp)+1; c++)
         dots.push({x:c*sp, y:r*sp});
@@ -3371,33 +3371,51 @@ function resetInputUI() {
   function lerpC(a,b,t) { return a.map((v,i)=>Math.round(v+(b[i]-v)*t)); }
 
   function tick() {
-    time += 0.005;
+    time += 0.007;
     ctx.clearRect(0,0,W,H);
+    // Draw rich gradient orbs
     for (const o of orbs) {
-      o.x += o.vx + Math.sin(time+o.phase)*0.3;
-      o.y += o.vy + Math.cos(time*0.7+o.phase)*0.2;
+      o.x += o.vx + Math.sin(time+o.phase)*0.4;
+      o.y += o.vy + Math.cos(time*0.7+o.phase)*0.3;
       if(o.x<-o.r) o.x=W+o.r; if(o.x>W+o.r) o.x=-o.r;
       if(o.y<-o.r) o.y=H+o.r; if(o.y>H+o.r) o.y=-o.r;
-      const t=(Math.sin(time*0.4+o.phase)+1)/2;
+      const t=(Math.sin(time*0.5+o.phase)+1)/2;
       const [r,g,b]=lerpC(o.colors[0],o.colors[1],t);
       const g2=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
-      g2.addColorStop(0,`rgba(${r},${g},${b},0.14)`);
-      g2.addColorStop(0.5,`rgba(${r},${g},${b},0.06)`);
+      g2.addColorStop(0,`rgba(${r},${g},${b},0.28)`);
+      g2.addColorStop(0.45,`rgba(${r},${g},${b},0.12)`);
+      g2.addColorStop(0.8,`rgba(${r},${g},${b},0.03)`);
       g2.addColorStop(1,`rgba(${r},${g},${b},0)`);
       ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fillStyle=g2; ctx.fill();
     }
-    const IR = 140;
+    // Interactive Constellation + dot grid
+    const IR = 160;
+    const nearDots = [];
     for (const d of dots) {
       const dx=d.x-mouse.x, dy=d.y-mouse.y;
       const dist=Math.sqrt(dx*dx+dy*dy);
       const prox=Math.max(0,1-dist/IR);
-      const base=0.1+0.04*Math.sin(time*1.1+d.x*0.02+d.y*0.015);
-      ctx.beginPath(); ctx.arc(d.x,d.y,1,0,Math.PI*2);
+      const base=0.18+0.06*Math.sin(time*1.2+d.x*0.02+d.y*0.015);
+      ctx.beginPath(); ctx.arc(d.x,d.y,1.5,0,Math.PI*2);
       ctx.fillStyle=`rgba(139,92,246,${base})`; ctx.fill();
       if(prox>0.01) {
-        ctx.beginPath(); ctx.arc(d.x,d.y,1+prox*3,0,Math.PI*2);
+        nearDots.push({x:d.x, y:d.y, prox});
+        ctx.beginPath(); ctx.arc(d.x,d.y,1.5+prox*3.5,0,Math.PI*2);
         const r=Math.round(139+(6-139)*prox), g2c=Math.round(92+(182-92)*prox), bl=Math.round(246+(212-246)*prox);
-        ctx.fillStyle=`rgba(${r},${g2c},${bl},${prox*0.8})`; ctx.fill();
+        ctx.fillStyle=`rgba(${r},${g2c},${bl},${prox*0.9})`;
+        ctx.shadowColor='#06b6d4'; ctx.shadowBlur=prox*12;
+        ctx.fill(); ctx.shadowBlur=0;
+      }
+    }
+    // Draw laser lines connecting mouse to nearby dots
+    if (mouse.x > 0 && mouse.y > 0 && nearDots.length > 0) {
+      for (const nd of nearDots) {
+        ctx.beginPath();
+        ctx.moveTo(mouse.x, mouse.y);
+        ctx.lineTo(nd.x, nd.y);
+        ctx.strokeStyle = `rgba(6,182,212,${nd.prox * 0.4})`;
+        ctx.lineWidth = nd.prox * 1.5;
+        ctx.stroke();
       }
     }
     requestAnimationFrame(tick);
@@ -3414,8 +3432,8 @@ function resetInputUI() {
     constructor(el, opts={}) {
       this.el = el;
       this.original = el.textContent.trim();
-      this.speed = opts.speed || 25;
-      this.resolveDelay = opts.resolveDelay || 1.4;
+      this.speed = opts.speed || 40;
+      this.resolveDelay = opts.resolveDelay || 2.2;
       this.done = false;
       this._observe();
     }
@@ -3424,23 +3442,23 @@ function resetInputUI() {
         if (entries[0].isIntersecting && !this.done) {
           this.done = true;
           obs.disconnect();
-          setTimeout(() => this.play(), 60);
+          setTimeout(() => this.play(), 100);
         }
-      }, { threshold: 0.3 });
+      }, { threshold: 0.25 });
       obs.observe(this.el);
     }
     play() {
       const text = this.original;
       const len = text.length;
       let frame = 0;
-      const totalFrames = len * this.resolveDelay + 8;
+      const totalFrames = Math.floor(len * this.resolveDelay) + 14;
       const el = this.el;
       const tick = () => {
         let out = '';
         for (let i = 0; i < len; i++) {
           if (text[i] === ' ') { out += ' '; continue; }
           const resolveAt = i * this.resolveDelay;
-          out += (frame >= resolveAt + 3) ? text[i] : CHARS[Math.floor(Math.random() * CHARS.length)];
+          out += (frame >= resolveAt + 6) ? text[i] : CHARS[Math.floor(Math.random() * CHARS.length)];
         }
         el.textContent = out;
         if (frame < totalFrames) { frame++; setTimeout(tick, this.speed); }
@@ -3467,16 +3485,18 @@ function resetInputUI() {
       const b = document.createElement('span');
       const isH = side==='top'||side==='bottom';
       Object.assign(b.style, {
-        position: 'absolute', pointerEvents: 'none', zIndex: '1', borderRadius: '9999px',
+        position: 'absolute', pointerEvents: 'none', zIndex: '2', borderRadius: '9999px',
         ...(isH ? {
-          height: '2px', width: '40%', [side]: '0',
-          left: side==='top'?'-40%':'140%',
-          background: `linear-gradient(90deg, transparent, ${this.color}, transparent)`,
+          height: '3px', width: '45%', [side]: '0',
+          left: side==='top'?'-45%':'145%',
+          background: `linear-gradient(90deg, transparent, #fff, ${this.color}, transparent)`,
+          boxShadow: `0 0 14px ${this.color}, 0 0 6px #fff`,
           animation: `star-h-${side} ${this.speed}s linear infinite`,
         } : {
-          width: '2px', height: '35%', [side==='left'?'left':'right']: '0',
-          top: side==='left'?'-35%':'135%',
-          background: `linear-gradient(180deg, transparent, ${this.color}, transparent)`,
+          width: '3px', height: '40%', [side==='left'?'left':'right']: '0',
+          top: side==='left'?'-40%':'140%',
+          background: `linear-gradient(180deg, transparent, #fff, ${this.color}, transparent)`,
+          boxShadow: `0 0 14px ${this.color}, 0 0 6px #fff`,
           animation: `star-v-${side} ${this.speed}s linear infinite`,
         })
       });
@@ -3487,8 +3507,8 @@ function resetInputUI() {
   class SpotlightCard {
     constructor(el, opts={}) {
       this.el = el;
-      this.color = opts.color || 'rgba(139,92,246,0.18)';
-      this.size = opts.size || 280;
+      this.color = opts.color || 'radial-gradient(circle at 50% 50%, rgba(139,92,246,0.45) 0%, rgba(6,182,212,0.25) 35%, transparent 70%)';
+      this.size = opts.size || 340;
       this._bind();
     }
     _bind() {
@@ -3498,8 +3518,8 @@ function resetInputUI() {
       const light = document.createElement('div');
       Object.assign(light.style, {
         position: 'absolute', pointerEvents: 'none', borderRadius: 'inherit', inset: '0',
-        opacity: '0', transition: 'opacity 0.3s ease', zIndex: '2',
-        background: `radial-gradient(circle at 50% 50%, ${this.color} 0%, transparent 70%)`,
+        opacity: '0', transition: 'opacity 0.25s ease', zIndex: '2',
+        background: this.color.startsWith('radial-gradient') ? this.color : `radial-gradient(circle at 50% 50%, ${this.color} 0%, transparent 70%)`,
         backgroundSize: `${this.size}px ${this.size}px`, backgroundRepeat: 'no-repeat',
       });
       el.appendChild(light);
@@ -3515,8 +3535,8 @@ function resetInputUI() {
   class TiltedCard {
     constructor(el, opts={}) {
       this.el = el;
-      this.maxTilt = opts.maxTilt || 6;
-      this.maxScale = opts.maxScale || 1.02;
+      this.maxTilt = opts.maxTilt || 10;
+      this.maxScale = opts.maxScale || 1.04;
       this._bind();
     }
     _bind() {
@@ -3528,11 +3548,11 @@ function resetInputUI() {
         const dx = (e.clientX - (r.left + r.width/2)) / (r.width/2);
         const dy = (e.clientY - (r.top + r.height/2)) / (r.height/2);
         el.style.transition = 'transform 0.08s ease';
-        el.style.transform = `perspective(800px) rotateX(${-dy * this.maxTilt}deg) rotateY(${dx * this.maxTilt}deg) scale(${this.maxScale})`;
+        el.style.transform = `perspective(900px) rotateX(${-dy * this.maxTilt}deg) rotateY(${dx * this.maxTilt}deg) scale(${this.maxScale})`;
       });
       el.addEventListener('mouseleave', () => {
-        el.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1)';
-        el.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)';
+        el.style.transition = 'transform 0.45s cubic-bezier(0.16,1,0.3,1)';
+        el.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)';
       });
     }
   }
@@ -3540,11 +3560,11 @@ function resetInputUI() {
   class ShinyText {
     constructor(el, opts={}) {
       this.el = el;
-      const s = opts.speed || 3.5;
+      const s = opts.speed || 3;
       const txt = el.innerHTML;
       el.innerHTML = `<span style="
-        background: linear-gradient(120deg, currentColor 25%, #c084fc 48%, #e879f9 52%, currentColor 75%);
-        background-size: 200% auto;
+        background: linear-gradient(120deg, currentColor 20%, #ffffff 45%, #c084fc 52%, #ffffff 58%, currentColor 80%);
+        background-size: 250% auto;
         -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
         animation: shiny-sweep ${s}s linear infinite; display: inline-flex; align-items: center; gap: inherit;
       ">${txt}</span>`;
@@ -3556,10 +3576,10 @@ function resetInputUI() {
     const st = document.createElement('style');
     st.id = 'rb-keyframes';
     st.textContent = `
-      @keyframes star-h-top    { 0%{left:-40%} 100%{left:140%} }
-      @keyframes star-h-bottom { 0%{left:140%} 100%{left:-40%} }
-      @keyframes star-v-left   { 0%{top:-35%}  100%{top:135%}  }
-      @keyframes star-v-right  { 0%{top:135%}  100%{top:-35%}  }
+      @keyframes star-h-top    { 0%{left:-45%} 100%{left:145%} }
+      @keyframes star-h-bottom { 0%{left:145%} 100%{left:-45%} }
+      @keyframes star-v-left   { 0%{top:-40%}  100%{top:140%}  }
+      @keyframes star-v-right  { 0%{top:140%}  100%{top:-40%}  }
       @keyframes shiny-sweep   { 0%{background-position:-200% center} 100%{background-position:200% center} }
     `;
     document.head.appendChild(st);
@@ -3567,19 +3587,19 @@ function resetInputUI() {
 
   function initAll() {
     document.querySelectorAll('[data-decrypt]').forEach(el => {
-      if (!el._decrypt) el._decrypt = new DecryptedText(el, { speed: parseInt(el.dataset.decryptSpeed||'25') });
+      if (!el._decrypt) el._decrypt = new DecryptedText(el, { speed: parseInt(el.dataset.decryptSpeed||'40') });
     });
     document.querySelectorAll('[data-starborder]').forEach(el => {
       if (!el._sb) el._sb = new StarBorder(el, { color: el.dataset.sbColor||'#8b5cf6', speed: parseFloat(el.dataset.sbSpeed||'3.5') });
     });
     document.querySelectorAll('[data-spotlight]').forEach(el => {
-      if (!el._spotlight) el._spotlight = new SpotlightCard(el, { color: el.dataset.spotlightColor||'rgba(139,92,246,0.2)', size: parseInt(el.dataset.spotlightSize||'280') });
+      if (!el._spotlight) el._spotlight = new SpotlightCard(el, { color: el.dataset.spotlightColor||'rgba(139,92,246,0.3)', size: parseInt(el.dataset.spotlightSize||'340') });
     });
     document.querySelectorAll('[data-tilt]').forEach(el => {
-      if (!el._tilt) el._tilt = new TiltedCard(el, { maxTilt: parseFloat(el.dataset.tiltMax||'6'), maxScale: parseFloat(el.dataset.tiltScale||'1.02') });
+      if (!el._tilt) el._tilt = new TiltedCard(el, { maxTilt: parseFloat(el.dataset.tiltMax||'10'), maxScale: parseFloat(el.dataset.tiltScale||'1.04') });
     });
     document.querySelectorAll('[data-shiny]').forEach(el => {
-      if (!el._shiny) el._shiny = new ShinyText(el, { speed: parseFloat(el.dataset.shinySpeed||'3.5') });
+      if (!el._shiny) el._shiny = new ShinyText(el, { speed: parseFloat(el.dataset.shinySpeed||'3') });
     });
   }
 
