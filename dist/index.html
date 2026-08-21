@@ -1525,13 +1525,8 @@ const ICONS = {
 };
 
 const MODEL_META = {
-  'gemma4-26b-uncensored:latest': { badge:'26B MoE', cls:'badge-purple', desc:'Gemma 4 26B-A4B Uncensored (MoE · 4B Active · MTP)', speed:'~22 t/s' },
-  'gemma4:latest': { badge:'26B MoE', cls:'badge-purple', desc:'Gemma 4 26B-A4B Uncensored', speed:'~22 t/s' },
-  'qwen38-uncensored:latest': { badge:'27B Max', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored (Hybrid Attention · 8K Ctx)', speed:'~4 t/s' },
-  'qwen38-27b:latest': { badge:'27B', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored', speed:'~4 t/s' },
-  'qwen38:latest': { badge:'27B', cls:'badge-purple', desc:'Qwen 3.8 27B Uncensored', speed:'~4 t/s' },
-  'qwen36-yzai:latest': { badge:'Pro', cls:'badge-purple', desc:'@yepzhi AI Model (Aliased)', speed:'~22 t/s' },
-  'minicpm-v:8b': { badge:'Vision', cls:'badge-blue', desc:'MiniCPM-V 8B Multimodal', speed:'~12 t/s' }
+  'gemma4-26b-uncensored:latest': { badge:'26B MoE', cls:'badge-purple', desc:'Gemma 4 26B-A4B Uncensored (MoE · 4B Active · MTP)', speed:'~23 t/s' },
+  'gemma4:latest': { badge:'26B MoE', cls:'badge-purple', desc:'Gemma 4 26B-A4B Uncensored (MoE · 4B Active · MTP)', speed:'~23 t/s' }
 };
 
 // ── CONFIG & STATE ─────────────────────────────────────────
@@ -1815,11 +1810,11 @@ async function checkServicesHealth(forceCheck = false) {
   const drawerText = document.getElementById('statusText');
 
   if (ollamaOk) {
-    const isGemma = (selectedModel || '').toLowerCase().includes('gemma');
-    if (topDot) { topDot.style.background = '#3FB950'; topDot.title = `Server Live · ${isGemma ? 'Gemma 4 26B MoE' : 'Qwen 3.8 27B'} Ready`; }
-    if (activeSub) activeSub.innerHTML = `<span style="color:#3FB950;font-weight:600;">${isGemma ? 'Gemma 4 MoE (A4B): Ready' : 'Qwen 3.8 27B: Ready'}</span>`;
+    if (topDot) { topDot.style.background = '#3FB950'; topDot.title = 'Server Live · Gemma 4 26B MoE Ready'; }
+    if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Gemma 4 MoE (A4B): Ready</span>';
     if (drawerDot) drawerDot.style.background = '#3FB950';
     if (drawerText) drawerText.innerHTML = 'AI Server <strong style="color:#3FB950">operational and ready</strong>';
+    updateModelHeader();
   } else {
     if (topDot) { topDot.style.background = '#F85149'; topDot.title = 'Reconnecting...'; }
     if (activeSub) activeSub.innerHTML = '<span style="color:var(--text-muted);">Reconnecting...</span>';
@@ -1859,18 +1854,16 @@ async function loadModels() {
     allModels = models;
 
     if (models.length) {
-      const preferredModel = models.find(m => {
-        const lower = m.name.toLowerCase();
-        return lower.includes('gemma4') || lower.includes('qwen38-uncensored') || lower.includes('qwen38') || lower.includes('qwen36-yzai');
-      }) || models[0];
-      if (preferredModel) {
-        selectedModel = preferredModel.name;
+      const gemmaModel = models.find(m => m.name.toLowerCase().includes('gemma4') || m.name.toLowerCase().includes('gemma'));
+      if (gemmaModel) {
+        selectedModel = gemmaModel.name;
+      } else {
+        selectedModel = models[0]?.name || 'gemma4-26b-uncensored:latest';
       }
     }
 
     lastOnlineTimestamp = Date.now();
-    const isGemma = (selectedModel || '').toLowerCase().includes('gemma');
-    setStatus(true, `Server Live · ${isGemma ? 'Gemma 4 26B MoE (A4B)' : 'Qwen 3.8 27B'} (8K)`);
+    setStatus(true, `Server Live · Gemma 4 26B MoE (A4B) (8K)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -1902,15 +1895,13 @@ function setStatus(ok, text) {
 }
 
 function updateModelHeader() {
-  const isGemma = (selectedModel || '').toLowerCase().includes('gemma');
   const activeName = document.getElementById('activeName');
-  if (activeName) activeName.textContent = isGemma ? '@yepzhi AI · Gemma 4 26B MoE' : '@yepzhi AI · Qwen 3.8 27B';
+  if (activeName) activeName.textContent = '@yepzhi AI · Gemma 4 26B MoE';
   const activeSub = document.getElementById('activeSub');
-  const modelSub = isGemma ? 'Gemma 4 MoE (A4B): Ready' : 'Qwen 3.8 27B: Ready';
-  if (activeSub) activeSub.innerHTML = `<span style="color:#3FB950;font-weight:600;">${modelSub}</span>`;
+  if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Gemma 4 MoE (A4B): Ready</span>';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = isGemma ? 'Context: 8K · MoE 4B Active (100% GPU)' : 'Context: 8K · 3 Slots Ready (100% GPU)';
+    tokenCount.textContent = 'Context: 8K · MoE 4B Active (100% GPU)';
   }
 }
 
@@ -2225,7 +2216,7 @@ REGLAS CRÍTICAS DE SÍNTESIS:
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: selectedModel || 'qwen36-yzai:latest',
+        model: selectedModel || 'gemma4-26b-uncensored:latest',
         messages: [
           { role: 'system', content: systemInstruction },
           { role: 'user', content: `Historial reciente:\n${contextSlice}\n\nNueva petición del usuario que requiere búsqueda en vivo: "${userPrompt}"\n\nCadena de búsqueda web óptima:` }
@@ -2386,7 +2377,7 @@ async function sendMessage() {
     return;
   }
   if (isStreaming) return;
-  if (!selectedModel) selectedModel = 'qwen36-yzai:latest';
+  if (!selectedModel) selectedModel = 'gemma4-26b-uncensored:latest';
   if (!checkRateLimit()) return;
 
   input.value = ''; autoResize(input);
@@ -2435,7 +2426,7 @@ async function sendMessage() {
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom(true);
 
-  // ── Native Multimodal Vision (Qwen 3.8 Direct Vision Feed) ──
+  // ── Native Multimodal Vision (Gemma 4 26B MoE Direct Vision Feed) ──
   if (imageAttached) {
     // Attach image directly to the last user message for native Ollama multimodal vision
     payload[payload.length - 1].images = [imageAttached];
@@ -2581,7 +2572,7 @@ async function sendMessage() {
   let retryCount = 0;
   async function attemptFetch() {
     try {
-      const modelForCall = selectedModel || 'qwen36-yzai:latest';
+      const modelForCall = selectedModel || 'gemma4-26b-uncensored:latest';
       const chatBody = { 
         model: modelForCall, 
         messages: payload,
