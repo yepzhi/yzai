@@ -2493,7 +2493,7 @@ async function sendMessage() {
   if (isRxModeActive) {
     effectiveSysPrompt = effectiveSysPrompt ? `${effectiveSysPrompt}\n\n${RX_DOCTOR_SYSTEM_PROMPT}` : RX_DOCTOR_SYSTEM_PROMPT;
   } else if (isVoiceModeActive) {
-    const voiceInstruction = 'Estás en modo de conversación de voz en tiempo real. Responde siempre de manera concisa, natural, conversacional y fluida (máximo 2 o 3 oraciones claras). Evita listas largas, código o tablas a menos que el usuario lo solicite expresamente.';
+    const voiceInstruction = 'Estás en modo de conversación de voz en tiempo real. Brinda respuestas completas, profundas, claras y bien estructuradas, explicando cada punto con la amplitud necesaria sin recortar arbitrariamente tus explicaciones. Mantén un tono natural y conversacional. Evita el uso de tablas complejas, bloques densos de código o formato markdown excesivo para que la lectura en voz alta sea 100% fluida y agradable.';
     effectiveSysPrompt = effectiveSysPrompt ? `${effectiveSysPrompt}\n\n${voiceInstruction}` : voiceInstruction;
   }
   if (effectiveSysPrompt) payload.push({ role:'system', content: effectiveSysPrompt });
@@ -3127,6 +3127,23 @@ function setupPushToTalk() {
   }
 }
 
+let persistentMicStream = null;
+
+async function requestMicPermission() {
+  if (persistentMicStream) return true;
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      persistentMicStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      console.log('[Mic] Permanent audio permission granted for origin.');
+      return true;
+    } catch (err) {
+      console.warn('[Mic Permission Denied/Error]', err.message);
+      return false;
+    }
+  }
+  return true;
+}
+
 function initSpeechRecognition() {
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRec) {
@@ -3134,9 +3151,10 @@ function initSpeechRecognition() {
     return null;
   }
   const rec = new SpeechRec();
-  rec.continuous = false;
+  rec.continuous = true;
   rec.interimResults = true;
   rec.lang = 'es-MX';
+  
   rec.onstart = () => {
     isListening = true;
     const micEl = document.getElementById('micBtn');
@@ -3147,36 +3165,61 @@ function initSpeechRecognition() {
       p.placeholder = "Escuchando tu voz... habla ahora";
       autoResize(p);
     }
-    updateVoiceLiveUI('listening', 'Escuchando...', 'Habla ahora...');
+    updateVoiceLiveUI('listening', 'Escuchando...', 'Habla con libertad...');
   };
+
+  let silenceTimer = null;
+
   rec.onresult = (event) => {
     let transcript = '';
     for (let i = event.resultIndex; i < event.results.length; i++) {
       transcript += event.results[i][0].transcript;
     }
     const input = document.getElementById('prompt');
-    if (input) {
+    if (input && transcript.trim()) {
       input.value = transcript;
       input.classList.add('listening-input');
       autoResize(input);
     }
     
-    updateVoiceLiveUI('listening', 'Capturando...', `"${transcript}"`);
+    updateVoiceLiveUI('listening', 'Capturando voz...', `"${transcript}"`);
     
-    // Si no está en Push-to-Talk y la frase finalizó, auto-enviar
-    if (!isHoldingPushToTalk && event.results[0].isFinal && isVoiceModeActive && !isStreaming) {
-      setTimeout(() => {
-        if (input.value.trim() !== '' && !isStreaming) sendMessage();
-      }, 550);
+    // Silence detection for natural voice auto-send
+    if (!isHoldingPushToTalk && isVoiceModeActive && !isStreaming) {
+      if (silenceTimer) clearTimeout(silenceTimer);
+      silenceTimer = setTimeout(() => {
+        if (input && input.value.trim() !== '' && !isStreaming && (!synthesis || !synthesis.speaking)) {
+          stopMic();
+          sendMessage();
+        }
+      }, 1400); // 1.4s of natural pause to finish sentence
     }
   };
+
   rec.onerror = (e) => {
     console.warn('[Speech Error]', e.error);
-    stopMic();
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      isListening = false;
+      const micEl = document.getElementById('micBtn');
+      if (micEl) micEl.classList.remove('listening');
+    }
   };
+
   rec.onend = () => {
-    stopMic();
+    // If voice mode is active and we want to listen, keep recognition alive without re-prompting
+    if (isVoiceModeActive && isListening && !isStreaming && (!synthesis || !synthesis.speaking)) {
+      try {
+        rec.start();
+      } catch (e) {
+        // silent
+      }
+    } else {
+      isListening = false;
+      const micEl = document.getElementById('micBtn');
+      if (micEl) micEl.classList.remove('listening');
+    }
   };
+
   return rec;
 }
 
@@ -3188,13 +3231,23 @@ function toggleMic() {
   }
 }
 
-function startMic() {
+async function startMic() {
   if (isStreaming) return;
   if (synthesis && synthesis.speaking) synthesis.cancel();
+  
+  // Ensure audio permission is registered once
+  await requestMicPermission();
+
   if (!recognition) recognition = initSpeechRecognition();
-  if (recognition && !isListening) {
-    try { recognition.start(); } catch (e) { console.warn(e); }
-  } else if (!recognition) {
+  if (recognition) {
+    isListening = true;
+    try { 
+      recognition.start(); 
+    } catch (e) { 
+      // If already started, ignore error
+      console.log('[Speech] Recognition already active');
+    }
+  } else {
     alert('Tu navegador no soporta entrada por micrófono. Te sugerimos Google Chrome o Microsoft Edge.');
   }
 }
@@ -3214,7 +3267,7 @@ function stopMic() {
   }
 }
 
-function toggleVoiceMode() {
+async function toggleVoiceMode() {
   isVoiceModeActive = !isVoiceModeActive;
   const btn = document.getElementById('voiceModeBtn');
   const txt = document.getElementById('voiceModeText');
@@ -3224,7 +3277,9 @@ function toggleVoiceMode() {
     if (txt) txt.textContent = 'Modo Voz: ON';
     if (overlay) overlay.classList.add('active');
     VoiceQueue.clear();
-    updateVoiceLiveUI('idle', 'Modo Voz Activo', 'Presiona para hablar');
+    updateVoiceLiveUI('idle', 'Modo Voz Activo', 'Presiona para hablar o usa tu voz');
+    await requestMicPermission();
+    startMic();
   } else {
     if (btn) btn.classList.remove('active');
     if (txt) txt.textContent = 'Modo Voz';
