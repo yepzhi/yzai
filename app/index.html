@@ -477,11 +477,28 @@ think::before {
 .think-body { margin-top: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; font-size: 11.5px; color: var(--text-dim); line-height: 1.5; white-space: pre-wrap; font-style: italic; }
 
 .cursor { display: inline-block; width: 6px; height: 16px; background: var(--primary); animation: blink 1s step-end infinite; vertical-align: text-bottom; margin-left: 4px; border-radius: 2px; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-
-.msg-time { font-size: 11px; color: var(--muted); margin-top: 6px; padding: 0 4px; font-family: var(--font-mono); }
-
-/* FLUX2 Generation Progress & Visor Card */
+.msg-time { font-size: 11px; color: var(--muted); margin-top: 6px; padding: 0 4px; font-family: var(--font-mono); display: flex; align-items: center; gap: 8px; }
+.msg-tts-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: var(--text-dim, #a1a1aa);
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.msg-tts-btn:hover {
+  background: rgba(56, 182, 255, 0.18);
+  border-color: rgba(56, 182, 255, 0.4);
+  color: #38b6ff;
+  transform: translateY(-1px);
+}
 .flux-progress-card {
   background: var(--surface2, rgba(255, 255, 255, 0.03));
   border: 1px solid var(--border-light, rgba(255, 255, 255, 0.1));
@@ -2329,7 +2346,26 @@ function createMsg(role, content, streaming=false, images=[]) {
 
   const time = document.createElement('div');
   time.className = 'msg-time';
-  time.textContent = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  time.style.display = 'flex';
+  time.style.alignItems = 'center';
+  time.style.gap = '8px';
+
+  const timeSpan = document.createElement('span');
+  timeSpan.textContent = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  time.appendChild(timeSpan);
+
+  if (role === 'ai') {
+    const speakBtn = document.createElement('button');
+    speakBtn.className = 'msg-tts-btn';
+    speakBtn.title = 'Escuchar respuesta en voz alta';
+    speakBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> <span>Escuchar</span>`;
+    speakBtn.onclick = (e) => {
+      e.stopPropagation();
+      const txt = bubble.textContent.replace(/Escuchar|Aviso:/g, '').trim();
+      speakText(txt);
+    };
+    time.appendChild(speakBtn);
+  }
 
   col.append(bubble, time);
   role === 'ai' ? div.append(av, col) : div.append(col, av);
@@ -2740,10 +2776,10 @@ async function sendMessage() {
   let currentThinking = '';
   let typewriterTimer = null;
   let streamFinished = false;
+  let lastSpeakIdx = 0;
 
   function startTypewriterLoop() {
     if (typewriterTimer) return;
-    let lastSpeakIdx = 0;
     
     typewriterTimer = setInterval(() => {
       let hasChanges = false;
@@ -3133,73 +3169,153 @@ let recognition = null;
 let isListening = false;
 let synthesis = window.speechSynthesis || null;
 
+let availableVoices = [];
+function loadVoices() {
+  if (!synthesis) return;
+  availableVoices = synthesis.getVoices();
+}
+if (synthesis) {
+  loadVoices();
+  if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = loadVoices;
+  }
+}
+
+function getBestNaturalVoice() {
+  if (!synthesis) return null;
+  if (!availableVoices.length) availableVoices = synthesis.getVoices();
+  if (!availableVoices.length) return null;
+
+  // 1. Premium Neural / Natural Online voices (Edge, Windows, Google Cloud)
+  const naturalEs = availableVoices.find(v => (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Online')) && v.lang.toLowerCase().startsWith('es'));
+  if (naturalEs) return naturalEs;
+
+  // 2. High quality Apple Enhanced / Siri voices (macOS / iOS)
+  const appleEnhanced = availableVoices.find(v => (v.name.includes('Enhanced') || v.name.includes('Premium') || v.name.includes('Siri') || v.name.includes('Paulina') || v.name.includes('Jorge') || v.name.includes('Monica') || v.name.includes('Juan') || v.name.includes('Diego') || v.name.includes('Carlos') || v.name.includes('Helena')) && v.lang.toLowerCase().startsWith('es'));
+  if (appleEnhanced) return appleEnhanced;
+
+  // 3. Google Neural voices
+  const googleEs = availableVoices.find(v => v.name.includes('Google') && v.lang.toLowerCase().startsWith('es'));
+  if (googleEs) return googleEs;
+
+  // 4. Any Spanish localized voice (Mexico / Latin America / Spain)
+  const regionalEs = availableVoices.find(v => v.lang === 'es-MX' || v.lang === 'es-US' || v.lang === 'es-419') || availableVoices.find(v => v.lang.toLowerCase().startsWith('es'));
+  if (regionalEs) return regionalEs;
+
+  return availableVoices[0] || null;
+}
+
+window._activeUtterance = null;
+
 const VoiceQueue = {
   queue: [],
   isPlaying: false,
   isStreamComplete: false,
+  watchdogTimer: null,
+
   push(text) {
     const clean = text
-      .replace(/```[\s\S]*?```/g, ' [código omitido] ')
+      .replace(/```[\s\S]*?```/g, ' código omitido ')
       .replace(/`([^`]+)`/g, '$1')
       .replace(/https?:\/\/[^\s]+/g, '')
-      .replace(/[#*_~\[\]\(\)]/g, '')
+      .replace(/[#*_~\[\]\(\)\<\>]/g, '')
       .replace(/\s+/g, ' ')
       .trim();
     if (!clean || clean.length < 2) return;
     this.queue.push(clean);
     this.playNext();
   },
+
   playNext() {
-    if (this.isPlaying || !synthesis || !isVoiceModeActive) return;
+    if (this.isPlaying || !synthesis) return;
 
     if (!this.queue.length) {
       if (this.isStreamComplete && !isStreaming && isVoiceModeActive) {
-        updateVoiceLiveUI('listening', 'Listo para escucharte', 'Reabriendo micrófono...');
+        updateVoiceLiveUI('listening', 'Listo para escucharte', 'Micrófono activo...');
         setTimeout(() => {
           if (!isStreaming && isVoiceModeActive && !this.isPlaying && (!synthesis || !synthesis.speaking)) {
             startMic();
           }
-        }, 450);
+        }, 350);
       }
       return;
     }
 
     this.isPlaying = true;
     const chunk = this.queue.shift();
+
+    try {
+      if (synthesis.paused) synthesis.resume();
+    } catch(e) {}
+
     const utterance = new SpeechSynthesisUtterance(chunk);
     utterance.lang = 'es-MX';
-    utterance.rate = 1.05;
-    
-    const voices = synthesis.getVoices();
-    const esVoice = voices.find(v => v.lang.includes('es') && (v.name.includes('Natural') || v.name.includes('Siri') || v.name.includes('Paulina') || v.name.includes('Jorge') || v.name.includes('Monica') || v.name.includes('Helena') || v.name.includes('Sabina'))) || voices.find(v => v.lang.includes('es'));
-    if (esVoice) utterance.voice = esVoice;
-    
-    updateVoiceLiveUI('speaking', 'YZAI respondiendo en vivo...', `"${chunk}"`);
-    
-    const onFinish = () => {
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    const bestVoice = getBestNaturalVoice();
+    if (bestVoice) {
+      utterance.voice = bestVoice;
+      utterance.lang = bestVoice.lang || 'es-MX';
+    }
+
+    window._activeUtterance = utterance;
+    updateVoiceLiveUI('speaking', 'YZAI hablando...', `"${chunk}"`);
+
+    const finishChunk = () => {
+      if (this.watchdogTimer) { clearTimeout(this.watchdogTimer); this.watchdogTimer = null; }
+      window._activeUtterance = null;
       this.isPlaying = false;
       setTimeout(() => {
         this.playNext();
-      }, 70);
+      }, 50);
     };
 
-    utterance.onend = onFinish;
-    utterance.onerror = onFinish;
-    
+    utterance.onend = finishChunk;
+    utterance.onerror = (err) => {
+      console.warn('[SpeechSynthesis Error]', err);
+      finishChunk();
+    };
+
+    // Watchdog timer: In case Chrome/Safari fails to fire onend
+    const estimatedDuration = Math.max(3000, (chunk.length / 9) * 1000 + 4000);
+    this.watchdogTimer = setTimeout(() => {
+      if (this.isPlaying) {
+        console.log('[Voice Watchdog] Forcing next chunk');
+        finishChunk();
+      }
+    }, estimatedDuration);
+
     try {
       synthesis.speak(utterance);
     } catch (e) {
-      this.isPlaying = false;
-      this.playNext();
+      console.warn('[Speech speak failed]', e);
+      finishChunk();
     }
   },
+
   clear() {
+    if (this.watchdogTimer) { clearTimeout(this.watchdogTimer); this.watchdogTimer = null; }
     this.queue = [];
     this.isPlaying = false;
     this.isStreamComplete = false;
-    if (synthesis && synthesis.speaking) synthesis.cancel();
+    window._activeUtterance = null;
+    if (synthesis) {
+      try { synthesis.cancel(); } catch(e) {}
+    }
   }
 };
+
+function speakText(text) {
+  if (!synthesis) return;
+  try {
+    if (synthesis.paused) synthesis.resume();
+  } catch(e) {}
+  VoiceQueue.clear();
+  VoiceQueue.push(text);
+  VoiceQueue.isStreamComplete = true;
+  VoiceQueue.playNext();
+}
 
 function updateVoiceLiveUI(state, statusText, subtitleText) {
   const orb = document.getElementById('voicePlasmaOrb');
@@ -3416,6 +3532,17 @@ async function toggleVoiceMode() {
     if (txt) txt.textContent = 'Modo Voz: ON';
     if (overlay) overlay.classList.add('active');
     VoiceQueue.clear();
+
+    // Desbloquear audio en el navegador (Safari / Chrome gesture unlock)
+    if (synthesis) {
+      try {
+        if (synthesis.paused) synthesis.resume();
+        const primer = new SpeechSynthesisUtterance('');
+        primer.volume = 0;
+        synthesis.speak(primer);
+      } catch(e) {}
+    }
+
     updateVoiceLiveUI('idle', 'Modo Voz Activo', 'Presiona para hablar o usa tu voz');
     await requestMicPermission();
     startMic();
