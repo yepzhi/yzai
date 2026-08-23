@@ -1274,7 +1274,74 @@ think::before {
 /* Aurora canvas integration for yzai */
 #yzai-aurora {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  opacity: 0.6; mix-blend-mode: screen;
+  opacity: 0.92; mix-blend-mode: screen;
+}
+
+/* Liquid Glass Message Bubbles */
+.msg.ai .bubble {
+  background: rgba(15, 20, 32, 0.75) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+.msg.user .bubble {
+  background: linear-gradient(135deg, rgba(39, 126, 255, 0.85), rgba(139, 92, 246, 0.85)) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 10px 30px -5px rgba(39, 126, 255, 0.35) !important;
+}
+
+/* Interactive Suggestion Cards Grid on Welcome */
+.welcome-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  width: 100%;
+  max-width: 650px;
+  margin-top: 24px;
+  text-align: left;
+}
+.welcome-chip-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  color: #fff;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+.welcome-chip-card:hover {
+  background: rgba(139, 92, 246, 0.14);
+  border-color: rgba(139, 92, 246, 0.45);
+  box-shadow: 0 12px 28px -6px rgba(139, 92, 246, 0.35);
+  transform: translateY(-2px);
+}
+.welcome-chip-card .chip-icon {
+  font-size: 1.4rem;
+  line-height: 1;
+}
+.welcome-chip-card .chip-content strong {
+  display: block;
+  font-size: 0.9rem;
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.welcome-chip-card .chip-content span {
+  display: block;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+  line-height: 1.3;
 }
 </style>
 </head>
@@ -1403,6 +1470,37 @@ think::before {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           <span>Español &amp; English · Escribe en el idioma que prefieras</span>
         </div>
+
+        <div class="welcome-chips-grid">
+          <div class="welcome-chip-card" data-tilted data-spotlight onclick="quickPrompt('Ayúdame a diseñar una arquitectura limpia, robusta y de alto rendimiento para...')">
+            <span class="chip-icon">⚡</span>
+            <div class="chip-content">
+              <strong>Arquitectura &amp; Código</strong>
+              <span>Diseño de sistemas y optimización</span>
+            </div>
+          </div>
+          <div class="welcome-chip-card" data-tilted data-spotlight onclick="quickPrompt('Explícame a profundidad el funcionamiento y matemáticas de los transformadores y atención...')">
+            <span class="chip-icon">🧠</span>
+            <div class="chip-content">
+              <strong>Razonamiento &amp; IA</strong>
+              <span>Modelos neuronales y análisis</span>
+            </div>
+          </div>
+          <div class="welcome-chip-card" data-tilted data-spotlight onclick="toggleRxMode()">
+            <span class="chip-icon">🔬</span>
+            <div class="chip-content">
+              <strong>Imagenología PhD</strong>
+              <span>Modo diagnóstico y análisis visual</span>
+            </div>
+          </div>
+          <div class="welcome-chip-card" data-tilted data-spotlight onclick="toggleVoiceMode()">
+            <span class="chip-icon">🎙️</span>
+            <div class="chip-content">
+              <strong>Conversación de Voz</strong>
+              <span>Diálogo interactivo en tiempo real</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -1517,7 +1615,7 @@ think::before {
       <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Hablar por micrófono / Modo Voz" aria-label="Microphone">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
       </button>
-      <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send">
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send" data-starborder data-sb-color="#8b5cf6" data-sb-speed="3">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
       <button class="stop-btn" id="stopBtn" onclick="stopGeneration()" aria-label="Stop" style="display:none">
@@ -2155,7 +2253,48 @@ function welcomeHTML() {
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
       <span>Español &amp; English · Escribe en el idioma que prefieras</span>
     </div>
+
+    <div class="welcome-chips-grid">
+      <div class="welcome-chip-card" data-tilted data-spotlight onclick="quickPrompt('Ayúdame a diseñar una arquitectura limpia, robusta y de alto rendimiento para...')">
+        <span class="chip-icon">⚡</span>
+        <div class="chip-content">
+          <strong>Arquitectura &amp; Código</strong>
+          <span>Diseño de sistemas y optimización</span>
+        </div>
+      </div>
+      <div class="welcome-chip-card" data-tilted data-spotlight onclick="quickPrompt('Explícame a profundidad el funcionamiento y matemáticas de los transformadores y atención...')">
+        <span class="chip-icon">🧠</span>
+        <div class="chip-content">
+          <strong>Razonamiento &amp; IA</strong>
+          <span>Modelos neuronales y análisis</span>
+        </div>
+      </div>
+      <div class="welcome-chip-card" data-tilted data-spotlight onclick="toggleRxMode()">
+        <span class="chip-icon">🔬</span>
+        <div class="chip-content">
+          <strong>Imagenología PhD</strong>
+          <span>Modo diagnóstico y análisis visual</span>
+        </div>
+      </div>
+      <div class="welcome-chip-card" data-tilted data-spotlight onclick="toggleVoiceMode()">
+        <span class="chip-icon">🎙️</span>
+        <div class="chip-content">
+          <strong>Conversación de Voz</strong>
+          <span>Diálogo interactivo en tiempo real</span>
+        </div>
+      </div>
+    </div>
   </div>`;
+}
+
+function quickPrompt(txt) {
+  const p = document.getElementById('prompt');
+  if (p) {
+    p.value = txt;
+    p.focus();
+    autoResize(p);
+    sendMessage();
+  }
 }
 
 function createMsg(role, content, streaming=false, images=[]) {
@@ -3458,20 +3597,20 @@ function resetInputUI() {
   <span>Support</span>
 </a>
 
-<!-- ── Aurora Interactive Background for yzai ── -->
+<!-- ── Aurora Interactive Constellation & Mesh for yzai ── -->
 <script>
 (function() {
   const canvas = document.getElementById('yzai-aurora');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  let W, H, dots = [], mouse = { x: -9999, y: -9999 }, time = 0;
+  let W, H, dots = [], mouse = { x: -9999, y: -9999 }, time = 0, lastUserInteraction = 0;
   const ORB_COLORS = [
     [[139,92,246],[99,102,241]],   // purple → indigo
     [[59,130,246],[6,182,212]],    // blue → cyan
     [[168,85,247],[236,72,153]],   // violet → pink
   ];
   const orbs = ORB_COLORS.map((c, i) => ({
-    x: 0, y: 0, vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.3,
+    x: 0, y: 0, vx: (Math.random()-0.5)*0.45, vy: (Math.random()-0.5)*0.35,
     r: 320 + i*80, colors: c, phase: i*1.8
   }));
 
@@ -3482,7 +3621,7 @@ function resetInputUI() {
     canvas.style.width = W+'px'; canvas.style.height = H+'px';
     ctx.scale(dpr,dpr);
     dots = [];
-    const sp = 38;
+    const sp = 36;
     for (let r=0; r<Math.ceil(H/sp)+1; r++)
       for (let c=0; c<Math.ceil(W/sp)+1; c++)
         dots.push({x:c*sp, y:r*sp});
@@ -3492,59 +3631,114 @@ function resetInputUI() {
   }
   resize();
   window.addEventListener('resize', resize);
-  window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-  window.addEventListener('touchmove', e => { const t=e.touches[0]; mouse.x=t.clientX; mouse.y=t.clientY; }, {passive:true});
+  window.addEventListener('mousemove', e => { 
+    mouse.x = e.clientX; 
+    mouse.y = e.clientY; 
+    lastUserInteraction = Date.now();
+  });
+  
+  const handleTouch = (e) => {
+    if (!e.touches || !e.touches[0]) return;
+    mouse.x = e.touches[0].clientX;
+    mouse.y = e.touches[0].clientY;
+    lastUserInteraction = Date.now();
+  };
+  window.addEventListener('touchstart', handleTouch, {passive:true});
+  window.addEventListener('touchmove', handleTouch, {passive:true});
 
   function lerpC(a,b,t) { return a.map((v,i)=>Math.round(v+(b[i]-v)*t)); }
 
   function tick() {
-    time += 0.007;
+    time += 0.0075;
     ctx.clearRect(0,0,W,H);
-    // Draw rich gradient orbs
+    
+    // Draw rich radiant gradient orbs
     for (const o of orbs) {
-      o.x += o.vx + Math.sin(time+o.phase)*0.4;
-      o.y += o.vy + Math.cos(time*0.7+o.phase)*0.3;
+      o.x += o.vx + Math.sin(time+o.phase)*0.5;
+      o.y += o.vy + Math.cos(time*0.7+o.phase)*0.35;
       if(o.x<-o.r) o.x=W+o.r; if(o.x>W+o.r) o.x=-o.r;
       if(o.y<-o.r) o.y=H+o.r; if(o.y>H+o.r) o.y=-o.r;
       const t=(Math.sin(time*0.5+o.phase)+1)/2;
       const [r,g,b]=lerpC(o.colors[0],o.colors[1],t);
       const g2=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
-      g2.addColorStop(0,`rgba(${r},${g},${b},0.28)`);
-      g2.addColorStop(0.45,`rgba(${r},${g},${b},0.12)`);
-      g2.addColorStop(0.8,`rgba(${r},${g},${b},0.03)`);
+      g2.addColorStop(0,`rgba(${r},${g},${b},0.35)`);
+      g2.addColorStop(0.45,`rgba(${r},${g},${b},0.16)`);
+      g2.addColorStop(0.8,`rgba(${r},${g},${b},0.04)`);
       g2.addColorStop(1,`rgba(${r},${g},${b},0)`);
       ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fillStyle=g2; ctx.fill();
     }
+
+    // Determine target focus (mobile autonomous probe or user interaction)
+    const isTouchDevice = ('ontouchstart' in window) || (window.innerWidth < 768);
+    const isUserActive = (Date.now() - lastUserInteraction) < 3000 && mouse.x > 0 && mouse.y > 0;
+
+    let targetX = mouse.x;
+    let targetY = mouse.y;
+
+    if (!isUserActive || (isTouchDevice && (mouse.x <= 0 || mouse.y <= 0))) {
+      targetX = (W * 0.5) + (W * 0.38) * Math.sin(time * 0.85) * Math.cos(time * 0.4);
+      targetY = (H * 0.45) + (H * 0.32) * Math.sin(time * 0.7 + 1.2);
+    }
+
+    const node2X = (W * 0.5) + (W * 0.30) * Math.cos(time * 0.65 + 2.2);
+    const node2Y = (H * 0.5) + (H * 0.25) * Math.sin(time * 0.8 + 0.5);
+
     // Interactive Constellation + dot grid
     const IR = 160;
     const nearDots = [];
+    const nearDots2 = [];
+
     for (const d of dots) {
-      const dx=d.x-mouse.x, dy=d.y-mouse.y;
+      const dx=d.x-targetX, dy=d.y-targetY;
       const dist=Math.sqrt(dx*dx+dy*dy);
       const prox=Math.max(0,1-dist/IR);
-      const base=0.18+0.06*Math.sin(time*1.2+d.x*0.02+d.y*0.015);
-      ctx.beginPath(); ctx.arc(d.x,d.y,1.5,0,Math.PI*2);
+
+      const dx2=d.x-node2X, dy2=d.y-node2Y;
+      const dist2=Math.sqrt(dx2*dx2+dy2*dy2);
+      const prox2=Math.max(0,1-dist2/(IR*0.85));
+
+      const maxProx = Math.max(prox, prox2*0.7);
+      const base=0.20+0.07*Math.sin(time*1.2+d.x*0.02+d.y*0.015);
+      
+      ctx.beginPath(); ctx.arc(d.x,d.y,1.6,0,Math.PI*2);
       ctx.fillStyle=`rgba(139,92,246,${base})`; ctx.fill();
-      if(prox>0.01) {
-        nearDots.push({x:d.x, y:d.y, prox});
-        ctx.beginPath(); ctx.arc(d.x,d.y,1.5+prox*3.5,0,Math.PI*2);
-        const r=Math.round(139+(6-139)*prox), g2c=Math.round(92+(182-92)*prox), bl=Math.round(246+(212-246)*prox);
-        ctx.fillStyle=`rgba(${r},${g2c},${bl},${prox*0.9})`;
-        ctx.shadowColor='#06b6d4'; ctx.shadowBlur=prox*12;
+
+      if(maxProx > 0.01) {
+        if (prox > 0.01) nearDots.push({x:d.x, y:d.y, prox});
+        if (prox2 > 0.01) nearDots2.push({x:d.x, y:d.y, prox: prox2});
+
+        ctx.beginPath(); ctx.arc(d.x,d.y,1.6+maxProx*3.8,0,Math.PI*2);
+        const r=Math.round(139+(6-139)*maxProx), g2c=Math.round(92+(182-92)*maxProx), bl=Math.round(246+(212-246)*maxProx);
+        ctx.fillStyle=`rgba(${r},${g2c},${bl},${maxProx*0.95})`;
+        ctx.shadowColor='#06b6d4'; ctx.shadowBlur=maxProx*14;
         ctx.fill(); ctx.shadowBlur=0;
       }
     }
-    // Draw laser lines connecting mouse to nearby dots
-    if (mouse.x > 0 && mouse.y > 0 && nearDots.length > 0) {
+
+    // Draw laser lines connecting target to nearby dots
+    if (nearDots.length > 0) {
       for (const nd of nearDots) {
         ctx.beginPath();
-        ctx.moveTo(mouse.x, mouse.y);
+        ctx.moveTo(targetX, targetY);
         ctx.lineTo(nd.x, nd.y);
-        ctx.strokeStyle = `rgba(6,182,212,${nd.prox * 0.4})`;
-        ctx.lineWidth = nd.prox * 1.5;
+        ctx.strokeStyle = `rgba(6,182,212,${nd.prox * 0.45})`;
+        ctx.lineWidth = nd.prox * 1.6;
         ctx.stroke();
       }
     }
+
+    // Secondary node connections
+    if (nearDots2.length > 0) {
+      for (const nd of nearDots2) {
+        ctx.beginPath();
+        ctx.moveTo(node2X, node2Y);
+        ctx.lineTo(nd.x, nd.y);
+        ctx.strokeStyle = `rgba(139,92,246,${nd.prox * 0.32})`;
+        ctx.lineWidth = nd.prox * 1.2;
+        ctx.stroke();
+      }
+    }
+
     requestAnimationFrame(tick);
   }
   tick();
