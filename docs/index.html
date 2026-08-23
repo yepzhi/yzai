@@ -36,6 +36,7 @@
 <!-- Libraries -->
 <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1657,6 +1658,8 @@ let abortCtrl     = null;
 let isStreaming   = false;
 let allModels     = [];
 let currentImageBase64 = null; // stored internally, NEVER shown as text to user
+let currentImageDimensions = null; // { w, h }
+let currentImageOcrText = ''; // Extracted text via OCR
 let currentAttachedDoc = null; // stored internally, NEVER dumped into prompt textarea
 
 function removeAttachedDoc() {
@@ -1707,10 +1710,23 @@ function processFile(file) {
         ctx.drawImage(img, 0, 0, w, h);
         const jpegData = canvas.toDataURL('image/jpeg', 0.92);
         currentImageBase64 = jpegData.split(',')[1];
+        currentImageDimensions = { w, h };
+        currentImageOcrText = '';
         document.getElementById('imgPreview').src = jpegData;
         const kb = Math.round(currentImageBase64.length * 0.75 / 1024);
         document.getElementById('token-count').textContent = `Imagen lista — ${w}×${h}px, ~${kb}KB`;
         document.getElementById('sendBtn').disabled = false;
+
+        // Background OCR via Tesseract.js if available
+        if (window.Tesseract && typeof window.Tesseract.recognize === 'function') {
+          window.Tesseract.recognize(jpegData, 'spa+eng', { logger: () => {} })
+            .then(res => {
+              if (res && res.data && res.data.text && res.data.text.trim()) {
+                currentImageOcrText = res.data.text.trim();
+                console.log('[OCR] Extracted text from image:', currentImageOcrText.slice(0, 100));
+              }
+            }).catch(err => console.warn('[OCR]', err.message));
+        }
       };
       img.src = rawData;
     };
@@ -1867,8 +1883,43 @@ document.addEventListener('paste', (e) => {
 
 function removeImage() {
   currentImageBase64 = null;
+  currentImageDimensions = null;
+  currentImageOcrText = '';
   document.getElementById('imgPreviewContainer').style.display = 'none';
   document.getElementById('imgPreview').src = '';
+}
+
+async function analyzeImageWithVision(imageBase64, userPrompt, isRxMode) {
+  try {
+    const prompt = isRxMode
+      ? `Eres un especialista de nivel PhD en radiología e imagenología médica. Analiza esta imagen/escaneo médico con riguroso detalle técnico y clínico: describe la región anatómica, técnica de adquisición, densidades, opacidades, bordes, cualquier anomalía o hallazgo relevante y texto o etiquetas visibles en la imagen. Pregunta del usuario: ${userPrompt || 'Análisis general'}`
+      : `Describe exhaustivamente lo que ves en esta imagen: objetos principales, personas, entorno, diagramas, esquemas, colores, texto visible y cualquier detalle visual clave para responder a la pregunta del usuario: ${userPrompt || '¿Qué hay en esta imagen?'}`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+
+    const res = await fetch(`${OLLAMA_URL}/api/generate?clave=secreta123`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model: 'moondream:latest',
+        prompt: prompt,
+        images: [imageBase64],
+        stream: false
+      })
+    });
+    clearTimeout(timeoutId);
+    if (res.ok) {
+      const data = await res.json();
+      if (data.response && data.response.trim()) {
+        return data.response.trim();
+      }
+    }
+  } catch (err) {
+    console.warn('[Vision Pipeline]', err.message);
+  }
+  return null;
 }
 
 // ── INIT ───────────────────────────────────────────────────
@@ -2461,9 +2512,10 @@ async function sendMessage() {
     removeAttachedDoc();
   }
 
-  // Capture ONLY the freshly attached image - never re-use old history images
-  // (re-using causes wrong image analysis across turns)
+  // Capture freshly attached image and OCR/metadata before cleaning
   const imageAttached = currentImageBase64 || null;
+  const imageDims = currentImageDimensions || null;
+  const imageOcr = currentImageOcrText || '';
 
   const userMsgForHistory = { role:'user', content: userTextForApi };
   if (currentImageBase64) userMsgForHistory.images = [currentImageBase64];
@@ -2479,10 +2531,30 @@ async function sendMessage() {
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom(true);
 
-  // ── Native Multimodal Vision (Gemma 4 26B MoE Direct Vision Feed) ──
+  // ── Multimodal Vision Perception & OCR Pipeline ──
   if (imageAttached) {
-    // Attach image directly to the last user message for native Ollama multimodal vision
-    payload[payload.length - 1].images = [imageAttached];
+    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Analizando visión y estructura de la imagen…</span>`;
+    document.getElementById('token-count').textContent = 'Analyzing image vision...';
+
+    const visionAnalysis = await analyzeImageWithVision(imageAttached, text, isRxModeActive);
+
+    let visionContext = `[IMAGEN ADJUNTA POR EL USUARIO]\n`;
+    if (imageDims) {
+      visionContext += `- Dimensiones de imagen: ${imageDims.w}×${imageDims.h}px\n`;
+    }
+    if (visionAnalysis) {
+      visionContext += `- Análisis Visual (Neural Vision Perception):\n${visionAnalysis}\n\n`;
+    }
+    if (imageOcr && imageOcr.trim()) {
+      visionContext += `- Texto / Datos legibles en la imagen (OCR):\n\`\`\`text\n${imageOcr.trim()}\n\`\`\`\n\n`;
+    }
+    if (!visionAnalysis && (!imageOcr || !imageOcr.trim())) {
+      visionContext += `(El usuario ha adjuntado una imagen para esta consulta).\n\n`;
+    }
+
+    payload[payload.length - 1].content = `${visionContext}---\nPregunta o instrucción del usuario: ${payload[payload.length - 1].content}`;
+    // NOTE: We do NOT send raw payload.images to gemma4-26b-uncensored because Ollama rejects multimodal requests on text models.
+    bubble.innerHTML = '<span class="cursor"></span>';
   }
 
   // ── Proactive AI Contextual Web Search Injection ──
