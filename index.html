@@ -1083,6 +1083,32 @@ think::before {
 }
 @keyframes statusPulse { 0% { transform: scale(0.6); opacity: 1; } 100% { transform: scale(1.9); opacity: 0; } }
 
+.voice-speaker-btn {
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #34d399;
+  padding: 8px 14px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.25);
+  user-select: none;
+}
+.voice-speaker-btn:hover {
+  background: rgba(16, 185, 129, 0.28);
+  border-color: rgba(16, 185, 129, 0.7);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.voice-speaker-btn:active {
+  transform: scale(0.96);
+}
+
 .voice-live-close { 
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--text-dim); 
   width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
@@ -1469,6 +1495,11 @@ think::before {
       <span id="voiceModeText">Modo Voz</span>
     </button>
 
+    <button class="voice-mode-pill" id="forceSpeakerTopBtn" onclick="forceSpeakerAndSpeak()" title="Forzar altavoz del teléfono y escuchar respuesta">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+      <span>Altavoz</span>
+    </button>
+
     <button class="action-btn" onclick="newChat()" aria-label="New chat" title="New chat" data-spotlight data-spotlight-size="120">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
@@ -1709,9 +1740,15 @@ think::before {
       </div>
       <span id="voiceLiveStatusText">Modo Voz Activo</span>
     </div>
-    <button class="voice-live-close" onclick="toggleVoiceMode()" title="Salir del Modo Voz" aria-label="Cerrar">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button class="voice-speaker-btn" id="voiceForceSpeakerBtn" onclick="forceSpeakerAndSpeak()" title="Forzar altavoz y reproducir audio">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        <span>Altavoz</span>
+      </button>
+      <button class="voice-live-close" onclick="toggleVoiceMode()" title="Salir del Modo Voz" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
   </div>
   <div class="voice-visualizer-container">
     <div class="voice-plasma-orb" id="voicePlasmaOrb" title="Toca o mantén presionado para hablar">
@@ -3398,6 +3435,57 @@ function speakText(text) {
   setTimeout(() => {
     if (!VoiceQueue.isPlaying) VoiceQueue.playNext();
   }, 60);
+}
+
+function forceSpeakerAndSpeak(customText) {
+  // 1. Detener micrófono para liberar el canal de llamadas telefónicas en iOS/Android
+  stopMic();
+
+  // 2. Disparar Web Audio Context con tono acústico breve para forzar el altavoz multimedia principal
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (AudioCtx) {
+      const ctx = new AudioCtx();
+      if (ctx.state === 'suspended') {
+        ctx.resume();
+      }
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      gain.gain.value = 0.05;
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      setTimeout(() => {
+        try {
+          osc.stop();
+          ctx.close();
+        } catch(e) {}
+      }, 120);
+    }
+  } catch(e) {}
+
+  // 3. Despertar speech synthesis
+  if (!synthesis) {
+    alert('Tu navegador no soporta síntesis de voz (TTS). Te sugerimos Google Chrome o Safari.');
+    return;
+  }
+
+  try {
+    if (synthesis.paused) synthesis.resume();
+    loadVoices();
+  } catch(e) {}
+
+  // 4. Determinar texto a hablar (última respuesta de la IA o mensaje de confirmación)
+  let textToSpeak = customText;
+  if (!textToSpeak) {
+    const lastAi = [...messages].reverse().find(m => m.role === 'ai');
+    textToSpeak = lastAi && lastAi.content ? lastAi.content : 'Altavoz activado. YZAI está listo para hablar.';
+  }
+
+  // Notificar visualmente en el overlay si está activo
+  updateVoiceLiveUI('speaking', 'Altavoz Activado', 'Reproduciendo en altavoz...');
+
+  speakText(textToSpeak);
 }
 
 function updateVoiceLiveUI(state, statusText, subtitleText) {
