@@ -1046,6 +1046,71 @@ think::before {
     border-radius: 14px; margin-right: 2px;
   }
   .menu-btn, .action-btn { width: 38px; height: 38px; border-radius: 14px; }
+
+  /* Mobile Welcome Page Center & Fit Optimization */
+  .messages-wrapper {
+    padding: 0 8px;
+  }
+  .welcome {
+    padding: 12px 10px 110px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .welcome-icon {
+    width: 64px; height: 64px;
+    margin-bottom: 16px;
+  }
+  .welcome-icon svg {
+    width: 36px; height: 36px;
+  }
+  .welcome h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .welcome p {
+    font-size: 13.5px;
+    max-width: 92%;
+    line-height: 1.45;
+  }
+  .bilingual-badge {
+    margin-top: 16px;
+    padding: 6px 12px;
+    font-size: 11px;
+    max-width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    justify-content: center;
+  }
+  .welcome-chips-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 18px;
+    padding: 0;
+    max-width: 100%;
+  }
+  .welcome-chip-card {
+    padding: 11px 12px;
+    gap: 8px;
+    border-radius: 14px;
+  }
+  .welcome-chip-card .chip-content strong {
+    font-size: 0.78rem;
+    line-height: 1.25;
+  }
+}
+
+@media (max-width: 420px) {
+  .welcome-chips-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .welcome-chip-card {
+    padding: 12px 14px;
+  }
+  .welcome-chip-card .chip-content strong {
+    font-size: 0.84rem;
+  }
 }
 
 /* ─── REALTIME VOICE OVERLAY ("MODO VOZ LIVE") ────── */
@@ -1339,12 +1404,13 @@ think::before {
 /* Interactive Suggestion Cards Grid on Welcome */
 .welcome-chips-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   width: 100%;
-  max-width: 650px;
-  margin-top: 24px;
+  max-width: 600px;
+  margin: 24px auto 0;
   text-align: left;
+  box-sizing: border-box;
 }
 .welcome-chip-card {
   background: rgba(255, 255, 255, 0.04);
