@@ -2361,7 +2361,8 @@ function createMsg(role, content, streaming=false, images=[]) {
     speakBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> <span>Escuchar</span>`;
     speakBtn.onclick = (e) => {
       e.stopPropagation();
-      const txt = bubble.textContent.replace(/Escuchar|Aviso:/g, '').trim();
+      unlockAudioAndVoices();
+      const txt = bubble.innerText || bubble.textContent || '';
       speakText(txt);
     };
     time.appendChild(speakBtn);
@@ -2799,9 +2800,9 @@ async function sendMessage() {
       // REALTIME TTS CHUNKING: Hablar oraciones completas y fluidas (sin cortar palabras a medias)
       if (isVoiceModeActive && currentText.length > lastSpeakIdx && typeof VoiceQueue !== 'undefined') {
         const unparsed = currentText.slice(lastSpeakIdx);
-        // Only match completed sentence or paragraph delimiters: [.!?:] followed by whitespace
+        // Match completed sentences [.!?:\n]
         const match = unparsed.match(/([\s\S]*?[.!?:](\s+|\n)|[\s\S]*?\n\n)/);
-        if (match && match[0].trim().length >= 15) {
+        if (match && match[0].trim().length >= 6) {
           const chunkToSpeak = match[0];
           lastSpeakIdx += chunkToSpeak.length;
           VoiceQueue.push(chunkToSpeak);
@@ -2832,7 +2833,9 @@ async function sendMessage() {
             lastSpeakIdx = targetText.length;
           }
           VoiceQueue.isStreamComplete = true;
-          if (!VoiceQueue.isPlaying) VoiceQueue.playNext();
+          setTimeout(() => {
+            if (!VoiceQueue.isPlaying) VoiceQueue.playNext();
+          }, 50);
         }
 
         messages.push({ role:'ai', content:targetText });
@@ -3172,40 +3175,74 @@ let synthesis = window.speechSynthesis || null;
 let availableVoices = [];
 function loadVoices() {
   if (!synthesis) return;
-  availableVoices = synthesis.getVoices();
+  try {
+    const v = synthesis.getVoices();
+    if (v && v.length) availableVoices = v;
+  } catch(e) {}
 }
+
 if (synthesis) {
   loadVoices();
+  if (typeof synthesis.addEventListener === 'function') {
+    synthesis.addEventListener('voiceschanged', loadVoices);
+  }
   if (speechSynthesis.onvoiceschanged !== undefined) {
     speechSynthesis.onvoiceschanged = loadVoices;
   }
 }
 
+// Desbloqueo universal de audio por gesto de usuario
+let isAudioUnlocked = false;
+function unlockAudioAndVoices() {
+  if (!synthesis) return;
+  loadVoices();
+  try {
+    if (synthesis.paused) synthesis.resume();
+  } catch(e) {}
+  if (!isAudioUnlocked) {
+    isAudioUnlocked = true;
+    try {
+      const u = new SpeechSynthesisUtterance(' ');
+      u.volume = 0.01;
+      synthesis.speak(u);
+    } catch(e) {}
+  }
+}
+window.addEventListener('click', unlockAudioAndVoices, { once: false, passive: true });
+window.addEventListener('keydown', unlockAudioAndVoices, { once: false, passive: true });
+window.addEventListener('touchstart', unlockAudioAndVoices, { once: false, passive: true });
+
 function getBestNaturalVoice() {
   if (!synthesis) return null;
-  if (!availableVoices.length) availableVoices = synthesis.getVoices();
-  if (!availableVoices.length) return null;
+  let voices = [];
+  try { voices = synthesis.getVoices() || []; } catch(e) {}
+  if (!voices.length && availableVoices.length) voices = availableVoices;
+  if (!voices.length) return null;
 
-  // 1. Premium Neural / Natural Online voices (Edge, Windows, Google Cloud)
-  const naturalEs = availableVoices.find(v => (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Online')) && v.lang.toLowerCase().startsWith('es'));
+  // 1. Voces Neuronales / Naturales en Español (Edge, Chrome, Google Cloud)
+  const naturalEs = voices.find(v => (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Online')) && v.lang.toLowerCase().startsWith('es'));
   if (naturalEs) return naturalEs;
 
-  // 2. High quality Apple Enhanced / Siri voices (macOS / iOS)
-  const appleEnhanced = availableVoices.find(v => (v.name.includes('Enhanced') || v.name.includes('Premium') || v.name.includes('Siri') || v.name.includes('Paulina') || v.name.includes('Jorge') || v.name.includes('Monica') || v.name.includes('Juan') || v.name.includes('Diego') || v.name.includes('Carlos') || v.name.includes('Helena')) && v.lang.toLowerCase().startsWith('es'));
-  if (appleEnhanced) return appleEnhanced;
+  // 2. Voces Apple Siri / Mejoradas en Español (macOS / iOS: Paulina, Jorge, Mónica, Juan, Diego, Carlos, Helena, Soledad)
+  const appleEs = voices.find(v => (v.name.includes('Enhanced') || v.name.includes('Premium') || v.name.includes('Siri') || /Paulina|Jorge|Mónica|Monica|Juan|Diego|Carlos|Helena|Soledad|Francisca/i.test(v.name)) && v.lang.toLowerCase().startsWith('es'));
+  if (appleEs) return appleEs;
 
-  // 3. Google Neural voices
-  const googleEs = availableVoices.find(v => v.name.includes('Google') && v.lang.toLowerCase().startsWith('es'));
+  // 3. Voces de Google en Español
+  const googleEs = voices.find(v => v.name.includes('Google') && v.lang.toLowerCase().startsWith('es'));
   if (googleEs) return googleEs;
 
-  // 4. Any Spanish localized voice (Mexico / Latin America / Spain)
-  const regionalEs = availableVoices.find(v => v.lang === 'es-MX' || v.lang === 'es-US' || v.lang === 'es-419') || availableVoices.find(v => v.lang.toLowerCase().startsWith('es'));
+  // 4. Cualquier voz regional en Español (es-MX, es-US, es-419, es-ES)
+  const regionalEs = voices.find(v => /^es[-_]/i.test(v.lang)) || voices.find(v => v.lang.toLowerCase().startsWith('es'));
   if (regionalEs) return regionalEs;
 
-  return availableVoices[0] || null;
+  // 5. Voz predeterminada del sistema
+  const def = voices.find(v => v.default);
+  if (def) return def;
+
+  return voices[0] || null;
 }
 
-window._activeUtterance = null;
+window._activeSpeechUtterances = window._activeSpeechUtterances || new Set();
 
 const VoiceQueue = {
   queue: [],
@@ -3214,22 +3251,27 @@ const VoiceQueue = {
   watchdogTimer: null,
 
   push(text) {
+    if (!text) return;
     const clean = text
+      .replace(/<think>[\s\S]*?<\/think>/g, '')
       .replace(/```[\s\S]*?```/g, ' código omitido ')
       .replace(/`([^`]+)`/g, '$1')
       .replace(/https?:\/\/[^\s]+/g, '')
-      .replace(/[#*_~\[\]\(\)\<\>]/g, '')
+      .replace(/[*_~\[\]\(\)\<\>#]/g, '')
       .replace(/\s+/g, ' ')
       .trim();
     if (!clean || clean.length < 2) return;
     this.queue.push(clean);
-    this.playNext();
+    if (!this.isPlaying) {
+      this.playNext();
+    }
   },
 
   playNext() {
     if (this.isPlaying || !synthesis) return;
 
     if (!this.queue.length) {
+      this.isPlaying = false;
       if (this.isStreamComplete && !isStreaming && isVoiceModeActive) {
         updateVoiceLiveUI('listening', 'Listo para escucharte', 'Micrófono activo...');
         setTimeout(() => {
@@ -3250,7 +3292,7 @@ const VoiceQueue = {
 
     const utterance = new SpeechSynthesisUtterance(chunk);
     utterance.lang = 'es-MX';
-    utterance.rate = 1.0;
+    utterance.rate = 1.05;
     utterance.pitch = 1.0;
 
     const bestVoice = getBestNaturalVoice();
@@ -3259,16 +3301,23 @@ const VoiceQueue = {
       utterance.lang = bestVoice.lang || 'es-MX';
     }
 
-    window._activeUtterance = utterance;
+    // Prevenir bug de recolección de basura (GC) en Chrome/Safari
+    window._activeSpeechUtterances.add(utterance);
+
     updateVoiceLiveUI('speaking', 'YZAI hablando...', `"${chunk}"`);
 
+    let done = false;
     const finishChunk = () => {
+      if (done) return;
+      done = true;
       if (this.watchdogTimer) { clearTimeout(this.watchdogTimer); this.watchdogTimer = null; }
-      window._activeUtterance = null;
+      if (window._activeSpeechUtterances) {
+        window._activeSpeechUtterances.delete(utterance);
+      }
       this.isPlaying = false;
       setTimeout(() => {
         this.playNext();
-      }, 50);
+      }, 35);
     };
 
     utterance.onend = finishChunk;
@@ -3277,8 +3326,8 @@ const VoiceQueue = {
       finishChunk();
     };
 
-    // Watchdog timer: In case Chrome/Safari fails to fire onend
-    const estimatedDuration = Math.max(3000, (chunk.length / 9) * 1000 + 4000);
+    // Watchdog timer: si el navegador no dispara onend, avanzar después de tiempo estimado
+    const estimatedDuration = Math.max(3500, (chunk.length / 8) * 1000 + 3500);
     this.watchdogTimer = setTimeout(() => {
       if (this.isPlaying) {
         console.log('[Voice Watchdog] Forcing next chunk');
@@ -3288,6 +3337,7 @@ const VoiceQueue = {
 
     try {
       synthesis.speak(utterance);
+      if (synthesis.paused) synthesis.resume();
     } catch (e) {
       console.warn('[Speech speak failed]', e);
       finishChunk();
@@ -3299,22 +3349,49 @@ const VoiceQueue = {
     this.queue = [];
     this.isPlaying = false;
     this.isStreamComplete = false;
-    window._activeUtterance = null;
+    if (window._activeSpeechUtterances) window._activeSpeechUtterances.clear();
     if (synthesis) {
-      try { synthesis.cancel(); } catch(e) {}
+      try { 
+        synthesis.cancel(); 
+        if (synthesis.paused) synthesis.resume();
+      } catch(e) {}
     }
   }
 };
 
 function speakText(text) {
-  if (!synthesis) return;
+  if (!synthesis) {
+    alert('Tu navegador no soporta síntesis de voz (TTS). Te sugerimos Google Chrome o Safari.');
+    return;
+  }
   try {
     if (synthesis.paused) synthesis.resume();
   } catch(e) {}
+
   VoiceQueue.clear();
-  VoiceQueue.push(text);
+
+  const clean = text
+    .replace(/<think>[\s\S]*?<\/think>/g, '')
+    .replace(/```[\s\S]*?```/g, ' código omitido ')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/https?:\/\/[^\s]+/g, '')
+    .replace(/[*_~\[\]\(\)\<\>#]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!clean) return;
+
+  // Dividir por oraciones para que Chrome/Safari no se congelen con párrafos largos
+  const sentences = clean.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g) || [clean];
+  sentences.forEach(s => {
+    const st = s.trim();
+    if (st.length > 1) VoiceQueue.push(st);
+  });
+
   VoiceQueue.isStreamComplete = true;
-  VoiceQueue.playNext();
+  setTimeout(() => {
+    if (!VoiceQueue.isPlaying) VoiceQueue.playNext();
+  }, 60);
 }
 
 function updateVoiceLiveUI(state, statusText, subtitleText) {
