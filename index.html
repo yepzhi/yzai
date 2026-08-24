@@ -1563,10 +1563,6 @@ think::before {
       <span id="voiceModeText">Modo Voz</span>
     </button>
 
-    <button class="voice-mode-pill" id="forceSpeakerTopBtn" onclick="forceSpeakerAndSpeak()" title="Forzar altavoz del teléfono y escuchar respuesta">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-      <span>Altavoz</span>
-    </button>
 
     <button class="action-btn" onclick="newChat()" aria-label="New chat" title="New chat" data-spotlight data-spotlight-size="120">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -1653,7 +1649,7 @@ think::before {
     </div>
 
     <!-- Centered Context / Slot Status Badge (cleanly elevated above toolbar) -->
-    <div class="input-hint" id="token-count">Context: 8K · 1 Slot Ready (100% GPU)</div>
+    <div class="input-hint" id="token-count">Context: 8K · 2 Slots Ready (100% GPU)</div>
 
     <!-- Centered Toolbar for Mode toggles (aligned with input container width) -->
     <div class="input-top-bar">
@@ -1776,7 +1772,7 @@ think::before {
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Concurrencia & Contexto</span>
-          <strong style="color:var(--secondary); font-size:12px;">MoE 4B Active · 8K Ctx (1 Slot)</strong>
+          <strong style="color:var(--secondary); font-size:12px;">MoE 4B Active · 8K Ctx (2 Slots)</strong>
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Sandbox de Código</span>
@@ -1830,7 +1826,7 @@ think::before {
     <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px;">
       <button class="voice-speaker-btn" onclick="forceSpeakerAndSpeak()" style="padding:10px 20px; font-size:14px; gap:8px; border-radius:24px; box-shadow:0 4px 16px rgba(16,185,129,0.35);">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-        <span>🔊 Forzar Altavoz</span>
+        <span>Forzar Altavoz</span>
       </button>
     </div>
   </div>
@@ -2224,7 +2220,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · Gemma 4 26B MoE (8K · 1 Slot)`);
+    setStatus(true, `Server Live · Gemma 4 26B MoE (8K · 2 Slots)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -2262,7 +2258,7 @@ function updateModelHeader() {
   if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Gemma 4 MoE (A4B): Ready</span>';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 8K · 1 Slot (100% GPU)';
+    tokenCount.textContent = 'Context: 8K · 2 Slots (100% GPU)';
   }
 }
 
