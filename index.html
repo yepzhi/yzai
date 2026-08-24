@@ -1755,6 +1755,12 @@ think::before {
       <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.95; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
     </div>
     <div class="voice-live-subtitle" id="voiceLiveSubtitle">Conversación en vivo con YZAI</div>
+    <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px;">
+      <button class="voice-speaker-btn" onclick="forceSpeakerAndSpeak()" style="padding:10px 20px; font-size:14px; gap:8px; border-radius:24px; box-shadow:0 4px 16px rgba(16,185,129,0.35);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        <span>🔊 Forzar Altavoz</span>
+      </button>
+    </div>
   </div>
   <div style="width:100%; max-width:500px; display:flex; justify-content:center; padding-bottom:12px;">
     <button id="voiceOverlayMicBtn" class="voice-ptt-btn">
@@ -3324,6 +3330,7 @@ const VoiceQueue = {
     }, estimatedDuration);
 
     try {
+      activateMediaAudioSession();
       synthesis.speak(utterance);
       if (synthesis.paused) synthesis.resume();
     } catch (e) {
@@ -3382,54 +3389,65 @@ function speakText(text) {
   }, 60);
 }
 
+// ── GLOBAL AUDIO CONTEXT (singleton) ──────────────────────
+// iOS/Android route audio to earpiece when mic is active and no media audio context is open.
+// Holding a persistent AudioContext open forces "media" audio category → loudspeaker.
+let _globalAudioCtx = null;
+function getGlobalAudioCtx() {
+  const ACtx = window.AudioContext || window.webkitAudioContext;
+  if (!ACtx) return null;
+  if (!_globalAudioCtx || _globalAudioCtx.state === 'closed') {
+    _globalAudioCtx = new ACtx();
+  }
+  if (_globalAudioCtx.state === 'suspended') {
+    _globalAudioCtx.resume().catch(() => {});
+  }
+  return _globalAudioCtx;
+}
+
+// Play an inaudible tone to activate the media audio session on the device.
+// Must be called from a direct user-gesture handler (onclick) to work on iOS.
+function activateMediaAudioSession() {
+  const ctx = getGlobalAudioCtx();
+  if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.001, ctx.currentTime); // nearly silent
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.15);
+  } catch(e) {}
+}
+
 function forceSpeakerAndSpeak(customText) {
-  // 1. Detener micrófono para liberar el canal de llamadas telefónicas en iOS/Android
+  // STEP 1: Release mic — earpiece lock is caused by getUserMedia remaining active
   stopMic();
 
-  // 2. Disparar Web Audio Context con tono acústico breve para forzar el altavoz multimedia principal
-  try {
-    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-    if (AudioCtx) {
-      const ctx = new AudioCtx();
-      if (ctx.state === 'suspended') {
-        ctx.resume();
-      }
-      const osc = ctx.createOscillator();
-      const gain = ctx.createGain();
-      gain.gain.value = 0.05;
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.start();
-      setTimeout(() => {
-        try {
-          osc.stop();
-          ctx.close();
-        } catch(e) {}
-      }, 120);
-    }
-  } catch(e) {}
+  // STEP 2: Activate media audio session via Web Audio — this forces iOS/Android
+  // to route to the loudspeaker instead of the earpiece.
+  activateMediaAudioSession();
 
-  // 3. Despertar speech synthesis
+  // STEP 3: Wake speech synthesis (required after mic stop on some browsers)
   if (!synthesis) {
     alert('Tu navegador no soporta síntesis de voz (TTS). Te sugerimos Google Chrome o Safari.');
     return;
   }
-
   try {
+    synthesis.cancel();
     if (synthesis.paused) synthesis.resume();
     loadVoices();
   } catch(e) {}
 
-  // 4. Determinar texto a hablar (última respuesta de la IA o mensaje de confirmación)
+  // STEP 4: Determine what text to speak
   let textToSpeak = customText;
   if (!textToSpeak) {
     const lastAi = [...messages].reverse().find(m => m.role === 'ai');
     textToSpeak = lastAi && lastAi.content ? lastAi.content : 'Altavoz activado. YZAI está listo para hablar.';
   }
 
-  // Notificar visualmente en el overlay si está activo
   updateVoiceLiveUI('speaking', 'Altavoz Activado', 'Reproduciendo en altavoz...');
-
   speakText(textToSpeak);
 }
 
@@ -3652,9 +3670,14 @@ async function toggleVoiceMode() {
     if (overlay) overlay.classList.add('active');
     VoiceQueue.clear();
 
-    // Desbloquear audio en el navegador (Safari / Chrome gesture unlock)
+    // Activar sesión de audio multimedia (fuerza altavoz en iOS/Android)
+    // Debe llamarse desde un evento directo del usuario (click) para tener efecto
+    activateMediaAudioSession();
+
+    // Desbloquear speech synthesis (Safari / Chrome gesture unlock)
     if (synthesis) {
       try {
+        synthesis.cancel();
         if (synthesis.paused) synthesis.resume();
         const primer = new SpeechSynthesisUtterance('');
         primer.volume = 0;
