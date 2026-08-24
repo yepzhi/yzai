@@ -1901,6 +1901,7 @@ let currentImageBase64 = null; // stored internally, NEVER shown as text to user
 let currentImageDimensions = null; // { w, h }
 let currentImageOcrText = ''; // Extracted text via OCR
 let currentAttachedDoc = null; // stored internally, NEVER dumped into prompt textarea
+let persistentMicStream = null;
 
 function removeAttachedDoc() {
   currentAttachedDoc = null;
@@ -2201,14 +2202,6 @@ async function init() {
   checkServicesHealth();
   setupPushToTalk();
   setInterval(checkServicesHealth, 30000);
-  // Precarga silenciosa del modelo en VRAM al abrir la interfaz
-  if (selectedModel) {
-    fetch(`${OLLAMA_URL}/api/generate?clave=secreta123`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ model: selectedModel, keep_alive: -1 })
-    }).catch(() => {});
-  }
 }
 
 let lastOnlineTimestamp = Date.now();
@@ -2469,53 +2462,28 @@ function createMsg(role, content, streaming=false, images=[]) {
   return div;
 }
 
-function renderMd(el, text, nativeThinking = '') {
-  let thinking = nativeThinking || '';
-  let clean = text || '';
-
-  // Handle closed think tags
-  clean = clean.replace(/<think>([\s\S]*?)<\/think>/gi, (_,t) => { 
-    thinking += t.trim() + '\n\n'; 
-    return ''; 
-  });
-
-  // Handle open think tag (streaming)
-  const openMatch = clean.match(/<think>([\s\S]*)$/i);
-  let isThinkingNow = false;
-  if (openMatch) {
-    isThinkingNow = true;
-    thinking += openMatch[1].trim();
-    clean = clean.replace(openMatch[0], '');
-  }
-
-  clean = clean.trim();
-  thinking = thinking.trim();
+function renderMd(el, text) {
+  let clean = (text || '')
+    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+    .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
+    .replace(/<think>[\s\S]*$/gi, '')
+    .replace(/<thought>[\s\S]*$/gi, '')
+    .trim();
 
   let html = '';
-  if (thinking || isThinkingNow) {
-    const thinkStatus = isThinkingNow ? 'Razonando en segundo plano...' : 'Proceso de razonamiento';
-    html += `<details class="think-accordion" ${isThinkingNow ? 'open' : ''} style="margin-bottom:12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.02); padding:6px 10px;">
-      <summary style="cursor:pointer; color:var(--cyan); font-size:12px; font-weight:600; display:flex; align-items:center; gap:6px; user-select:none;">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="${isThinkingNow ? 'spin-svg' : ''}"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
-        <span>${thinkStatus}</span>
-      </summary>
-      <div class="think-body" style="color:var(--muted); font-style:italic; padding-top:8px; font-size:0.9em; white-space:pre-wrap; border-top:1px solid rgba(255,255,255,0.05); margin-top:6px;">${esc(thinking)}${isThinkingNow ? '<span class="cursor"></span>' : ''}</div>
-    </details>`;
-  }
-  
   if (clean) {
     if (typeof marked !== 'undefined' && marked && marked.parse) {
       try {
-        html += marked.parse(clean);
+        html = marked.parse(clean);
       } catch(e) {
-        html += esc(clean);
+        html = esc(clean);
       }
     } else {
-      html += esc(clean);
+      html = esc(clean);
     }
   }
   
-  el.innerHTML = html || (isThinkingNow ? '' : '<span class="cursor"></span>');
+  el.innerHTML = html || '<span class="cursor"></span>';
 
   if (typeof hljs !== 'undefined' && hljs && hljs.highlightElement) {
     el.querySelectorAll('pre code').forEach(block => {
@@ -2768,14 +2736,15 @@ async function sendMessage() {
   document.getElementById('token-count').textContent = 'Generando...';
 
   const payload = [];
-  let effectiveSysPrompt = systemPrompt || '';
+  const directInstruction = 'INSTRUCCIÓN PRIMARIA: Responde directamente, sin prefacios, sin rodeos, sin etiquetas <think> y sin monólogo de pensamiento interno.';
+  let effectiveSysPrompt = systemPrompt ? `${systemPrompt}\n\n${directInstruction}` : directInstruction;
   if (isRxModeActive) {
-    effectiveSysPrompt = effectiveSysPrompt ? `${effectiveSysPrompt}\n\n${RX_DOCTOR_SYSTEM_PROMPT}` : RX_DOCTOR_SYSTEM_PROMPT;
+    effectiveSysPrompt = `${effectiveSysPrompt}\n\n${RX_DOCTOR_SYSTEM_PROMPT}`;
   } else if (isVoiceModeActive) {
-    const voiceInstruction = 'Estás en modo de conversación de voz en tiempo real. Brinda respuestas completas, profundas, claras y bien estructuradas, explicando cada punto con la amplitud necesaria sin recortar arbitrariamente tus explicaciones. Mantén un tono natural y conversacional. Evita el uso de tablas complejas, bloques densos de código o formato markdown excesivo para que la lectura en voz alta sea 100% fluida y agradable.';
-    effectiveSysPrompt = effectiveSysPrompt ? `${effectiveSysPrompt}\n\n${voiceInstruction}` : voiceInstruction;
+    const voiceInstruction = 'Estás en modo de conversación de voz en tiempo real. Brinda respuestas completas, profundas, claras y bien estructuradas. Mantén un tono natural y conversacional sin formato markdown excesivo para que la lectura en voz alta sea 100% fluida.';
+    effectiveSysPrompt = `${effectiveSysPrompt}\n\n${voiceInstruction}`;
   }
-  if (effectiveSysPrompt) payload.push({ role:'system', content: effectiveSysPrompt });
+  payload.push({ role:'system', content: effectiveSysPrompt });
 
   // Dump history
   messages.forEach(m => {
@@ -2852,11 +2821,9 @@ async function sendMessage() {
   let liveTimer = null;
   let collectedToolCalls = []; // For web_search tool calling
 
-  // Variables del Typewriter para suavidad
+  // Variables del Typewriter para máxima velocidad y suavidad
   let targetText = '';
-  let targetThinking = '';
   let currentText = '';
-  let currentThinking = '';
   let typewriterTimer = null;
   let streamFinished = false;
   let lastSpeakIdx = 0;
@@ -2866,24 +2833,17 @@ async function sendMessage() {
     
     typewriterTimer = setInterval(() => {
       let hasChanges = false;
-      const pendingThinking = targetThinking.length - currentThinking.length;
       const pendingText = targetText.length - currentText.length;
       
-      if (pendingThinking > 0) {
-        const step = Math.min(pendingThinking, Math.max(4, Math.ceil(pendingThinking * 0.35)));
-        currentThinking += targetThinking.substr(currentThinking.length, step);
-        hasChanges = true;
-      }
       if (pendingText > 0) {
-        const step = Math.min(pendingText, Math.max(3, Math.ceil(pendingText * 0.3)));
+        const step = Math.min(pendingText, Math.max(5, Math.ceil(pendingText * 0.4)));
         currentText += targetText.substr(currentText.length, step);
         hasChanges = true;
       }
       
-      // REALTIME TTS CHUNKING: Hablar oraciones completas y fluidas (sin cortar palabras a medias)
+      // REALTIME TTS CHUNKING: Hablar oraciones completas y fluidas
       if (isVoiceModeActive && currentText.length > lastSpeakIdx && typeof VoiceQueue !== 'undefined') {
         const unparsed = currentText.slice(lastSpeakIdx);
-        // Match completed sentences [.!?:\n]
         const match = unparsed.match(/([\s\S]*?[.!?:](\s+|\n)|[\s\S]*?\n\n)/);
         if (match && match[0].trim().length >= 6) {
           const chunkToSpeak = match[0];
@@ -2893,22 +2853,20 @@ async function sendMessage() {
       }
 
       if (hasChanges) {
-        renderMd(bubble, currentText, currentThinking);
+        renderMd(bubble, currentText);
         bubble.innerHTML += '<span class="cursor"></span>';
         scrollBottom();
       } else if (streamFinished) {
         clearInterval(typewriterTimer);
         typewriterTimer = null;
         
-        // Garantizar que la advertencia médica obligatoria esté presente en modo RX
         if (isRxModeActive && targetText && !targetText.includes('No sustituye el juicio clínico') && !targetText.includes('profesional de la salud certificado')) {
           targetText += '\n\n> ⚠️ **Aviso:** Este análisis es generado por un modelo de lenguaje con fines de apoyo técnico al análisis de imagen. No sustituye el juicio clínico de un profesional de la salud certificado, no consulta fuentes externas ni bases de investigación en tiempo real, y no debe utilizarse como único fundamento para decisiones diagnósticas o terapéuticas.';
         }
 
-        renderMd(bubble, targetText || '…', targetThinking);
+        renderMd(bubble, targetText || '…');
         bubble.querySelectorAll('.cursor').forEach(el => el.remove());
 
-        // Enviar resto del texto que haya quedado pendiente en la cola de voz
         if (isVoiceModeActive && typeof VoiceQueue !== 'undefined') {
           if (targetText.length > lastSpeakIdx) {
             const tail = targetText.slice(lastSpeakIdx).trim();
@@ -2927,7 +2885,7 @@ async function sendMessage() {
         checkContextUsage();
         document.getElementById('prompt').focus();
       }
-    }, 16); // ~60fps para máxima suavidad visual
+    }, 12);
   }
 
   let loadingIndicatorActive = false;
@@ -3027,17 +2985,8 @@ async function sendMessage() {
               }, 500);
             }
             
-            let hasChange = false;
             if (d.message?.content) {
               targetText += d.message.content;
-              hasChange = true;
-            }
-            if (d.message?.thinking) {
-              targetThinking += d.message.thinking;
-              hasChange = true;
-            }
-            
-            if (hasChange) {
               tokenCount++;
               startTypewriterLoop();
             }
