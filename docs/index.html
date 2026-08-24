@@ -2220,12 +2220,11 @@ async function loadModels() {
     allModels = models;
 
     if (models.length) {
-      const gemmaModel = models.find(m => m.name.toLowerCase().includes('gemma4') || m.name.toLowerCase().includes('gemma'));
-      if (gemmaModel) {
-        selectedModel = gemmaModel.name;
-      } else {
-        selectedModel = models[0]?.name || 'gemma4-26b-uncensored:latest';
-      }
+      const gemmaModel = models.find(m => m.name === 'gemma4-26b-uncensored:latest') 
+        || models.find(m => m.name.includes('gemma4-26b-uncensored'))
+        || models.find(m => m.name.toLowerCase().includes('gemma4') && !m.name.includes('.bak'))
+        || models[0];
+      selectedModel = gemmaModel ? gemmaModel.name : 'gemma4-26b-uncensored:latest';
     }
 
     lastOnlineTimestamp = Date.now();
