@@ -1663,7 +1663,7 @@ think::before {
     </div>
 
     <!-- Centered Context / Slot Status Badge (cleanly elevated above toolbar) -->
-    <div class="input-hint" id="token-count">Context: 8K · 1 Slot (100% GPU)</div>
+    <div class="input-hint" id="token-count">Context: 4K · 1 Slot (100% GPU)</div>
 
     <!-- Centered Toolbar for Mode toggles (aligned with input container width) -->
     <div class="input-top-bar">
@@ -1786,7 +1786,7 @@ think::before {
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Concurrencia & Contexto</span>
-          <strong style="color:var(--secondary); font-size:12px;">MoE 4B Active · 8K Ctx (1 Slot Dedicated)</strong>
+          <strong style="color:var(--secondary); font-size:12px;">MoE 4B Active · 4K Ctx (1 Slot Dedicated)</strong>
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Sandbox de Código</span>
@@ -1884,12 +1884,12 @@ const MODEL_META = {
 };
 
 // ── CONFIG & STATE ─────────────────────────────────────────
-let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
+let OLLAMA_URL   = '';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
 let selectedModel = 'gemma4-26b-uncensored:latest';
-const FIXED_CTX   = 8192; // 8K MoE / Hybrid SWA (100% GPU VRAM)
-let selectedModelDesc = 'Gemma 4 26B-A4B MoE Uncensored (8K Ctx · 100% GPU VRAM)';
+const FIXED_CTX   = 4096; // 4K MoE / Hybrid SWA (100% GPU VRAM)
+let selectedModelDesc = 'Gemma 4 26B-A4B MoE Uncensored (4K Ctx · 100% GPU VRAM)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -2132,28 +2132,29 @@ function removeImage() {
 
 // ── INIT ───────────────────────────────────────────────────
 async function discoverEndpoint() {
-  if (location.hostname.includes('yepzhi.com')) {
-    OLLAMA_URL = 'https://api-yzai.yepzhi.com';
-    return;
-  }
   const host = window.location.hostname || '127.0.0.1';
-  // api-yzai.yepzhi.com first — prevents Cloudflare Pages (which returns 200
-  // for everything via _redirects) from being mistaken as an Ollama endpoint.
+  // Check same-origin ('') first — on yzai.yepzhi.com, Nginx proxies /api/ directly to Ollama.
+  // This completely avoids cross-origin/subdomain Cloudflare WAF 403 blocks.
   const candidates = [
-    'https://api-yzai.yepzhi.com',
+    '',
+    window.location.origin,
+    'https://yzai.yepzhi.com',
     `http://${host}:11434`,
+    'http://127.0.0.1:11434',
     'http://yzai.local:11434',
+    'http://192.168.1.127:11434',
     'http://192.168.1.222:11434',
     'http://192.168.1.86:11434',
     'http://192.168.1.72:11434',
-    'http://127.0.0.1:11434',
-    origin
+    'https://api-yzai.yepzhi.com'
   ];
   for (const url of candidates) {
+    if (url === undefined || url === null) continue;
     try {
       const c = new AbortController();
-      const t = setTimeout(() => c.abort(), 2000);
-      const r = await fetch(`${url}/api/tags?clave=secreta123`, { signal: c.signal });
+      const t = setTimeout(() => c.abort(), 2500);
+      const testUrl = url ? `${url}/api/tags?clave=secreta123` : `/api/tags?clave=secreta123`;
+      const r = await fetch(testUrl, { signal: c.signal });
       clearTimeout(t);
       if (!r.ok) continue;
       // Validate it's real Ollama JSON — not an HTML page (Cloudflare Pages
@@ -2161,12 +2162,13 @@ async function discoverEndpoint() {
       const ct = r.headers.get('content-type') || '';
       if (!ct.includes('application/json')) continue;
       const data = await r.json();
-      if (Array.isArray(data.models)) { OLLAMA_URL = url; return; }
+      if (Array.isArray(data.models) && data.models.length > 0) {
+        OLLAMA_URL = url;
+        console.log('[YZAI] Active Ollama endpoint:', url || '(same-origin)');
+        return;
+      }
     } catch(e) {}
   }
-  
-  // Si llegamos aquí, no se encontró ningún endpoint vivo.
-  // Dejamos la URL por defecto para que checkServicesHealth la maneje.
 }
 
 async function checkServicesHealth(forceCheck = false) {

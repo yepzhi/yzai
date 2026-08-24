@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#030209">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; connect-src * 'unsafe-inline' blob: data: http: https: ws: wss:;">
@@ -36,6 +37,7 @@
 <!-- Libraries -->
 <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -476,11 +478,28 @@ think::before {
 .think-body { margin-top: 8px; background: rgba(0,0,0,0.3); border: 1px solid var(--border-light); border-radius: 12px; padding: 12px; font-size: 11.5px; color: var(--text-dim); line-height: 1.5; white-space: pre-wrap; font-style: italic; }
 
 .cursor { display: inline-block; width: 6px; height: 16px; background: var(--primary); animation: blink 1s step-end infinite; vertical-align: text-bottom; margin-left: 4px; border-radius: 2px; }
-@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
-
-.msg-time { font-size: 11px; color: var(--muted); margin-top: 6px; padding: 0 4px; font-family: var(--font-mono); }
-
-/* FLUX2 Generation Progress & Visor Card */
+.msg-time { font-size: 11px; color: var(--muted); margin-top: 6px; padding: 0 4px; font-family: var(--font-mono); display: flex; align-items: center; gap: 8px; }
+.msg-tts-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  color: var(--text-dim, #a1a1aa);
+  font-size: 11px;
+  font-weight: 500;
+  font-family: var(--font-sans);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.msg-tts-btn:hover {
+  background: rgba(56, 182, 255, 0.18);
+  border-color: rgba(56, 182, 255, 0.4);
+  color: #38b6ff;
+  transform: translateY(-1px);
+}
 .flux-progress-card {
   background: var(--surface2, rgba(255, 255, 255, 0.03));
   border: 1px solid var(--border-light, rgba(255, 255, 255, 0.1));
@@ -640,6 +659,19 @@ think::before {
   pointer-events: none; z-index: 30; display: flex; flex-direction: column; align-items: center;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
+/* Solid dark underlay shield to prevent transparent bleed-through behind iOS keyboard toolbar */
+.input-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100dvh;
+  background: #030209;
+  pointer-events: none;
+  z-index: -1;
+}
 .input-container {
   width: 100%; max-width: 880px; pointer-events: all;
   background: rgba(18, 18, 26, 0.88); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
@@ -796,11 +828,11 @@ think::before {
 .mic-btn:hover { background: rgba(255,255,255,0.15); color: #fff; transform: translateY(-2px); border-color: rgba(255,255,255,0.2); }
 .mic-btn.listening {
   background: rgba(239,68,68,0.2); color: #ef4444; border-color: #ef4444;
-  animation: micPulse 1.5s infinite;
+  animation: micPulse 2.4s infinite ease-in-out;
 }
 @keyframes micPulse {
-  0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.4); }
-  70% { box-shadow: 0 0 0 10px rgba(239,68,68,0); }
+  0% { box-shadow: 0 0 0 0 rgba(239,68,68,0.45); }
+  70% { box-shadow: 0 0 0 12px rgba(239,68,68,0); }
   100% { box-shadow: 0 0 0 0 rgba(239,68,68,0); }
 }
 
@@ -1028,6 +1060,76 @@ think::before {
     border-radius: 14px; margin-right: 2px;
   }
   .menu-btn, .action-btn { width: 38px; height: 38px; border-radius: 14px; }
+
+  /* Mobile Welcome Page Center & Fit Optimization */
+  .messages-wrapper {
+    padding: 0 8px;
+  }
+  .welcome {
+    padding: 12px 10px 110px;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+  .welcome-icon {
+    width: 64px; height: 64px;
+    margin-bottom: 16px;
+  }
+  .welcome-icon svg {
+    width: 36px; height: 36px;
+  }
+  .welcome h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+  .welcome p {
+    font-size: 13.5px;
+    max-width: 92%;
+    line-height: 1.45;
+  }
+  .bilingual-badge {
+    margin-top: 16px;
+    padding: 6px 12px;
+    font-size: 11px;
+    max-width: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    justify-content: center;
+  }
+  .welcome-chips-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-top: 18px;
+    padding: 0;
+    max-width: 100%;
+  }
+  .welcome-chip-card {
+    padding: 10px 10px;
+    gap: 7px;
+    border-radius: 13px;
+    align-items: center;
+  }
+  .welcome-chip-card .chip-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+  .welcome-chip-card .chip-content strong {
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.25px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+}
+
+@media (max-width: 375px) {
+  .welcome-chip-card .chip-content strong {
+    font-size: 0.68rem;
+    white-space: normal;
+    text-align: left;
+  }
 }
 
 /* ─── REALTIME VOICE OVERLAY ("MODO VOZ LIVE") ────── */
@@ -1065,6 +1167,32 @@ think::before {
 }
 @keyframes statusPulse { 0% { transform: scale(0.6); opacity: 1; } 100% { transform: scale(1.9); opacity: 0; } }
 
+.voice-speaker-btn {
+  background: rgba(16, 185, 129, 0.16);
+  border: 1px solid rgba(16, 185, 129, 0.45);
+  color: #34d399;
+  padding: 8px 14px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.25);
+  user-select: none;
+}
+.voice-speaker-btn:hover {
+  background: rgba(16, 185, 129, 0.28);
+  border-color: rgba(16, 185, 129, 0.7);
+  color: #fff;
+  transform: translateY(-1px);
+}
+.voice-speaker-btn:active {
+  transform: scale(0.96);
+}
+
 .voice-live-close { 
   background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12); color: var(--text-dim); 
   width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; 
@@ -1085,28 +1213,28 @@ think::before {
 .voice-plasma-orb.listening {
   background: radial-gradient(circle at 35% 35%, #60a5fa 0%, #3b82f6 35%, #8b5cf6 70%, #1e1045 100%);
   box-shadow: 0 0 100px rgba(59, 130, 246, 0.7), 0 0 140px rgba(139, 92, 246, 0.6), inset 0 0 45px rgba(255,255,255,0.9);
-  transform: scale(1.18);
-  animation: orbPulseListening 0.8s infinite alternate ease-in-out;
+  transform: scale(1.14);
+  animation: orbPulseListening 2.4s infinite alternate ease-in-out;
 }
 .voice-plasma-orb.thinking {
   background: radial-gradient(circle at 45% 45%, #c084fc 0%, #6366f1 45%, #1e1b4b 100%);
   box-shadow: 0 0 90px rgba(192, 132, 252, 0.65), 0 0 130px rgba(99, 102, 241, 0.55); 
-  animation: orbThinkingGlow 2s infinite ease-in-out;
+  animation: orbThinkingGlow 3.0s infinite ease-in-out;
 }
 .voice-plasma-orb.speaking {
   background: radial-gradient(circle at 35% 35%, #c084fc 0%, #8b5cf6 40%, #3b82f6 80%, #0c0827 100%);
   box-shadow: 0 0 110px rgba(192, 132, 252, 0.6), 0 0 130px rgba(59, 130, 246, 0.65); 
-  animation: orbPulse 0.4s infinite alternate ease-in-out;
-  transform: scale(1.14);
+  animation: orbPulse 1.8s infinite alternate ease-in-out;
+  transform: scale(1.12);
 }
-@keyframes orbIdle { 0%, 100% { transform: scale(1) translate(0, 0); } 50% { transform: scale(1.08) translate(0, -6px); box-shadow: 0 0 80px rgba(168, 85, 247, 0.4), 0 0 110px rgba(99, 102, 241, 0.4); } }
-@keyframes orbPulseListening { 0% { transform: scale(1.14); } 100% { transform: scale(1.24); filter: brightness(1.25); } }
+@keyframes orbIdle { 0%, 100% { transform: scale(1) translate(0, 0); } 50% { transform: scale(1.06) translate(0, -6px); box-shadow: 0 0 80px rgba(168, 85, 247, 0.4), 0 0 110px rgba(99, 102, 241, 0.4); } }
+@keyframes orbPulseListening { 0% { transform: scale(1.08); filter: brightness(1); } 100% { transform: scale(1.20); filter: brightness(1.22); } }
 @keyframes orbThinkingGlow {
   0% { transform: scale(1); filter: brightness(1); box-shadow: 0 0 70px rgba(192, 132, 252, 0.45), 0 0 100px rgba(99, 102, 241, 0.4); }
-  50% { transform: scale(1.06); filter: brightness(1.2); box-shadow: 0 0 100px rgba(192, 132, 252, 0.75), 0 0 140px rgba(99, 102, 241, 0.65); }
+  50% { transform: scale(1.06); filter: brightness(1.18); box-shadow: 0 0 100px rgba(192, 132, 252, 0.75), 0 0 140px rgba(99, 102, 241, 0.65); }
   100% { transform: scale(1); filter: brightness(1); box-shadow: 0 0 70px rgba(192, 132, 252, 0.45), 0 0 100px rgba(99, 102, 241, 0.4); }
 }
-@keyframes orbPulse { 0% { transform: scale(0.98); filter: brightness(1); } 100% { transform: scale(1.22); filter: brightness(1.35); } }
+@keyframes orbPulse { 0% { transform: scale(1.02); filter: brightness(1.05); } 100% { transform: scale(1.18); filter: brightness(1.3); } }
 
 .voice-live-subtitle { 
   max-width: 520px; text-align: center; font-size: 16.5px; color: #fff; line-height: 1.55; 
@@ -1273,7 +1401,72 @@ think::before {
 /* Aurora canvas integration for yzai */
 #yzai-aurora {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  opacity: 0.6; mix-blend-mode: screen;
+  opacity: 0.92; mix-blend-mode: screen;
+}
+
+/* Liquid Glass Message Bubbles */
+.msg.ai .bubble {
+  background: rgba(15, 20, 32, 0.75) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+.msg.user .bubble {
+  background: linear-gradient(135deg, rgba(39, 126, 255, 0.85), rgba(139, 92, 246, 0.85)) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid rgba(255, 255, 255, 0.25) !important;
+  box-shadow: 0 10px 30px -5px rgba(39, 126, 255, 0.35) !important;
+}
+
+/* Interactive Suggestion Cards Grid on Welcome */
+.welcome-chips-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  width: 100%;
+  max-width: 580px;
+  margin: 24px auto 0;
+  text-align: left;
+  box-sizing: border-box;
+}
+.welcome-chip-card {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  color: #fff;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+}
+.welcome-chip-card:hover {
+  background: rgba(139, 92, 246, 0.14);
+  border-color: rgba(139, 92, 246, 0.45);
+  box-shadow: 0 12px 28px -6px rgba(139, 92, 246, 0.35);
+  transform: translateY(-2px);
+}
+.welcome-chip-card .chip-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.welcome-chip-card .chip-content strong {
+  display: block;
+  font-size: 0.88rem;
+  color: #fff;
+  font-weight: 700;
+  margin-bottom: 0;
 }
 </style>
 </head>
@@ -1384,6 +1577,7 @@ think::before {
       <span id="voiceModeText">Modo Voz</span>
     </button>
 
+
     <button class="action-btn" onclick="newChat()" aria-label="New chat" title="New chat" data-spotlight data-spotlight-size="120">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     </button>
@@ -1401,6 +1595,41 @@ think::before {
         <div class="bilingual-badge" data-shiny data-shiny-speed="3.5">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           <span>Español &amp; English · Escribe en el idioma que prefieras</span>
+        </div>
+
+        <div class="welcome-chips-grid">
+          <div class="welcome-chip-card" data-tilted data-spotlight onclick="quickPrompt('Ayúdame a diseñar una arquitectura limpia, robusta y de alto rendimiento para...')">
+            <span class="chip-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </span>
+            <div class="chip-content">
+              <strong>Arquitectura &amp; Código</strong>
+            </div>
+          </div>
+          <div class="welcome-chip-card" data-tilted data-spotlight onclick="quickPrompt('Explícame a profundidad el funcionamiento y matemáticas de los transformadores y atención...')">
+            <span class="chip-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z"/></svg>
+            </span>
+            <div class="chip-content">
+              <strong>Razonamiento &amp; IA</strong>
+            </div>
+          </div>
+          <div class="welcome-chip-card" data-tilted data-spotlight onclick="toggleRxMode()">
+            <span class="chip-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="3"/></svg>
+            </span>
+            <div class="chip-content">
+              <strong>Imagenología PhD</strong>
+            </div>
+          </div>
+          <div class="welcome-chip-card" data-tilted data-spotlight onclick="toggleVoiceMode()">
+            <span class="chip-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            </span>
+            <div class="chip-content">
+              <strong>Conversación de Voz</strong>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1434,7 +1663,7 @@ think::before {
     </div>
 
     <!-- Centered Context / Slot Status Badge (cleanly elevated above toolbar) -->
-    <div class="input-hint" id="token-count">Context: 16K · 5 Slots Ready (100% GPU)</div>
+    <div class="input-hint" id="token-count">Context: 4K · 1 Slot (100% GPU)</div>
 
     <!-- Centered Toolbar for Mode toggles (aligned with input container width) -->
     <div class="input-top-bar">
@@ -1516,7 +1745,7 @@ think::before {
       <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Hablar por micrófono / Modo Voz" aria-label="Microphone">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
       </button>
-      <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send">
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send" data-starborder data-sb-color="#8b5cf6" data-sb-speed="3">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
       <button class="stop-btn" id="stopBtn" onclick="stopGeneration()" aria-label="Stop" style="display:none">
@@ -1557,7 +1786,7 @@ think::before {
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Concurrencia & Contexto</span>
-          <strong style="color:var(--secondary); font-size:12px;">MoE 4B Active · 16K Ctx (5 Slots)</strong>
+          <strong style="color:var(--secondary); font-size:12px;">MoE 4B Active · 4K Ctx (1 Slot Dedicated)</strong>
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Sandbox de Código</span>
@@ -1593,15 +1822,27 @@ think::before {
       </div>
       <span id="voiceLiveStatusText">Modo Voz Activo</span>
     </div>
-    <button class="voice-live-close" onclick="toggleVoiceMode()" title="Salir del Modo Voz" aria-label="Cerrar">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-    </button>
+    <div style="display:flex; align-items:center; gap:8px;">
+      <button class="voice-speaker-btn" id="voiceForceSpeakerBtn" onclick="forceSpeakerAndSpeak()" title="Forzar altavoz y reproducir audio">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        <span>Altavoz</span>
+      </button>
+      <button class="voice-live-close" onclick="toggleVoiceMode()" title="Salir del Modo Voz" aria-label="Cerrar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
   </div>
   <div class="voice-visualizer-container">
     <div class="voice-plasma-orb" id="voicePlasmaOrb" title="Toca o mantén presionado para hablar">
       <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="opacity:0.95; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.5));"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
     </div>
     <div class="voice-live-subtitle" id="voiceLiveSubtitle">Conversación en vivo con YZAI</div>
+    <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin-top:14px;">
+      <button class="voice-speaker-btn" onclick="forceSpeakerAndSpeak()" style="padding:10px 20px; font-size:14px; gap:8px; border-radius:24px; box-shadow:0 4px 16px rgba(16,185,129,0.35);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        <span>Forzar Altavoz</span>
+      </button>
+    </div>
   </div>
   <div style="width:100%; max-width:500px; display:flex; justify-content:center; padding-bottom:12px;">
     <button id="voiceOverlayMicBtn" class="voice-ptt-btn">
@@ -1643,12 +1884,12 @@ const MODEL_META = {
 };
 
 // ── CONFIG & STATE ─────────────────────────────────────────
-let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
+let OLLAMA_URL   = '';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
 let selectedModel = 'gemma4-26b-uncensored:latest';
-const FIXED_CTX   = 16384; // 16K MoE / Hybrid SWA (32+ páginas)
-let selectedModelDesc = 'Gemma 4 26B-A4B MoE Uncensored (16K Ctx · 5 Slots)';
+const FIXED_CTX   = 4096; // 4K MoE / Hybrid SWA (100% GPU VRAM)
+let selectedModelDesc = 'Gemma 4 26B-A4B MoE Uncensored (4K Ctx · 100% GPU VRAM)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -1657,12 +1898,15 @@ let abortCtrl     = null;
 let isStreaming   = false;
 let allModels     = [];
 let currentImageBase64 = null; // stored internally, NEVER shown as text to user
+let currentImageDimensions = null; // { w, h }
+let currentImageOcrText = ''; // Extracted text via OCR
 let currentAttachedDoc = null; // stored internally, NEVER dumped into prompt textarea
+let persistentMicStream = null;
 
 function removeAttachedDoc() {
   currentAttachedDoc = null;
   document.getElementById('docPreviewContainer').style.display = 'none';
-  document.getElementById('token-count').textContent = 'Context: 16K · Ready';
+  document.getElementById('token-count').textContent = 'Context: 8K · Ready';
 }
 
 const esc = (str) => String(str).replace(/[&<>"']/g, match => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
@@ -1675,8 +1919,8 @@ const TEXT_EXTENSIONS = ['txt','md','markdown','json','jsonl','csv','tsv',
 
 // PDF: max chars to extract (~80K ≈ 20K tokens)
 const PDF_MAX_CHARS = 80_000;
-// Image: max dimension before compressing (higher = more detail for moondream OCR)
-const IMG_MAX_PX = 1536;
+// Image: max dimension before compressing (optimized for fast neural vision & network transfer)
+const IMG_MAX_PX = 800;
 
 function processFile(file) {
   if (!file) return;
@@ -1705,12 +1949,25 @@ function processFile(file) {
         canvas.width = w; canvas.height = h;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, w, h);
-        const jpegData = canvas.toDataURL('image/jpeg', 0.92);
+        const jpegData = canvas.toDataURL('image/jpeg', 0.85);
         currentImageBase64 = jpegData.split(',')[1];
+        currentImageDimensions = { w, h };
+        currentImageOcrText = '';
         document.getElementById('imgPreview').src = jpegData;
         const kb = Math.round(currentImageBase64.length * 0.75 / 1024);
         document.getElementById('token-count').textContent = `Imagen lista — ${w}×${h}px, ~${kb}KB`;
         document.getElementById('sendBtn').disabled = false;
+
+        // Background OCR via Tesseract.js if available
+        if (window.Tesseract && typeof window.Tesseract.recognize === 'function') {
+          window.Tesseract.recognize(jpegData, 'spa+eng', { logger: () => {} })
+            .then(res => {
+              if (res && res.data && res.data.text && res.data.text.trim()) {
+                currentImageOcrText = res.data.text.trim();
+                console.log('[OCR] Extracted text from image:', currentImageOcrText.slice(0, 100));
+              }
+            }).catch(err => console.warn('[OCR]', err.message));
+        }
       };
       img.src = rawData;
     };
@@ -1867,34 +2124,37 @@ document.addEventListener('paste', (e) => {
 
 function removeImage() {
   currentImageBase64 = null;
+  currentImageDimensions = null;
+  currentImageOcrText = '';
   document.getElementById('imgPreviewContainer').style.display = 'none';
   document.getElementById('imgPreview').src = '';
 }
 
 // ── INIT ───────────────────────────────────────────────────
 async function discoverEndpoint() {
-  if (location.hostname.includes('yepzhi.com')) {
-    OLLAMA_URL = 'https://api-yzai.yepzhi.com';
-    return;
-  }
   const host = window.location.hostname || '127.0.0.1';
-  // api-yzai.yepzhi.com first — prevents Cloudflare Pages (which returns 200
-  // for everything via _redirects) from being mistaken as an Ollama endpoint.
+  // Check same-origin ('') first — on yzai.yepzhi.com, Nginx proxies /api/ directly to Ollama.
+  // This completely avoids cross-origin/subdomain Cloudflare WAF 403 blocks.
   const candidates = [
-    'https://api-yzai.yepzhi.com',
+    '',
+    window.location.origin,
+    'https://yzai.yepzhi.com',
     `http://${host}:11434`,
+    'http://127.0.0.1:11434',
     'http://yzai.local:11434',
+    'http://192.168.1.127:11434',
     'http://192.168.1.222:11434',
     'http://192.168.1.86:11434',
     'http://192.168.1.72:11434',
-    'http://127.0.0.1:11434',
-    origin
+    'https://api-yzai.yepzhi.com'
   ];
   for (const url of candidates) {
+    if (url === undefined || url === null) continue;
     try {
       const c = new AbortController();
-      const t = setTimeout(() => c.abort(), 2000);
-      const r = await fetch(`${url}/api/tags?clave=secreta123`, { signal: c.signal });
+      const t = setTimeout(() => c.abort(), 2500);
+      const testUrl = url ? `${url}/api/tags?clave=secreta123` : `/api/tags?clave=secreta123`;
+      const r = await fetch(testUrl, { signal: c.signal });
       clearTimeout(t);
       if (!r.ok) continue;
       // Validate it's real Ollama JSON — not an HTML page (Cloudflare Pages
@@ -1902,12 +2162,13 @@ async function discoverEndpoint() {
       const ct = r.headers.get('content-type') || '';
       if (!ct.includes('application/json')) continue;
       const data = await r.json();
-      if (Array.isArray(data.models)) { OLLAMA_URL = url; return; }
+      if (Array.isArray(data.models) && data.models.length > 0) {
+        OLLAMA_URL = url;
+        console.log('[YZAI] Active Ollama endpoint:', url || '(same-origin)');
+        return;
+      }
     } catch(e) {}
   }
-  
-  // Si llegamos aquí, no se encontró ningún endpoint vivo.
-  // Dejamos la URL por defecto para que checkServicesHealth la maneje.
 }
 
 async function checkServicesHealth(forceCheck = false) {
@@ -1943,14 +2204,6 @@ async function init() {
   checkServicesHealth();
   setupPushToTalk();
   setInterval(checkServicesHealth, 30000);
-  // Precarga silenciosa del modelo en VRAM al abrir la interfaz
-  if (selectedModel) {
-    fetch(`${OLLAMA_URL}/api/generate?clave=secreta123`, {
-      method: 'POST',
-      headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({ model: selectedModel, keep_alive: -1 })
-    }).catch(() => {});
-  }
 }
 
 let lastOnlineTimestamp = Date.now();
@@ -1976,7 +2229,7 @@ async function loadModels() {
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · Gemma 4 26B MoE (16K · 5 Slots)`);
+    setStatus(true, `Server Live · Gemma 4 26B MoE (8K · 1 Slot)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -2014,7 +2267,7 @@ function updateModelHeader() {
   if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Gemma 4 MoE (A4B): Ready</span>';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 16K · 5 Slots (100% GPU)';
+    tokenCount.textContent = 'Context: 8K · 1 Slot (100% GPU)';
   }
 }
 
@@ -2104,7 +2357,52 @@ function welcomeHTML() {
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
       <span>Español &amp; English · Escribe en el idioma que prefieras</span>
     </div>
+
+    <div class="welcome-chips-grid">
+      <div class="welcome-chip-card" data-tilted data-spotlight onclick="quickPrompt('Ayúdame a diseñar una arquitectura limpia, robusta y de alto rendimiento para...')">
+        <span class="chip-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </span>
+        <div class="chip-content">
+          <strong>Arquitectura &amp; Código</strong>
+        </div>
+      </div>
+      <div class="welcome-chip-card" data-tilted data-spotlight onclick="quickPrompt('Explícame a profundidad el funcionamiento y matemáticas de los transformadores y atención...')">
+        <span class="chip-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z"/></svg>
+        </span>
+        <div class="chip-content">
+          <strong>Razonamiento &amp; IA</strong>
+        </div>
+      </div>
+      <div class="welcome-chip-card" data-tilted data-spotlight onclick="toggleRxMode()">
+        <span class="chip-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="3"/></svg>
+        </span>
+        <div class="chip-content">
+          <strong>Imagenología PhD</strong>
+        </div>
+      </div>
+      <div class="welcome-chip-card" data-tilted data-spotlight onclick="toggleVoiceMode()">
+        <span class="chip-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+        </span>
+        <div class="chip-content">
+          <strong>Conversación de Voz</strong>
+        </div>
+      </div>
+    </div>
   </div>`;
+}
+
+function quickPrompt(txt) {
+  const p = document.getElementById('prompt');
+  if (p) {
+    p.value = txt;
+    p.focus();
+    autoResize(p);
+    sendMessage();
+  }
 }
 
 function createMsg(role, content, streaming=false, images=[]) {
@@ -2139,53 +2437,55 @@ function createMsg(role, content, streaming=false, images=[]) {
 
   const time = document.createElement('div');
   time.className = 'msg-time';
-  time.textContent = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  time.style.display = 'flex';
+  time.style.alignItems = 'center';
+  time.style.gap = '8px';
+
+  const timeSpan = document.createElement('span');
+  timeSpan.textContent = new Date().toLocaleTimeString([], { hour:'2-digit', minute:'2-digit' });
+  time.appendChild(timeSpan);
+
+  if (role === 'ai') {
+    const speakBtn = document.createElement('button');
+    speakBtn.className = 'msg-tts-btn';
+    speakBtn.title = 'Escuchar respuesta en voz alta';
+    speakBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> <span>Escuchar</span>`;
+    speakBtn.onclick = (e) => {
+      e.stopPropagation();
+      unlockAudioAndVoices();
+      const txt = bubble.innerText || bubble.textContent || '';
+      speakText(txt);
+    };
+    time.appendChild(speakBtn);
+  }
 
   col.append(bubble, time);
   role === 'ai' ? div.append(av, col) : div.append(col, av);
   return div;
 }
 
-function renderMd(el, text, nativeThinking = '') {
-  let thinking = nativeThinking;
-  let clean = text;
-
-  // Handle closed think tags
-  clean = clean.replace(/<think>([\s\S]*?)<\/think>/g, (_,t) => { 
-    thinking += t.trim() + '\n\n'; 
-    return ''; 
-  });
-
-  // Handle open think tag (streaming)
-  const openMatch = clean.match(/<think>([\s\S]*)$/);
-  let isThinkingNow = false;
-  if (openMatch) {
-    isThinkingNow = true;
-    thinking += openMatch[1].trim();
-    clean = clean.replace(openMatch[0], '');
-  }
-
-  clean = clean.trim();
-  thinking = thinking.trim();
+function renderMd(el, text) {
+  let clean = (text || '')
+    .replace(/<think>[\s\S]*?<\/think>/gi, '')
+    .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
+    .replace(/<think>[\s\S]*$/gi, '')
+    .replace(/<thought>[\s\S]*$/gi, '')
+    .trim();
 
   let html = '';
-  if (thinking || isThinkingNow) {
-    html += `<div class="think-body" style="color:var(--muted); font-style:italic; border-left: 2px solid var(--border-light); padding-left: 12px; margin-bottom: 12px; opacity: 0.8; font-size: 0.95em;">${esc(thinking)}${isThinkingNow ? '<span class="cursor"></span>' : ''}</div>`;
-  }
-  
   if (clean) {
     if (typeof marked !== 'undefined' && marked && marked.parse) {
       try {
-        html += marked.parse(clean);
+        html = marked.parse(clean);
       } catch(e) {
-        html += esc(clean);
+        html = esc(clean);
       }
     } else {
-      html += esc(clean);
+      html = esc(clean);
     }
   }
   
-  el.innerHTML = html || (isThinkingNow ? '' : text);
+  el.innerHTML = html || '<span class="cursor"></span>';
 
   if (typeof hljs !== 'undefined' && hljs && hljs.highlightElement) {
     el.querySelectorAll('pre code').forEach(block => {
@@ -2438,18 +2738,21 @@ async function sendMessage() {
   document.getElementById('token-count').textContent = 'Generando...';
 
   const payload = [];
-  let effectiveSysPrompt = systemPrompt || '';
+  const directInstruction = 'INSTRUCCIÓN PRIMARIA: Responde directamente, sin prefacios, sin rodeos, sin etiquetas <think> y sin monólogo de pensamiento interno.';
+  let effectiveSysPrompt = systemPrompt ? `${systemPrompt}\n\n${directInstruction}` : directInstruction;
   if (isRxModeActive) {
-    effectiveSysPrompt = effectiveSysPrompt ? `${effectiveSysPrompt}\n\n${RX_DOCTOR_SYSTEM_PROMPT}` : RX_DOCTOR_SYSTEM_PROMPT;
+    effectiveSysPrompt = `${effectiveSysPrompt}\n\n${RX_DOCTOR_SYSTEM_PROMPT}`;
   } else if (isVoiceModeActive) {
-    const voiceInstruction = 'Estás en modo de conversación de voz en tiempo real. Responde siempre de manera concisa, natural, conversacional y fluida (máximo 2 o 3 oraciones claras). Evita listas largas, código o tablas a menos que el usuario lo solicite expresamente.';
-    effectiveSysPrompt = effectiveSysPrompt ? `${effectiveSysPrompt}\n\n${voiceInstruction}` : voiceInstruction;
+    const voiceInstruction = 'Estás en modo de conversación de voz en tiempo real. Brinda respuestas completas, profundas, claras y bien estructuradas. Mantén un tono natural y conversacional sin formato markdown excesivo para que la lectura en voz alta sea 100% fluida.';
+    effectiveSysPrompt = `${effectiveSysPrompt}\n\n${voiceInstruction}`;
   }
-  if (effectiveSysPrompt) payload.push({ role:'system', content: effectiveSysPrompt });
+  payload.push({ role:'system', content: effectiveSysPrompt });
 
-  // Dump history — strip raw images so Qwen (text-only) never chokes on base64 blobs
+  // Dump history
   messages.forEach(m => {
-    payload.push({ role: m.role==='ai'?'assistant':m.role, content: m.content });
+    const msgObj = { role: m.role==='ai'?'assistant':m.role, content: m.content };
+    if (m.images && m.images.length) msgObj.images = m.images;
+    payload.push(msgObj);
   });
 
   let userTextForApi = text;
@@ -2461,15 +2764,18 @@ async function sendMessage() {
     removeAttachedDoc();
   }
 
-  // Capture ONLY the freshly attached image - never re-use old history images
-  // (re-using causes wrong image analysis across turns)
+  // Capture freshly attached image
   const imageAttached = currentImageBase64 || null;
+  const currentMsgObj = { 
+    role: 'user', 
+    content: userTextForApi || (imageAttached ? 'Analiza esta imagen detalladamente, describe lo que ves, lee cualquier texto o diagrama visible y responde.' : '') 
+  };
+  if (imageAttached) {
+    currentMsgObj.images = [imageAttached];
+  }
 
-  const userMsgForHistory = { role:'user', content: userTextForApi };
-  if (currentImageBase64) userMsgForHistory.images = [currentImageBase64];
-  messages.push(userMsgForHistory);
-
-  payload.push({ role:'user', content: userTextForApi });
+  messages.push(currentMsgObj);
+  payload.push(currentMsgObj);
   removeImage();
 
   const container = document.getElementById('messages');
@@ -2477,13 +2783,8 @@ async function sendMessage() {
   const aiEl = createMsg('ai', '', true);
   container.appendChild(aiEl);
   const bubble = aiEl.querySelector('.bubble');
+  bubble.innerHTML = `<span class="ai-generating-indicator" style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;font-size:13px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Conectando con GPU...</span>`;
   scrollBottom(true);
-
-  // ── Native Multimodal Vision (Gemma 4 26B MoE Direct Vision Feed) ──
-  if (imageAttached) {
-    // Attach image directly to the last user message for native Ollama multimodal vision
-    payload[payload.length - 1].images = [imageAttached];
-  }
 
   // ── Proactive AI Contextual Web Search Injection ──
   // Si se detecta intención de búsqueda, usamos la IA local (0.3s) para sintetizar una búsqueda consciente del contexto
@@ -2522,39 +2823,31 @@ async function sendMessage() {
   let liveTimer = null;
   let collectedToolCalls = []; // For web_search tool calling
 
-  // Variables del Typewriter para suavidad
+  // Variables del Typewriter para máxima velocidad y suavidad
   let targetText = '';
-  let targetThinking = '';
   let currentText = '';
-  let currentThinking = '';
   let typewriterTimer = null;
   let streamFinished = false;
+  let lastSpeakIdx = 0;
 
   function startTypewriterLoop() {
     if (typewriterTimer) return;
-    let lastSpeakIdx = 0;
     
     typewriterTimer = setInterval(() => {
       let hasChanges = false;
-      const pendingThinking = targetThinking.length - currentThinking.length;
       const pendingText = targetText.length - currentText.length;
       
-      if (pendingThinking > 0) {
-        const step = Math.min(pendingThinking, Math.max(3, Math.ceil(pendingThinking * 0.3)));
-        currentThinking += targetThinking.substr(currentThinking.length, step);
-        hasChanges = true;
-      } else if (pendingText > 0) {
-        const step = Math.min(pendingText, Math.max(2, Math.ceil(pendingText * 0.25)));
+      if (pendingText > 0) {
+        const step = Math.min(pendingText, Math.max(5, Math.ceil(pendingText * 0.4)));
         currentText += targetText.substr(currentText.length, step);
         hasChanges = true;
       }
       
-      // REALTIME TTS CHUNKING: Hablar oraciones completas y fluidas (sin cortar palabras a medias)
+      // REALTIME TTS CHUNKING: Hablar oraciones completas y fluidas
       if (isVoiceModeActive && currentText.length > lastSpeakIdx && typeof VoiceQueue !== 'undefined') {
         const unparsed = currentText.slice(lastSpeakIdx);
-        // Only match completed sentence or paragraph delimiters: [.!?:] followed by whitespace
         const match = unparsed.match(/([\s\S]*?[.!?:](\s+|\n)|[\s\S]*?\n\n)/);
-        if (match && match[0].trim().length >= 15) {
+        if (match && match[0].trim().length >= 6) {
           const chunkToSpeak = match[0];
           lastSpeakIdx += chunkToSpeak.length;
           VoiceQueue.push(chunkToSpeak);
@@ -2562,22 +2855,20 @@ async function sendMessage() {
       }
 
       if (hasChanges) {
-        renderMd(bubble, currentText, currentThinking);
+        renderMd(bubble, currentText);
         bubble.innerHTML += '<span class="cursor"></span>';
         scrollBottom();
       } else if (streamFinished) {
         clearInterval(typewriterTimer);
         typewriterTimer = null;
         
-        // Garantizar que la advertencia médica obligatoria esté presente en modo RX
         if (isRxModeActive && targetText && !targetText.includes('No sustituye el juicio clínico') && !targetText.includes('profesional de la salud certificado')) {
           targetText += '\n\n> ⚠️ **Aviso:** Este análisis es generado por un modelo de lenguaje con fines de apoyo técnico al análisis de imagen. No sustituye el juicio clínico de un profesional de la salud certificado, no consulta fuentes externas ni bases de investigación en tiempo real, y no debe utilizarse como único fundamento para decisiones diagnósticas o terapéuticas.';
         }
 
-        renderMd(bubble, targetText || '…', targetThinking);
+        renderMd(bubble, targetText || '…');
         bubble.querySelectorAll('.cursor').forEach(el => el.remove());
 
-        // Enviar resto del texto que haya quedado pendiente en la cola de voz
         if (isVoiceModeActive && typeof VoiceQueue !== 'undefined') {
           if (targetText.length > lastSpeakIdx) {
             const tail = targetText.slice(lastSpeakIdx).trim();
@@ -2585,7 +2876,9 @@ async function sendMessage() {
             lastSpeakIdx = targetText.length;
           }
           VoiceQueue.isStreamComplete = true;
-          if (!VoiceQueue.isPlaying) VoiceQueue.playNext();
+          setTimeout(() => {
+            if (!VoiceQueue.isPlaying) VoiceQueue.playNext();
+          }, 50);
         }
 
         messages.push({ role:'ai', content:targetText });
@@ -2594,7 +2887,7 @@ async function sendMessage() {
         checkContextUsage();
         document.getElementById('prompt').focus();
       }
-    }, 16); // ~60fps para máxima suavidad visual
+    }, 12);
   }
 
   let loadingIndicatorActive = false;
@@ -2638,10 +2931,10 @@ async function sendMessage() {
         body: JSON.stringify(chatBody)
       });
       if (!res.ok) {
-        if ((res.status === 502 || res.status === 504 || res.status === 524) && !firstTokenReceived && retryCount < 5) {
+        if ((res.status === 502 || res.status === 503 || res.status === 504 || res.status === 524) && !firstTokenReceived && retryCount < 8) {
           retryCount++;
-          const waitTime = Math.pow(2, retryCount) * 1000;
-          document.getElementById('token-count').textContent = `Server busy. Retrying in ${(waitTime/1000)}s... (Attempt ${retryCount}/5)`;
+          const waitTime = Math.min(10000, 2000 + retryCount * 1500);
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;"><svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Cargando modelo en GPU (~16GB)... (${retryCount}/8)</span>`;
           await new Promise(r => setTimeout(r, waitTime));
           return attemptFetch();
         }
@@ -2649,10 +2942,10 @@ async function sendMessage() {
       }
       return res;
     } catch (e) {
-      if (retryCount < 5 && e.name !== 'AbortError') {
+      if (retryCount < 8 && e.name !== 'AbortError') {
         retryCount++;
-        const waitTime = Math.pow(2, retryCount) * 1000;
-        document.getElementById('token-count').textContent = `Connection failed. Retrying in ${(waitTime/1000)}s... (Attempt ${retryCount}/5)`;
+        const waitTime = Math.min(10000, 2000 + retryCount * 1500);
+        document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;"><svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Conectando con servidor de IA... (${retryCount}/8)</span>`;
         await new Promise(r => setTimeout(r, waitTime));
         return attemptFetch();
       }
@@ -2694,17 +2987,8 @@ async function sendMessage() {
               }, 500);
             }
             
-            let hasChange = false;
             if (d.message?.content) {
               targetText += d.message.content;
-              hasChange = true;
-            }
-            if (d.message?.thinking) {
-              targetThinking += d.message.thinking;
-              hasChange = true;
-            }
-            
-            if (hasChange) {
               tokenCount++;
               startTypewriterLoop();
             }
@@ -2922,73 +3206,296 @@ let recognition = null;
 let isListening = false;
 let synthesis = window.speechSynthesis || null;
 
+let availableVoices = [];
+function loadVoices() {
+  if (!synthesis) return;
+  try {
+    const v = synthesis.getVoices();
+    if (v && v.length) availableVoices = v;
+  } catch(e) {}
+}
+
+if (synthesis) {
+  loadVoices();
+  if (typeof synthesis.addEventListener === 'function') {
+    synthesis.addEventListener('voiceschanged', loadVoices);
+  }
+  if (speechSynthesis.onvoiceschanged !== undefined) {
+    speechSynthesis.onvoiceschanged = loadVoices;
+  }
+}
+
+// Desbloqueo universal de audio por gesto de usuario
+let isAudioUnlocked = false;
+function unlockAudioAndVoices() {
+  if (!synthesis) return;
+  loadVoices();
+  try {
+    if (synthesis.paused) synthesis.resume();
+  } catch(e) {}
+  if (!isAudioUnlocked) {
+    isAudioUnlocked = true;
+    try {
+      const u = new SpeechSynthesisUtterance(' ');
+      u.volume = 0.01;
+      synthesis.speak(u);
+    } catch(e) {}
+  }
+}
+window.addEventListener('click', unlockAudioAndVoices, { once: false, passive: true });
+window.addEventListener('keydown', unlockAudioAndVoices, { once: false, passive: true });
+window.addEventListener('touchstart', unlockAudioAndVoices, { once: false, passive: true });
+
+function getBestNaturalVoice() {
+  if (!synthesis) return null;
+  let voices = [];
+  try { voices = synthesis.getVoices() || []; } catch(e) {}
+  if (!voices.length && availableVoices.length) voices = availableVoices;
+  if (!voices.length) return null;
+
+  // 1. Voces Neuronales / Naturales en Español (Edge, Chrome, Google Cloud)
+  const naturalEs = voices.find(v => (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Online')) && v.lang.toLowerCase().startsWith('es'));
+  if (naturalEs) return naturalEs;
+
+  // 2. Voces Apple Siri / Mejoradas en Español (macOS / iOS: Paulina, Jorge, Mónica, Juan, Diego, Carlos, Helena, Soledad)
+  const appleEs = voices.find(v => (v.name.includes('Enhanced') || v.name.includes('Premium') || v.name.includes('Siri') || /Paulina|Jorge|Mónica|Monica|Juan|Diego|Carlos|Helena|Soledad|Francisca/i.test(v.name)) && v.lang.toLowerCase().startsWith('es'));
+  if (appleEs) return appleEs;
+
+  // 3. Voces de Google en Español
+  const googleEs = voices.find(v => v.name.includes('Google') && v.lang.toLowerCase().startsWith('es'));
+  if (googleEs) return googleEs;
+
+  // 4. Cualquier voz regional en Español (es-MX, es-US, es-419, es-ES)
+  const regionalEs = voices.find(v => /^es[-_]/i.test(v.lang)) || voices.find(v => v.lang.toLowerCase().startsWith('es'));
+  if (regionalEs) return regionalEs;
+
+  // 5. Voz predeterminada del sistema
+  const def = voices.find(v => v.default);
+  if (def) return def;
+
+  return voices[0] || null;
+}
+
+window._activeSpeechUtterances = window._activeSpeechUtterances || new Set();
+
 const VoiceQueue = {
   queue: [],
   isPlaying: false,
   isStreamComplete: false,
+  watchdogTimer: null,
+
   push(text) {
+    if (!text) return;
     const clean = text
-      .replace(/```[\s\S]*?```/g, ' [código omitido] ')
+      .replace(/<think>[\s\S]*?<\/think>/g, '')
+      .replace(/```[\s\S]*?```/g, ' código omitido ')
       .replace(/`([^`]+)`/g, '$1')
       .replace(/https?:\/\/[^\s]+/g, '')
-      .replace(/[#*_~\[\]\(\)]/g, '')
+      .replace(/[*_~\[\]\(\)\<\>#]/g, '')
       .replace(/\s+/g, ' ')
       .trim();
     if (!clean || clean.length < 2) return;
     this.queue.push(clean);
-    this.playNext();
+    if (!this.isPlaying) {
+      this.playNext();
+    }
   },
+
   playNext() {
-    if (this.isPlaying || !synthesis || !isVoiceModeActive) return;
+    if (this.isPlaying || !synthesis) return;
 
     if (!this.queue.length) {
+      this.isPlaying = false;
       if (this.isStreamComplete && !isStreaming && isVoiceModeActive) {
-        updateVoiceLiveUI('listening', 'Listo para escucharte', 'Reabriendo micrófono...');
+        updateVoiceLiveUI('listening', 'Listo para escucharte', 'Micrófono activo...');
         setTimeout(() => {
           if (!isStreaming && isVoiceModeActive && !this.isPlaying && (!synthesis || !synthesis.speaking)) {
             startMic();
           }
-        }, 450);
+        }, 350);
       }
       return;
     }
 
     this.isPlaying = true;
     const chunk = this.queue.shift();
+
+    // Detener micrófono para desbloquear el altavoz principal en iOS/Android
+    if (isListening) {
+      stopMic();
+    }
+
+    try {
+      if (synthesis.paused) synthesis.resume();
+    } catch(e) {}
+
     const utterance = new SpeechSynthesisUtterance(chunk);
     utterance.lang = 'es-MX';
     utterance.rate = 1.05;
-    
-    const voices = synthesis.getVoices();
-    const esVoice = voices.find(v => v.lang.includes('es') && (v.name.includes('Natural') || v.name.includes('Siri') || v.name.includes('Paulina') || v.name.includes('Jorge') || v.name.includes('Monica') || v.name.includes('Helena') || v.name.includes('Sabina'))) || voices.find(v => v.lang.includes('es'));
-    if (esVoice) utterance.voice = esVoice;
-    
-    updateVoiceLiveUI('speaking', 'YZAI respondiendo en vivo...', `"${chunk}"`);
-    
-    const onFinish = () => {
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+
+    const bestVoice = getBestNaturalVoice();
+    if (bestVoice) {
+      utterance.voice = bestVoice;
+      utterance.lang = bestVoice.lang || 'es-MX';
+    }
+
+    // Prevenir bug de recolección de basura (GC) en Chrome/Safari
+    window._activeSpeechUtterances.add(utterance);
+
+    updateVoiceLiveUI('speaking', 'YZAI hablando...', `"${chunk}"`);
+
+    let done = false;
+    const finishChunk = () => {
+      if (done) return;
+      done = true;
+      if (this.watchdogTimer) { clearTimeout(this.watchdogTimer); this.watchdogTimer = null; }
+      if (window._activeSpeechUtterances) {
+        window._activeSpeechUtterances.delete(utterance);
+      }
       this.isPlaying = false;
       setTimeout(() => {
         this.playNext();
-      }, 70);
+      }, 35);
     };
 
-    utterance.onend = onFinish;
-    utterance.onerror = onFinish;
-    
+    utterance.onend = finishChunk;
+    utterance.onerror = (err) => {
+      console.warn('[SpeechSynthesis Error]', err);
+      finishChunk();
+    };
+
+    // Watchdog timer: si el navegador no dispara onend, avanzar después de tiempo estimado
+    const estimatedDuration = Math.max(3500, (chunk.length / 8) * 1000 + 3500);
+    this.watchdogTimer = setTimeout(() => {
+      if (this.isPlaying) {
+        console.log('[Voice Watchdog] Forcing next chunk');
+        finishChunk();
+      }
+    }, estimatedDuration);
+
     try {
+      activateMediaAudioSession();
       synthesis.speak(utterance);
+      if (synthesis.paused) synthesis.resume();
     } catch (e) {
-      this.isPlaying = false;
-      this.playNext();
+      console.warn('[Speech speak failed]', e);
+      finishChunk();
     }
   },
+
   clear() {
+    if (this.watchdogTimer) { clearTimeout(this.watchdogTimer); this.watchdogTimer = null; }
     this.queue = [];
     this.isPlaying = false;
     this.isStreamComplete = false;
-    if (synthesis && synthesis.speaking) synthesis.cancel();
+    if (window._activeSpeechUtterances) window._activeSpeechUtterances.clear();
+    if (synthesis) {
+      try { 
+        synthesis.cancel(); 
+        if (synthesis.paused) synthesis.resume();
+      } catch(e) {}
+    }
   }
 };
+
+function speakText(text) {
+  if (!synthesis) {
+    alert('Tu navegador no soporta síntesis de voz (TTS). Te sugerimos Google Chrome o Safari.');
+    return;
+  }
+  try {
+    if (synthesis.paused) synthesis.resume();
+  } catch(e) {}
+
+  VoiceQueue.clear();
+
+  const clean = text
+    .replace(/<think>[\s\S]*?<\/think>/g, '')
+    .replace(/```[\s\S]*?```/g, ' código omitido ')
+    .replace(/`([^`]+)`/g, '$1')
+    .replace(/https?:\/\/[^\s]+/g, '')
+    .replace(/[*_~\[\]\(\)\<\>#]/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+
+  if (!clean) return;
+
+  // Dividir por oraciones para que Chrome/Safari no se congelen con párrafos largos
+  const sentences = clean.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g) || [clean];
+  sentences.forEach(s => {
+    const st = s.trim();
+    if (st.length > 1) VoiceQueue.push(st);
+  });
+
+  VoiceQueue.isStreamComplete = true;
+  setTimeout(() => {
+    if (!VoiceQueue.isPlaying) VoiceQueue.playNext();
+  }, 60);
+}
+
+// ── GLOBAL AUDIO CONTEXT (singleton) ──────────────────────
+// iOS/Android route audio to earpiece when mic is active and no media audio context is open.
+// Holding a persistent AudioContext open forces "media" audio category → loudspeaker.
+let _globalAudioCtx = null;
+function getGlobalAudioCtx() {
+  const ACtx = window.AudioContext || window.webkitAudioContext;
+  if (!ACtx) return null;
+  if (!_globalAudioCtx || _globalAudioCtx.state === 'closed') {
+    _globalAudioCtx = new ACtx();
+  }
+  if (_globalAudioCtx.state === 'suspended') {
+    _globalAudioCtx.resume().catch(() => {});
+  }
+  return _globalAudioCtx;
+}
+
+// Play an inaudible tone to activate the media audio session on the device.
+// Must be called from a direct user-gesture handler (onclick) to work on iOS.
+function activateMediaAudioSession() {
+  const ctx = getGlobalAudioCtx();
+  if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(0.001, ctx.currentTime); // nearly silent
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.15);
+  } catch(e) {}
+}
+
+function forceSpeakerAndSpeak(customText) {
+  // STEP 1: Release mic — earpiece lock is caused by getUserMedia remaining active
+  stopMic();
+
+  // STEP 2: Activate media audio session via Web Audio — this forces iOS/Android
+  // to route to the loudspeaker instead of the earpiece.
+  activateMediaAudioSession();
+
+  // STEP 3: Wake speech synthesis (required after mic stop on some browsers)
+  if (!synthesis) {
+    alert('Tu navegador no soporta síntesis de voz (TTS). Te sugerimos Google Chrome o Safari.');
+    return;
+  }
+  try {
+    synthesis.cancel();
+    if (synthesis.paused) synthesis.resume();
+    loadVoices();
+  } catch(e) {}
+
+  // STEP 4: Determine what text to speak
+  let textToSpeak = customText;
+  if (!textToSpeak) {
+    const lastAi = [...messages].reverse().find(m => m.role === 'ai');
+    textToSpeak = lastAi && lastAi.content ? lastAi.content : 'Altavoz activado. YZAI está listo para hablar.';
+  }
+
+  updateVoiceLiveUI('speaking', 'Altavoz Activado', 'Reproduciendo en altavoz...');
+  speakText(textToSpeak);
+}
 
 function updateVoiceLiveUI(state, statusText, subtitleText) {
   const orb = document.getElementById('voicePlasmaOrb');
@@ -3055,6 +3562,26 @@ function setupPushToTalk() {
   }
 }
 
+async function requestMicPermission() {
+  if (persistentMicStream) {
+    try { persistentMicStream.getTracks().forEach(t => t.stop()); } catch(e) {}
+    persistentMicStream = null;
+  }
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Liberar pista de audio de inmediato para que iOS/Android no retenga el hardware de audio en modo llamada
+      stream.getTracks().forEach(track => track.stop());
+      console.log('[Mic] Audio permission verified.');
+      return true;
+    } catch (err) {
+      console.warn('[Mic Permission Denied/Error]', err.message);
+      return false;
+    }
+  }
+  return true;
+}
+
 function initSpeechRecognition() {
   const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRec) {
@@ -3062,9 +3589,10 @@ function initSpeechRecognition() {
     return null;
   }
   const rec = new SpeechRec();
-  rec.continuous = false;
+  rec.continuous = true;
   rec.interimResults = true;
   rec.lang = 'es-MX';
+  
   rec.onstart = () => {
     isListening = true;
     const micEl = document.getElementById('micBtn');
@@ -3075,36 +3603,61 @@ function initSpeechRecognition() {
       p.placeholder = "Escuchando tu voz... habla ahora";
       autoResize(p);
     }
-    updateVoiceLiveUI('listening', 'Escuchando...', 'Habla ahora...');
+    updateVoiceLiveUI('listening', 'Escuchando...', 'Habla con libertad...');
   };
+
+  let silenceTimer = null;
+
   rec.onresult = (event) => {
     let transcript = '';
     for (let i = event.resultIndex; i < event.results.length; i++) {
       transcript += event.results[i][0].transcript;
     }
     const input = document.getElementById('prompt');
-    if (input) {
+    if (input && transcript.trim()) {
       input.value = transcript;
       input.classList.add('listening-input');
       autoResize(input);
     }
     
-    updateVoiceLiveUI('listening', 'Capturando...', `"${transcript}"`);
+    updateVoiceLiveUI('listening', 'Capturando voz...', `"${transcript}"`);
     
-    // Si no está en Push-to-Talk y la frase finalizó, auto-enviar
-    if (!isHoldingPushToTalk && event.results[0].isFinal && isVoiceModeActive && !isStreaming) {
-      setTimeout(() => {
-        if (input.value.trim() !== '' && !isStreaming) sendMessage();
-      }, 550);
+    // Silence detection for natural voice auto-send
+    if (!isHoldingPushToTalk && isVoiceModeActive && !isStreaming) {
+      if (silenceTimer) clearTimeout(silenceTimer);
+      silenceTimer = setTimeout(() => {
+        if (input && input.value.trim() !== '' && !isStreaming && (!synthesis || !synthesis.speaking)) {
+          stopMic();
+          sendMessage();
+        }
+      }, 1400); // 1.4s of natural pause to finish sentence
     }
   };
+
   rec.onerror = (e) => {
     console.warn('[Speech Error]', e.error);
-    stopMic();
+    if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+      isListening = false;
+      const micEl = document.getElementById('micBtn');
+      if (micEl) micEl.classList.remove('listening');
+    }
   };
+
   rec.onend = () => {
-    stopMic();
+    // If voice mode is active and we want to listen, keep recognition alive without re-prompting
+    if (isVoiceModeActive && isListening && !isStreaming && (!synthesis || !synthesis.speaking)) {
+      try {
+        rec.start();
+      } catch (e) {
+        // silent
+      }
+    } else {
+      isListening = false;
+      const micEl = document.getElementById('micBtn');
+      if (micEl) micEl.classList.remove('listening');
+    }
   };
+
   return rec;
 }
 
@@ -3116,13 +3669,23 @@ function toggleMic() {
   }
 }
 
-function startMic() {
+async function startMic() {
   if (isStreaming) return;
   if (synthesis && synthesis.speaking) synthesis.cancel();
+  
+  // Ensure audio permission is registered once
+  await requestMicPermission();
+
   if (!recognition) recognition = initSpeechRecognition();
-  if (recognition && !isListening) {
-    try { recognition.start(); } catch (e) { console.warn(e); }
-  } else if (!recognition) {
+  if (recognition) {
+    isListening = true;
+    try { 
+      recognition.start(); 
+    } catch (e) { 
+      // If already started, ignore error
+      console.log('[Speech] Recognition already active');
+    }
+  } else {
     alert('Tu navegador no soporta entrada por micrófono. Te sugerimos Google Chrome o Microsoft Edge.');
   }
 }
@@ -3142,7 +3705,7 @@ function stopMic() {
   }
 }
 
-function toggleVoiceMode() {
+async function toggleVoiceMode() {
   isVoiceModeActive = !isVoiceModeActive;
   const btn = document.getElementById('voiceModeBtn');
   const txt = document.getElementById('voiceModeText');
@@ -3152,7 +3715,25 @@ function toggleVoiceMode() {
     if (txt) txt.textContent = 'Modo Voz: ON';
     if (overlay) overlay.classList.add('active');
     VoiceQueue.clear();
-    updateVoiceLiveUI('idle', 'Modo Voz Activo', 'Presiona para hablar');
+
+    // Activar sesión de audio multimedia (fuerza altavoz en iOS/Android)
+    // Debe llamarse desde un evento directo del usuario (click) para tener efecto
+    activateMediaAudioSession();
+
+    // Desbloquear speech synthesis (Safari / Chrome gesture unlock)
+    if (synthesis) {
+      try {
+        synthesis.cancel();
+        if (synthesis.paused) synthesis.resume();
+        const primer = new SpeechSynthesisUtterance('');
+        primer.volume = 0;
+        synthesis.speak(primer);
+      } catch(e) {}
+    }
+
+    updateVoiceLiveUI('idle', 'Modo Voz Activo', 'Presiona para hablar o usa tu voz');
+    await requestMicPermission();
+    startMic();
   } else {
     if (btn) btn.classList.remove('active');
     if (txt) txt.textContent = 'Modo Voz';
@@ -3331,21 +3912,21 @@ function resetInputUI() {
   <span>Support</span>
 </a>
 
-<!-- ── Aurora Interactive Background for yzai ── -->
+<!-- ── Aurora Interactive Constellation & Mesh for yzai ── -->
 <script>
 (function() {
   const canvas = document.getElementById('yzai-aurora');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  let W, H, dots = [], mouse = { x: -9999, y: -9999 }, time = 0;
+  let W, H, dots = [], mouse = { x: -9999, y: -9999 }, time = 0, lastUserInteraction = 0;
   const ORB_COLORS = [
     [[139,92,246],[99,102,241]],   // purple → indigo
     [[59,130,246],[6,182,212]],    // blue → cyan
-    [[124,58,237],[139,92,246]],   // deep-purple → primary
+    [[168,85,247],[236,72,153]],   // violet → pink
   ];
   const orbs = ORB_COLORS.map((c, i) => ({
-    x: 0, y: 0, vx: (Math.random()-0.5)*0.3, vy: (Math.random()-0.5)*0.2,
-    r: 280 + i*60, colors: c, phase: i*1.8
+    x: 0, y: 0, vx: (Math.random()-0.5)*0.45, vy: (Math.random()-0.5)*0.35,
+    r: 320 + i*80, colors: c, phase: i*1.8
   }));
 
   function resize() {
@@ -3355,7 +3936,7 @@ function resetInputUI() {
     canvas.style.width = W+'px'; canvas.style.height = H+'px';
     ctx.scale(dpr,dpr);
     dots = [];
-    const sp = 42;
+    const sp = 36;
     for (let r=0; r<Math.ceil(H/sp)+1; r++)
       for (let c=0; c<Math.ceil(W/sp)+1; c++)
         dots.push({x:c*sp, y:r*sp});
@@ -3365,41 +3946,114 @@ function resetInputUI() {
   }
   resize();
   window.addEventListener('resize', resize);
-  window.addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
-  window.addEventListener('touchmove', e => { const t=e.touches[0]; mouse.x=t.clientX; mouse.y=t.clientY; }, {passive:true});
+  window.addEventListener('mousemove', e => { 
+    mouse.x = e.clientX; 
+    mouse.y = e.clientY; 
+    lastUserInteraction = Date.now();
+  });
+  
+  const handleTouch = (e) => {
+    if (!e.touches || !e.touches[0]) return;
+    mouse.x = e.touches[0].clientX;
+    mouse.y = e.touches[0].clientY;
+    lastUserInteraction = Date.now();
+  };
+  window.addEventListener('touchstart', handleTouch, {passive:true});
+  window.addEventListener('touchmove', handleTouch, {passive:true});
 
   function lerpC(a,b,t) { return a.map((v,i)=>Math.round(v+(b[i]-v)*t)); }
 
   function tick() {
-    time += 0.005;
+    time += 0.0075;
     ctx.clearRect(0,0,W,H);
+    
+    // Draw rich radiant gradient orbs
     for (const o of orbs) {
-      o.x += o.vx + Math.sin(time+o.phase)*0.3;
-      o.y += o.vy + Math.cos(time*0.7+o.phase)*0.2;
+      o.x += o.vx + Math.sin(time+o.phase)*0.5;
+      o.y += o.vy + Math.cos(time*0.7+o.phase)*0.35;
       if(o.x<-o.r) o.x=W+o.r; if(o.x>W+o.r) o.x=-o.r;
       if(o.y<-o.r) o.y=H+o.r; if(o.y>H+o.r) o.y=-o.r;
-      const t=(Math.sin(time*0.4+o.phase)+1)/2;
+      const t=(Math.sin(time*0.5+o.phase)+1)/2;
       const [r,g,b]=lerpC(o.colors[0],o.colors[1],t);
       const g2=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
-      g2.addColorStop(0,`rgba(${r},${g},${b},0.14)`);
-      g2.addColorStop(0.5,`rgba(${r},${g},${b},0.06)`);
+      g2.addColorStop(0,`rgba(${r},${g},${b},0.35)`);
+      g2.addColorStop(0.45,`rgba(${r},${g},${b},0.16)`);
+      g2.addColorStop(0.8,`rgba(${r},${g},${b},0.04)`);
       g2.addColorStop(1,`rgba(${r},${g},${b},0)`);
       ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fillStyle=g2; ctx.fill();
     }
-    const IR = 140;
+
+    // Determine target focus (mobile autonomous probe or user interaction)
+    const isTouchDevice = ('ontouchstart' in window) || (window.innerWidth < 768);
+    const isUserActive = (Date.now() - lastUserInteraction) < 3000 && mouse.x > 0 && mouse.y > 0;
+
+    let targetX = mouse.x;
+    let targetY = mouse.y;
+
+    if (!isUserActive || (isTouchDevice && (mouse.x <= 0 || mouse.y <= 0))) {
+      targetX = (W * 0.5) + (W * 0.38) * Math.sin(time * 0.85) * Math.cos(time * 0.4);
+      targetY = (H * 0.45) + (H * 0.32) * Math.sin(time * 0.7 + 1.2);
+    }
+
+    const node2X = (W * 0.5) + (W * 0.30) * Math.cos(time * 0.65 + 2.2);
+    const node2Y = (H * 0.5) + (H * 0.25) * Math.sin(time * 0.8 + 0.5);
+
+    // Interactive Constellation + dot grid
+    const IR = 160;
+    const nearDots = [];
+    const nearDots2 = [];
+
     for (const d of dots) {
-      const dx=d.x-mouse.x, dy=d.y-mouse.y;
+      const dx=d.x-targetX, dy=d.y-targetY;
       const dist=Math.sqrt(dx*dx+dy*dy);
       const prox=Math.max(0,1-dist/IR);
-      const base=0.1+0.04*Math.sin(time*1.1+d.x*0.02+d.y*0.015);
-      ctx.beginPath(); ctx.arc(d.x,d.y,1,0,Math.PI*2);
+
+      const dx2=d.x-node2X, dy2=d.y-node2Y;
+      const dist2=Math.sqrt(dx2*dx2+dy2*dy2);
+      const prox2=Math.max(0,1-dist2/(IR*0.85));
+
+      const maxProx = Math.max(prox, prox2*0.7);
+      const base=0.20+0.07*Math.sin(time*1.2+d.x*0.02+d.y*0.015);
+      
+      ctx.beginPath(); ctx.arc(d.x,d.y,1.6,0,Math.PI*2);
       ctx.fillStyle=`rgba(139,92,246,${base})`; ctx.fill();
-      if(prox>0.01) {
-        ctx.beginPath(); ctx.arc(d.x,d.y,1+prox*3,0,Math.PI*2);
-        const r=Math.round(139+(6-139)*prox), g2c=Math.round(92+(182-92)*prox), bl=Math.round(246+(212-246)*prox);
-        ctx.fillStyle=`rgba(${r},${g2c},${bl},${prox*0.8})`; ctx.fill();
+
+      if(maxProx > 0.01) {
+        if (prox > 0.01) nearDots.push({x:d.x, y:d.y, prox});
+        if (prox2 > 0.01) nearDots2.push({x:d.x, y:d.y, prox: prox2});
+
+        ctx.beginPath(); ctx.arc(d.x,d.y,1.6+maxProx*3.8,0,Math.PI*2);
+        const r=Math.round(139+(6-139)*maxProx), g2c=Math.round(92+(182-92)*maxProx), bl=Math.round(246+(212-246)*maxProx);
+        ctx.fillStyle=`rgba(${r},${g2c},${bl},${maxProx*0.95})`;
+        ctx.shadowColor='#06b6d4'; ctx.shadowBlur=maxProx*14;
+        ctx.fill(); ctx.shadowBlur=0;
       }
     }
+
+    // Draw laser lines connecting target to nearby dots
+    if (nearDots.length > 0) {
+      for (const nd of nearDots) {
+        ctx.beginPath();
+        ctx.moveTo(targetX, targetY);
+        ctx.lineTo(nd.x, nd.y);
+        ctx.strokeStyle = `rgba(6,182,212,${nd.prox * 0.45})`;
+        ctx.lineWidth = nd.prox * 1.6;
+        ctx.stroke();
+      }
+    }
+
+    // Secondary node connections
+    if (nearDots2.length > 0) {
+      for (const nd of nearDots2) {
+        ctx.beginPath();
+        ctx.moveTo(node2X, node2Y);
+        ctx.lineTo(nd.x, nd.y);
+        ctx.strokeStyle = `rgba(139,92,246,${nd.prox * 0.32})`;
+        ctx.lineWidth = nd.prox * 1.2;
+        ctx.stroke();
+      }
+    }
+
     requestAnimationFrame(tick);
   }
   tick();
@@ -3414,8 +4068,8 @@ function resetInputUI() {
     constructor(el, opts={}) {
       this.el = el;
       this.original = el.textContent.trim();
-      this.speed = opts.speed || 25;
-      this.resolveDelay = opts.resolveDelay || 1.4;
+      this.speed = opts.speed || 40;
+      this.resolveDelay = opts.resolveDelay || 2.2;
       this.done = false;
       this._observe();
     }
@@ -3424,23 +4078,23 @@ function resetInputUI() {
         if (entries[0].isIntersecting && !this.done) {
           this.done = true;
           obs.disconnect();
-          setTimeout(() => this.play(), 60);
+          setTimeout(() => this.play(), 100);
         }
-      }, { threshold: 0.3 });
+      }, { threshold: 0.25 });
       obs.observe(this.el);
     }
     play() {
       const text = this.original;
       const len = text.length;
       let frame = 0;
-      const totalFrames = len * this.resolveDelay + 8;
+      const totalFrames = Math.floor(len * this.resolveDelay) + 14;
       const el = this.el;
       const tick = () => {
         let out = '';
         for (let i = 0; i < len; i++) {
           if (text[i] === ' ') { out += ' '; continue; }
           const resolveAt = i * this.resolveDelay;
-          out += (frame >= resolveAt + 3) ? text[i] : CHARS[Math.floor(Math.random() * CHARS.length)];
+          out += (frame >= resolveAt + 6) ? text[i] : CHARS[Math.floor(Math.random() * CHARS.length)];
         }
         el.textContent = out;
         if (frame < totalFrames) { frame++; setTimeout(tick, this.speed); }
@@ -3467,16 +4121,18 @@ function resetInputUI() {
       const b = document.createElement('span');
       const isH = side==='top'||side==='bottom';
       Object.assign(b.style, {
-        position: 'absolute', pointerEvents: 'none', zIndex: '1', borderRadius: '9999px',
+        position: 'absolute', pointerEvents: 'none', zIndex: '2', borderRadius: '9999px',
         ...(isH ? {
-          height: '2px', width: '40%', [side]: '0',
-          left: side==='top'?'-40%':'140%',
-          background: `linear-gradient(90deg, transparent, ${this.color}, transparent)`,
+          height: '3px', width: '45%', [side]: '0',
+          left: side==='top'?'-45%':'145%',
+          background: `linear-gradient(90deg, transparent, #fff, ${this.color}, transparent)`,
+          boxShadow: `0 0 14px ${this.color}, 0 0 6px #fff`,
           animation: `star-h-${side} ${this.speed}s linear infinite`,
         } : {
-          width: '2px', height: '35%', [side==='left'?'left':'right']: '0',
-          top: side==='left'?'-35%':'135%',
-          background: `linear-gradient(180deg, transparent, ${this.color}, transparent)`,
+          width: '3px', height: '40%', [side==='left'?'left':'right']: '0',
+          top: side==='left'?'-40%':'140%',
+          background: `linear-gradient(180deg, transparent, #fff, ${this.color}, transparent)`,
+          boxShadow: `0 0 14px ${this.color}, 0 0 6px #fff`,
           animation: `star-v-${side} ${this.speed}s linear infinite`,
         })
       });
@@ -3487,8 +4143,8 @@ function resetInputUI() {
   class SpotlightCard {
     constructor(el, opts={}) {
       this.el = el;
-      this.color = opts.color || 'rgba(139,92,246,0.18)';
-      this.size = opts.size || 280;
+      this.color = opts.color || 'radial-gradient(circle at 50% 50%, rgba(139,92,246,0.45) 0%, rgba(6,182,212,0.25) 35%, transparent 70%)';
+      this.size = opts.size || 340;
       this._bind();
     }
     _bind() {
@@ -3498,8 +4154,8 @@ function resetInputUI() {
       const light = document.createElement('div');
       Object.assign(light.style, {
         position: 'absolute', pointerEvents: 'none', borderRadius: 'inherit', inset: '0',
-        opacity: '0', transition: 'opacity 0.3s ease', zIndex: '2',
-        background: `radial-gradient(circle at 50% 50%, ${this.color} 0%, transparent 70%)`,
+        opacity: '0', transition: 'opacity 0.25s ease', zIndex: '2',
+        background: this.color.startsWith('radial-gradient') ? this.color : `radial-gradient(circle at 50% 50%, ${this.color} 0%, transparent 70%)`,
         backgroundSize: `${this.size}px ${this.size}px`, backgroundRepeat: 'no-repeat',
       });
       el.appendChild(light);
@@ -3515,8 +4171,8 @@ function resetInputUI() {
   class TiltedCard {
     constructor(el, opts={}) {
       this.el = el;
-      this.maxTilt = opts.maxTilt || 6;
-      this.maxScale = opts.maxScale || 1.02;
+      this.maxTilt = opts.maxTilt || 10;
+      this.maxScale = opts.maxScale || 1.04;
       this._bind();
     }
     _bind() {
@@ -3528,11 +4184,11 @@ function resetInputUI() {
         const dx = (e.clientX - (r.left + r.width/2)) / (r.width/2);
         const dy = (e.clientY - (r.top + r.height/2)) / (r.height/2);
         el.style.transition = 'transform 0.08s ease';
-        el.style.transform = `perspective(800px) rotateX(${-dy * this.maxTilt}deg) rotateY(${dx * this.maxTilt}deg) scale(${this.maxScale})`;
+        el.style.transform = `perspective(900px) rotateX(${-dy * this.maxTilt}deg) rotateY(${dx * this.maxTilt}deg) scale(${this.maxScale})`;
       });
       el.addEventListener('mouseleave', () => {
-        el.style.transition = 'transform 0.5s cubic-bezier(0.16,1,0.3,1)';
-        el.style.transform = 'perspective(800px) rotateX(0deg) rotateY(0deg) scale(1)';
+        el.style.transition = 'transform 0.45s cubic-bezier(0.16,1,0.3,1)';
+        el.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale(1)';
       });
     }
   }
@@ -3540,11 +4196,11 @@ function resetInputUI() {
   class ShinyText {
     constructor(el, opts={}) {
       this.el = el;
-      const s = opts.speed || 3.5;
+      const s = opts.speed || 3;
       const txt = el.innerHTML;
       el.innerHTML = `<span style="
-        background: linear-gradient(120deg, currentColor 25%, #c084fc 48%, #e879f9 52%, currentColor 75%);
-        background-size: 200% auto;
+        background: linear-gradient(120deg, currentColor 20%, #ffffff 45%, #c084fc 52%, #ffffff 58%, currentColor 80%);
+        background-size: 250% auto;
         -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
         animation: shiny-sweep ${s}s linear infinite; display: inline-flex; align-items: center; gap: inherit;
       ">${txt}</span>`;
@@ -3556,10 +4212,10 @@ function resetInputUI() {
     const st = document.createElement('style');
     st.id = 'rb-keyframes';
     st.textContent = `
-      @keyframes star-h-top    { 0%{left:-40%} 100%{left:140%} }
-      @keyframes star-h-bottom { 0%{left:140%} 100%{left:-40%} }
-      @keyframes star-v-left   { 0%{top:-35%}  100%{top:135%}  }
-      @keyframes star-v-right  { 0%{top:135%}  100%{top:-35%}  }
+      @keyframes star-h-top    { 0%{left:-45%} 100%{left:145%} }
+      @keyframes star-h-bottom { 0%{left:145%} 100%{left:-45%} }
+      @keyframes star-v-left   { 0%{top:-40%}  100%{top:140%}  }
+      @keyframes star-v-right  { 0%{top:140%}  100%{top:-40%}  }
       @keyframes shiny-sweep   { 0%{background-position:-200% center} 100%{background-position:200% center} }
     `;
     document.head.appendChild(st);
@@ -3567,19 +4223,19 @@ function resetInputUI() {
 
   function initAll() {
     document.querySelectorAll('[data-decrypt]').forEach(el => {
-      if (!el._decrypt) el._decrypt = new DecryptedText(el, { speed: parseInt(el.dataset.decryptSpeed||'25') });
+      if (!el._decrypt) el._decrypt = new DecryptedText(el, { speed: parseInt(el.dataset.decryptSpeed||'40') });
     });
     document.querySelectorAll('[data-starborder]').forEach(el => {
       if (!el._sb) el._sb = new StarBorder(el, { color: el.dataset.sbColor||'#8b5cf6', speed: parseFloat(el.dataset.sbSpeed||'3.5') });
     });
     document.querySelectorAll('[data-spotlight]').forEach(el => {
-      if (!el._spotlight) el._spotlight = new SpotlightCard(el, { color: el.dataset.spotlightColor||'rgba(139,92,246,0.2)', size: parseInt(el.dataset.spotlightSize||'280') });
+      if (!el._spotlight) el._spotlight = new SpotlightCard(el, { color: el.dataset.spotlightColor||'rgba(139,92,246,0.3)', size: parseInt(el.dataset.spotlightSize||'340') });
     });
     document.querySelectorAll('[data-tilt]').forEach(el => {
-      if (!el._tilt) el._tilt = new TiltedCard(el, { maxTilt: parseFloat(el.dataset.tiltMax||'6'), maxScale: parseFloat(el.dataset.tiltScale||'1.02') });
+      if (!el._tilt) el._tilt = new TiltedCard(el, { maxTilt: parseFloat(el.dataset.tiltMax||'10'), maxScale: parseFloat(el.dataset.tiltScale||'1.04') });
     });
     document.querySelectorAll('[data-shiny]').forEach(el => {
-      if (!el._shiny) el._shiny = new ShinyText(el, { speed: parseFloat(el.dataset.shinySpeed||'3.5') });
+      if (!el._shiny) el._shiny = new ShinyText(el, { speed: parseFloat(el.dataset.shinySpeed||'3') });
     });
   }
 
@@ -3592,5 +4248,8 @@ function resetInputUI() {
 })();
 </script>
 
+  <!-- Universal Visitors Analytics Tracker -->
+  <script>window.NEOSYS_SITE_ID = 'yzai';</script>
+  <script src="https://yepzhi.com/visitors/tracker.js" defer></script>
 </body>
 </html>
