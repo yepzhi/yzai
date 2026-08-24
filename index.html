@@ -1806,8 +1806,8 @@ let OLLAMA_URL   = 'https://api-yzai.yepzhi.com';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
 let selectedModel = 'gemma4-26b-uncensored:latest';
-const FIXED_CTX   = 16384; // 16K MoE / Hybrid SWA (32+ páginas)
-let selectedModelDesc = 'Gemma 4 26B-A4B MoE Uncensored (16K Ctx · 5 Slots)';
+const FIXED_CTX   = 8192; // 8K MoE / Hybrid SWA (100% GPU VRAM)
+let selectedModelDesc = 'Gemma 4 26B-A4B MoE Uncensored (8K Ctx · 100% GPU VRAM)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
