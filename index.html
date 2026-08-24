@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover, interactive-widget=resizes-content">
+<meta name="theme-color" content="#030209">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; connect-src * 'unsafe-inline' blob: data: http: https: ws: wss:;">
@@ -657,6 +658,19 @@ think::before {
   background: linear-gradient(to top, rgba(3,3,5,0.98) 40%, rgba(3,3,5,0.85) 75%, transparent);
   pointer-events: none; z-index: 30; display: flex; flex-direction: column; align-items: center;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+/* Solid dark underlay shield to prevent transparent bleed-through behind iOS keyboard toolbar */
+.input-wrapper::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  height: 100dvh;
+  background: #030209;
+  pointer-events: none;
+  z-index: -1;
 }
 .input-container {
   width: 100%; max-width: 880px; pointer-events: all;
