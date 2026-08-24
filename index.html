@@ -2470,17 +2470,17 @@ function createMsg(role, content, streaming=false, images=[]) {
 }
 
 function renderMd(el, text, nativeThinking = '') {
-  let thinking = nativeThinking;
-  let clean = text;
+  let thinking = nativeThinking || '';
+  let clean = text || '';
 
   // Handle closed think tags
-  clean = clean.replace(/<think>([\s\S]*?)<\/think>/g, (_,t) => { 
+  clean = clean.replace(/<think>([\s\S]*?)<\/think>/gi, (_,t) => { 
     thinking += t.trim() + '\n\n'; 
     return ''; 
   });
 
   // Handle open think tag (streaming)
-  const openMatch = clean.match(/<think>([\s\S]*)$/);
+  const openMatch = clean.match(/<think>([\s\S]*)$/i);
   let isThinkingNow = false;
   if (openMatch) {
     isThinkingNow = true;
@@ -2493,7 +2493,14 @@ function renderMd(el, text, nativeThinking = '') {
 
   let html = '';
   if (thinking || isThinkingNow) {
-    html += `<div class="think-body" style="color:var(--muted); font-style:italic; border-left: 2px solid var(--border-light); padding-left: 12px; margin-bottom: 12px; opacity: 0.8; font-size: 0.95em;">${esc(thinking)}${isThinkingNow ? '<span class="cursor"></span>' : ''}</div>`;
+    const thinkStatus = isThinkingNow ? 'Razonando en segundo plano...' : 'Proceso de razonamiento';
+    html += `<details class="think-accordion" ${isThinkingNow ? 'open' : ''} style="margin-bottom:12px; border:1px solid rgba(255,255,255,0.08); border-radius:10px; background:rgba(255,255,255,0.02); padding:6px 10px;">
+      <summary style="cursor:pointer; color:var(--cyan); font-size:12px; font-weight:600; display:flex; align-items:center; gap:6px; user-select:none;">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="${isThinkingNow ? 'spin-svg' : ''}"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <span>${thinkStatus}</span>
+      </summary>
+      <div class="think-body" style="color:var(--muted); font-style:italic; padding-top:8px; font-size:0.9em; white-space:pre-wrap; border-top:1px solid rgba(255,255,255,0.05); margin-top:6px;">${esc(thinking)}${isThinkingNow ? '<span class="cursor"></span>' : ''}</div>
+    </details>`;
   }
   
   if (clean) {
@@ -2508,7 +2515,7 @@ function renderMd(el, text, nativeThinking = '') {
     }
   }
   
-  el.innerHTML = html || (isThinkingNow ? '' : text);
+  el.innerHTML = html || (isThinkingNow ? '' : '<span class="cursor"></span>');
 
   if (typeof hljs !== 'undefined' && hljs && hljs.highlightElement) {
     el.querySelectorAll('pre code').forEach(block => {
@@ -2805,6 +2812,7 @@ async function sendMessage() {
   const aiEl = createMsg('ai', '', true);
   container.appendChild(aiEl);
   const bubble = aiEl.querySelector('.bubble');
+  bubble.innerHTML = `<span class="ai-generating-indicator" style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;font-size:13px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Conectando con GPU...</span>`;
   scrollBottom(true);
 
   // ── Proactive AI Contextual Web Search Injection ──
@@ -2862,11 +2870,12 @@ async function sendMessage() {
       const pendingText = targetText.length - currentText.length;
       
       if (pendingThinking > 0) {
-        const step = Math.min(pendingThinking, Math.max(3, Math.ceil(pendingThinking * 0.3)));
+        const step = Math.min(pendingThinking, Math.max(4, Math.ceil(pendingThinking * 0.35)));
         currentThinking += targetThinking.substr(currentThinking.length, step);
         hasChanges = true;
-      } else if (pendingText > 0) {
-        const step = Math.min(pendingText, Math.max(2, Math.ceil(pendingText * 0.25)));
+      }
+      if (pendingText > 0) {
+        const step = Math.min(pendingText, Math.max(3, Math.ceil(pendingText * 0.3)));
         currentText += targetText.substr(currentText.length, step);
         hasChanges = true;
       }
