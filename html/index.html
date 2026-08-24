@@ -2783,7 +2783,7 @@ async function sendMessage() {
   const aiEl = createMsg('ai', '', true);
   container.appendChild(aiEl);
   const bubble = aiEl.querySelector('.bubble');
-  bubble.innerHTML = `<span class="ai-generating-indicator" style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;font-size:13px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Conectando con GPU...</span>`;
+  bubble.innerHTML = '<span class="cursor"></span>';
   scrollBottom(true);
 
   // ── Proactive AI Contextual Web Search Injection ──
@@ -2934,7 +2934,7 @@ async function sendMessage() {
         if ((res.status === 502 || res.status === 503 || res.status === 504 || res.status === 524) && !firstTokenReceived && retryCount < 8) {
           retryCount++;
           const waitTime = Math.min(10000, 2000 + retryCount * 1500);
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;"><svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Cargando modelo en GPU (~16GB)... (${retryCount}/8)</span>`;
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;"><svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Generando...</span>`;
           await new Promise(r => setTimeout(r, waitTime));
           return attemptFetch();
         }
@@ -2945,7 +2945,7 @@ async function sendMessage() {
       if (retryCount < 8 && e.name !== 'AbortError') {
         retryCount++;
         const waitTime = Math.min(10000, 2000 + retryCount * 1500);
-        document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;"><svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Conectando con servidor de IA... (${retryCount}/8)</span>`;
+        document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;"><svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Generando...</span>`;
         await new Promise(r => setTimeout(r, waitTime));
         return attemptFetch();
       }
