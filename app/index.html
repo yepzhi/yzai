@@ -2750,7 +2750,6 @@ async function sendMessage() {
   // Dump history
   messages.forEach(m => {
     const msgObj = { role: m.role==='ai'?'assistant':m.role, content: m.content };
-    if (m.images && m.images.length) msgObj.images = m.images;
     payload.push(msgObj);
   });
 
@@ -2763,18 +2762,40 @@ async function sendMessage() {
     removeAttachedDoc();
   }
 
-  // Capture freshly attached image
+  // Capture freshly attached image and run in-browser interpretation
   const imageAttached = currentImageBase64 || null;
-  const currentMsgObj = { 
-    role: 'user', 
-    content: userTextForApi || (imageAttached ? 'Analiza esta imagen detalladamente, describe lo que ves, lee cualquier texto o diagrama visible y responde.' : '') 
-  };
+  const imageDims = currentImageDimensions || { w: 800, h: 600 };
+  let imageOcr = currentImageOcrText || '';
+
   if (imageAttached) {
-    currentMsgObj.images = [imageAttached];
+    if (!imageOcr && window.Tesseract && typeof window.Tesseract.recognize === 'function') {
+      try {
+        const ocrRes = await window.Tesseract.recognize(`data:image/jpeg;base64,${imageAttached}`, 'spa+eng', { logger: () => {} });
+        if (ocrRes && ocrRes.data && ocrRes.data.text) {
+          imageOcr = ocrRes.data.text.trim();
+        }
+      } catch(e) {
+        console.warn('[OCR in sendMessage]', e);
+      }
+    }
+
+    let imgBlock = `[ANÁLISIS DE IMAGEN ADJUNTA: ${imageDims.w}×${imageDims.h}px]`;
+    if (imageOcr) {
+      imgBlock += `\n--- CONTENIDO TEXTUAL Y DIAGRAMAS EXTRAÍDOS (OCR HD) ---\n${imageOcr}\n---------------------------------------------------------`;
+    }
+    userTextForApi = userTextForApi 
+      ? `${imgBlock}\n\nPregunta / Instrucción del usuario: ${userTextForApi}` 
+      : `${imgBlock}\n\nInstrucción: Analiza detalladamente la información visible en esta imagen y responde con precisión técnica y profesional.`;
   }
 
+  const currentMsgObj = { 
+    role: 'user', 
+    content: userTextForApi || 'Hola',
+    images: imageAttached ? [imageAttached] : []
+  };
+
   messages.push(currentMsgObj);
-  payload.push(currentMsgObj);
+  payload.push({ role: 'user', content: userTextForApi || 'Hola' });
   removeImage();
 
   const container = document.getElementById('messages');
