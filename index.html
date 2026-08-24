@@ -1830,8 +1830,8 @@ const TEXT_EXTENSIONS = ['txt','md','markdown','json','jsonl','csv','tsv',
 
 // PDF: max chars to extract (~80K ≈ 20K tokens)
 const PDF_MAX_CHARS = 80_000;
-// Image: max dimension before compressing (higher = more detail for moondream OCR)
-const IMG_MAX_PX = 1536;
+// Image: max dimension before compressing (optimized for fast neural vision & network transfer)
+const IMG_MAX_PX = 800;
 
 function processFile(file) {
   if (!file) return;
@@ -1860,7 +1860,7 @@ function processFile(file) {
         canvas.width = w; canvas.height = h;
         const ctx = canvas.getContext('2d');
         ctx.drawImage(img, 0, 0, w, h);
-        const jpegData = canvas.toDataURL('image/jpeg', 0.92);
+        const jpegData = canvas.toDataURL('image/jpeg', 0.85);
         currentImageBase64 = jpegData.split(',')[1];
         currentImageDimensions = { w, h };
         currentImageOcrText = '';
@@ -2048,7 +2048,7 @@ async function analyzeImageWithVision(imageBase64, userPrompt, isRxMode) {
       : `Describe exhaustivamente lo que ves en esta imagen: objetos principales, personas, entorno, diagramas, esquemas, colores, texto visible y cualquier detalle visual clave para responder a la pregunta del usuario: ${userPrompt || '¿Qué hay en esta imagen?'}`;
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
+    const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout for VRAM model loading
 
     const res = await fetch(`${OLLAMA_URL}/api/generate?clave=secreta123`, {
       method: 'POST',
@@ -2925,10 +2925,10 @@ async function sendMessage() {
         body: JSON.stringify(chatBody)
       });
       if (!res.ok) {
-        if ((res.status === 502 || res.status === 504 || res.status === 524) && !firstTokenReceived && retryCount < 5) {
+        if ((res.status === 502 || res.status === 503 || res.status === 504 || res.status === 524) && !firstTokenReceived && retryCount < 8) {
           retryCount++;
-          const waitTime = Math.pow(2, retryCount) * 1000;
-          document.getElementById('token-count').textContent = `Server busy. Retrying in ${(waitTime/1000)}s... (Attempt ${retryCount}/5)`;
+          const waitTime = Math.min(10000, 2000 + retryCount * 1500);
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;"><svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Cargando modelo en GPU (~16GB)... (${retryCount}/8)</span>`;
           await new Promise(r => setTimeout(r, waitTime));
           return attemptFetch();
         }
@@ -2936,10 +2936,10 @@ async function sendMessage() {
       }
       return res;
     } catch (e) {
-      if (retryCount < 5 && e.name !== 'AbortError') {
+      if (retryCount < 8 && e.name !== 'AbortError') {
         retryCount++;
-        const waitTime = Math.pow(2, retryCount) * 1000;
-        document.getElementById('token-count').textContent = `Connection failed. Retrying in ${(waitTime/1000)}s... (Attempt ${retryCount}/5)`;
+        const waitTime = Math.min(10000, 2000 + retryCount * 1500);
+        document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;"><svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Conectando con servidor de IA... (${retryCount}/8)</span>`;
         await new Promise(r => setTimeout(r, waitTime));
         return attemptFetch();
       }
