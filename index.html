@@ -2041,39 +2041,6 @@ function removeImage() {
   document.getElementById('imgPreview').src = '';
 }
 
-async function analyzeImageWithVision(imageBase64, userPrompt, isRxMode) {
-  try {
-    const prompt = isRxMode
-      ? `Eres un especialista de nivel PhD en radiología e imagenología médica. Analiza esta imagen/escaneo médico con riguroso detalle técnico y clínico: describe la región anatómica, técnica de adquisición, densidades, opacidades, bordes, cualquier anomalía o hallazgo relevante y texto o etiquetas visibles en la imagen. Pregunta del usuario: ${userPrompt || 'Análisis general'}`
-      : `Describe exhaustivamente lo que ves en esta imagen: objetos principales, personas, entorno, diagramas, esquemas, colores, texto visible y cualquier detalle visual clave para responder a la pregunta del usuario: ${userPrompt || '¿Qué hay en esta imagen?'}`;
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 45000); // 45s timeout for VRAM model loading
-
-    const res = await fetch(`${OLLAMA_URL}/api/generate?clave=secreta123`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model: 'moondream:latest',
-        prompt: prompt,
-        images: [imageBase64],
-        stream: false
-      })
-    });
-    clearTimeout(timeoutId);
-    if (res.ok) {
-      const data = await res.json();
-      if (data.response && data.response.trim()) {
-        return data.response.trim();
-      }
-    }
-  } catch (err) {
-    console.warn('[Vision Pipeline]', err.message);
-  }
-  return null;
-}
-
 // ── INIT ───────────────────────────────────────────────────
 async function discoverEndpoint() {
   if (location.hostname.includes('yepzhi.com')) {
@@ -2711,9 +2678,11 @@ async function sendMessage() {
   }
   if (effectiveSysPrompt) payload.push({ role:'system', content: effectiveSysPrompt });
 
-  // Dump history — strip raw images so Qwen (text-only) never chokes on base64 blobs
+  // Dump history
   messages.forEach(m => {
-    payload.push({ role: m.role==='ai'?'assistant':m.role, content: m.content });
+    const msgObj = { role: m.role==='ai'?'assistant':m.role, content: m.content };
+    if (m.images && m.images.length) msgObj.images = m.images;
+    payload.push(msgObj);
   });
 
   let userTextForApi = text;
@@ -2725,16 +2694,18 @@ async function sendMessage() {
     removeAttachedDoc();
   }
 
-  // Capture freshly attached image and OCR/metadata before cleaning
+  // Capture freshly attached image
   const imageAttached = currentImageBase64 || null;
-  const imageDims = currentImageDimensions || null;
-  const imageOcr = currentImageOcrText || '';
+  const currentMsgObj = { 
+    role: 'user', 
+    content: userTextForApi || (imageAttached ? 'Analiza esta imagen detalladamente, describe lo que ves, lee cualquier texto o diagrama visible y responde.' : '') 
+  };
+  if (imageAttached) {
+    currentMsgObj.images = [imageAttached];
+  }
 
-  const userMsgForHistory = { role:'user', content: userTextForApi };
-  if (currentImageBase64) userMsgForHistory.images = [currentImageBase64];
-  messages.push(userMsgForHistory);
-
-  payload.push({ role:'user', content: userTextForApi });
+  messages.push(currentMsgObj);
+  payload.push(currentMsgObj);
   removeImage();
 
   const container = document.getElementById('messages');
@@ -2743,32 +2714,6 @@ async function sendMessage() {
   container.appendChild(aiEl);
   const bubble = aiEl.querySelector('.bubble');
   scrollBottom(true);
-
-  // ── Multimodal Vision Perception & OCR Pipeline ──
-  if (imageAttached) {
-    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Analizando visión y estructura de la imagen…</span>`;
-    document.getElementById('token-count').textContent = 'Analyzing image vision...';
-
-    const visionAnalysis = await analyzeImageWithVision(imageAttached, text, isRxModeActive);
-
-    let visionContext = `[IMAGEN ADJUNTA POR EL USUARIO]\n`;
-    if (imageDims) {
-      visionContext += `- Dimensiones de imagen: ${imageDims.w}×${imageDims.h}px\n`;
-    }
-    if (visionAnalysis) {
-      visionContext += `- Análisis Visual (Neural Vision Perception):\n${visionAnalysis}\n\n`;
-    }
-    if (imageOcr && imageOcr.trim()) {
-      visionContext += `- Texto / Datos legibles en la imagen (OCR):\n\`\`\`text\n${imageOcr.trim()}\n\`\`\`\n\n`;
-    }
-    if (!visionAnalysis && (!imageOcr || !imageOcr.trim())) {
-      visionContext += `(El usuario ha adjuntado una imagen para esta consulta).\n\n`;
-    }
-
-    payload[payload.length - 1].content = `${visionContext}---\nPregunta o instrucción del usuario: ${payload[payload.length - 1].content}`;
-    // NOTE: We do NOT send raw payload.images to gemma4-26b-uncensored because Ollama rejects multimodal requests on text models.
-    bubble.innerHTML = '<span class="cursor"></span>';
-  }
 
   // ── Proactive AI Contextual Web Search Injection ──
   // Si se detecta intención de búsqueda, usamos la IA local (0.3s) para sintetizar una búsqueda consciente del contexto
