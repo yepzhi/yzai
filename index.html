@@ -1090,26 +1090,31 @@ think::before {
     max-width: 100%;
   }
   .welcome-chip-card {
-    padding: 11px 12px;
-    gap: 8px;
-    border-radius: 14px;
+    padding: 10px 10px;
+    gap: 7px;
+    border-radius: 13px;
+    align-items: center;
+  }
+  .welcome-chip-card .chip-icon svg {
+    width: 16px;
+    height: 16px;
   }
   .welcome-chip-card .chip-content strong {
-    font-size: 0.78rem;
-    line-height: 1.25;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1.2;
+    letter-spacing: -0.25px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 }
 
-@media (max-width: 420px) {
-  .welcome-chips-grid {
-    grid-template-columns: 1fr;
-    gap: 8px;
-  }
-  .welcome-chip-card {
-    padding: 12px 14px;
-  }
+@media (max-width: 375px) {
   .welcome-chip-card .chip-content strong {
-    font-size: 0.84rem;
+    font-size: 0.68rem;
+    white-space: normal;
+    text-align: left;
   }
 }
 
@@ -1407,7 +1412,7 @@ think::before {
   grid-template-columns: repeat(2, 1fr);
   gap: 12px;
   width: 100%;
-  max-width: 600px;
+  max-width: 580px;
   margin: 24px auto 0;
   text-align: left;
   box-sizing: border-box;
@@ -1418,10 +1423,10 @@ think::before {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-radius: 16px;
-  padding: 14px 16px;
+  padding: 12px 14px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   cursor: pointer;
   color: #fff;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
