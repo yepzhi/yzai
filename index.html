@@ -1370,21 +1370,18 @@ think::before {
   transform: translateY(-2px);
 }
 .welcome-chip-card .chip-icon {
-  font-size: 1.4rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
   line-height: 1;
 }
 .welcome-chip-card .chip-content strong {
   display: block;
-  font-size: 0.9rem;
+  font-size: 0.88rem;
   color: #fff;
   font-weight: 700;
-  margin-bottom: 2px;
-}
-.welcome-chip-card .chip-content span {
-  display: block;
-  font-size: 0.76rem;
-  color: var(--text-muted);
-  line-height: 1.3;
+  margin-bottom: 0;
 }
 </style>
 </head>
@@ -1521,31 +1518,35 @@ think::before {
 
         <div class="welcome-chips-grid">
           <div class="welcome-chip-card" data-tilted data-spotlight onclick="quickPrompt('Ayúdame a diseñar una arquitectura limpia, robusta y de alto rendimiento para...')">
-            <span class="chip-icon">⚡</span>
+            <span class="chip-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            </span>
             <div class="chip-content">
               <strong>Arquitectura &amp; Código</strong>
-              <span>Diseño de sistemas y optimización</span>
             </div>
           </div>
           <div class="welcome-chip-card" data-tilted data-spotlight onclick="quickPrompt('Explícame a profundidad el funcionamiento y matemáticas de los transformadores y atención...')">
-            <span class="chip-icon">🧠</span>
+            <span class="chip-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z"/></svg>
+            </span>
             <div class="chip-content">
               <strong>Razonamiento &amp; IA</strong>
-              <span>Modelos neuronales y análisis</span>
             </div>
           </div>
           <div class="welcome-chip-card" data-tilted data-spotlight onclick="toggleRxMode()">
-            <span class="chip-icon">🔬</span>
+            <span class="chip-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="3"/></svg>
+            </span>
             <div class="chip-content">
               <strong>Imagenología PhD</strong>
-              <span>Modo diagnóstico y análisis visual</span>
             </div>
           </div>
           <div class="welcome-chip-card" data-tilted data-spotlight onclick="toggleVoiceMode()">
-            <span class="chip-icon">🎙️</span>
+            <span class="chip-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            </span>
             <div class="chip-content">
               <strong>Conversación de Voz</strong>
-              <span>Diálogo interactivo en tiempo real</span>
             </div>
           </div>
         </div>
@@ -2283,31 +2284,35 @@ function welcomeHTML() {
 
     <div class="welcome-chips-grid">
       <div class="welcome-chip-card" data-tilted data-spotlight onclick="quickPrompt('Ayúdame a diseñar una arquitectura limpia, robusta y de alto rendimiento para...')">
-        <span class="chip-icon">⚡</span>
+        <span class="chip-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        </span>
         <div class="chip-content">
           <strong>Arquitectura &amp; Código</strong>
-          <span>Diseño de sistemas y optimización</span>
         </div>
       </div>
       <div class="welcome-chip-card" data-tilted data-spotlight onclick="quickPrompt('Explícame a profundidad el funcionamiento y matemáticas de los transformadores y atención...')">
-        <span class="chip-icon">🧠</span>
+        <span class="chip-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z"/></svg>
+        </span>
         <div class="chip-content">
           <strong>Razonamiento &amp; IA</strong>
-          <span>Modelos neuronales y análisis</span>
         </div>
       </div>
       <div class="welcome-chip-card" data-tilted data-spotlight onclick="toggleRxMode()">
-        <span class="chip-icon">🔬</span>
+        <span class="chip-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="3"/></svg>
+        </span>
         <div class="chip-content">
           <strong>Imagenología PhD</strong>
-          <span>Modo diagnóstico y análisis visual</span>
         </div>
       </div>
       <div class="welcome-chip-card" data-tilted data-spotlight onclick="toggleVoiceMode()">
-        <span class="chip-icon">🎙️</span>
+        <span class="chip-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+        </span>
         <div class="chip-content">
           <strong>Conversación de Voz</strong>
-          <span>Diálogo interactivo en tiempo real</span>
         </div>
       </div>
     </div>
