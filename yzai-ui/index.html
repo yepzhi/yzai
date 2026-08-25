@@ -2858,11 +2858,6 @@ async function sendMessage() {
       } else if (streamFinished) {
         clearInterval(typewriterTimer);
         typewriterTimer = null;
-        
-        if (isRxModeActive && targetText && !targetText.includes('No sustituye el juicio clínico') && !targetText.includes('profesional de la salud certificado')) {
-          targetText += '\n\n> ⚠️ **Aviso:** Este análisis es generado por un modelo de lenguaje con fines de apoyo técnico al análisis de imagen. No sustituye el juicio clínico de un profesional de la salud certificado, no consulta fuentes externas ni bases de investigación en tiempo real, y no debe utilizarse como único fundamento para decisiones diagnósticas o terapéuticas.';
-        }
-
         renderMd(bubble, targetText || '…');
         bubble.querySelectorAll('.cursor').forEach(el => el.remove());
 
