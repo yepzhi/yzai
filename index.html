@@ -2220,15 +2220,15 @@ async function loadModels() {
     allModels = models;
 
     if (models.length) {
-      const gemmaModel = models.find(m => m.name === 'gemma4-26b-uncensored:latest') 
-        || models.find(m => m.name.includes('gemma4-26b-uncensored'))
+      const gemmaModel = models.find(m => m.name === 'gemma4-vision:latest') 
+        || models.find(m => m.name.includes('gemma4-vision'))
         || models.find(m => m.name.toLowerCase().includes('gemma4') && !m.name.includes('.bak'))
         || models[0];
-      selectedModel = gemmaModel ? gemmaModel.name : 'gemma4-26b-uncensored:latest';
+      selectedModel = gemmaModel ? gemmaModel.name : 'gemma4-vision:latest';
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · Gemma 4 26B MoE (8K · 1 Slot)`);
+    setStatus(true, `Server Live · Gemma 4 26B MoE Multimodal (Vision+Text)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -2795,7 +2795,11 @@ async function sendMessage() {
   };
 
   messages.push(currentMsgObj);
-  payload.push({ role: 'user', content: userTextForApi || 'Hola' });
+  const payloadUserObj = { role: 'user', content: userTextForApi || 'Hola' };
+  if (imageAttached) {
+    payloadUserObj.images = [imageAttached];
+  }
+  payload.push(payloadUserObj);
   removeImage();
 
   const container = document.getElementById('messages');
@@ -2929,7 +2933,7 @@ async function sendMessage() {
   let retryCount = 0;
   async function attemptFetch() {
     try {
-      const modelForCall = selectedModel || 'gemma4-26b-uncensored:latest';
+      const modelForCall = selectedModel || 'gemma4-vision:latest';
       const chatOptions = { 
         num_ctx: FIXED_CTX
       };
