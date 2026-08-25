@@ -1957,17 +1957,6 @@ function processFile(file) {
         const kb = Math.round(currentImageBase64.length * 0.75 / 1024);
         document.getElementById('token-count').textContent = `Imagen lista — ${w}×${h}px, ~${kb}KB`;
         document.getElementById('sendBtn').disabled = false;
-
-        // Background OCR via Tesseract.js if available
-        if (window.Tesseract && typeof window.Tesseract.recognize === 'function') {
-          window.Tesseract.recognize(jpegData, 'spa+eng', { logger: () => {} })
-            .then(res => {
-              if (res && res.data && res.data.text && res.data.text.trim()) {
-                currentImageOcrText = res.data.text.trim();
-                console.log('[OCR] Extracted text from image:', currentImageOcrText.slice(0, 100));
-              }
-            }).catch(err => console.warn('[OCR]', err.message));
-        }
       };
       img.src = rawData;
     };
@@ -2220,15 +2209,15 @@ async function loadModels() {
     allModels = models;
 
     if (models.length) {
-      const gemmaModel = models.find(m => m.name === 'gemma4-26b-uncensored:latest') 
-        || models.find(m => m.name.includes('gemma4-26b-uncensored'))
+      const gemmaModel = models.find(m => m.name === 'gemma4-vision:latest') 
+        || models.find(m => m.name.includes('gemma4-vision'))
         || models.find(m => m.name.toLowerCase().includes('gemma4') && !m.name.includes('.bak'))
         || models[0];
-      selectedModel = gemmaModel ? gemmaModel.name : 'gemma4-26b-uncensored:latest';
+      selectedModel = gemmaModel ? gemmaModel.name : 'gemma4-vision:latest';
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · Gemma 4 26B MoE (8K · 1 Slot)`);
+    setStatus(true, `Server Live · Gemma 4 26B MoE Multimodal (Vision+Text)`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -2750,6 +2739,7 @@ async function sendMessage() {
   // Dump history
   messages.forEach(m => {
     const msgObj = { role: m.role==='ai'?'assistant':m.role, content: m.content };
+    if (m.images && m.images.length) msgObj.images = m.images;
     payload.push(msgObj);
   });
 
@@ -2762,30 +2752,13 @@ async function sendMessage() {
     removeAttachedDoc();
   }
 
-  // Capture freshly attached image and run in-browser interpretation
+  // Capture freshly attached image for direct multimodal pixel analysis
   const imageAttached = currentImageBase64 || null;
-  const imageDims = currentImageDimensions || { w: 800, h: 600 };
-  let imageOcr = currentImageOcrText || '';
 
   if (imageAttached) {
-    if (!imageOcr && window.Tesseract && typeof window.Tesseract.recognize === 'function') {
-      try {
-        const ocrRes = await window.Tesseract.recognize(`data:image/jpeg;base64,${imageAttached}`, 'spa+eng', { logger: () => {} });
-        if (ocrRes && ocrRes.data && ocrRes.data.text) {
-          imageOcr = ocrRes.data.text.trim();
-        }
-      } catch(e) {
-        console.warn('[OCR in sendMessage]', e);
-      }
-    }
-
-    let imgBlock = `[ANÁLISIS DE IMAGEN ADJUNTA: ${imageDims.w}×${imageDims.h}px]`;
-    if (imageOcr) {
-      imgBlock += `\n--- CONTENIDO TEXTUAL Y DIAGRAMAS EXTRAÍDOS (OCR HD) ---\n${imageOcr}\n---------------------------------------------------------`;
-    }
-    userTextForApi = userTextForApi 
-      ? `${imgBlock}\n\nPregunta / Instrucción del usuario: ${userTextForApi}` 
-      : `${imgBlock}\n\nInstrucción: Analiza detalladamente la información visible en esta imagen y responde con precisión técnica y profesional.`;
+    userTextForApi = userTextForApi || (isRxModeActive 
+      ? 'Analiza detalladamente este estudio radiológico: identifica región anatómica, proyección, hallazgos óseos/articulares y conclusión.'
+      : 'Por favor analiza en detalle el contenido visual y estructuras de esta imagen.');
   }
 
   const currentMsgObj = { 
@@ -2795,7 +2768,11 @@ async function sendMessage() {
   };
 
   messages.push(currentMsgObj);
-  payload.push({ role: 'user', content: userTextForApi || 'Hola' });
+  const payloadUserObj = { role: 'user', content: userTextForApi || 'Hola' };
+  if (imageAttached) {
+    payloadUserObj.images = [imageAttached];
+  }
+  payload.push(payloadUserObj);
   removeImage();
 
   const container = document.getElementById('messages');
@@ -2929,7 +2906,7 @@ async function sendMessage() {
   let retryCount = 0;
   async function attemptFetch() {
     try {
-      const modelForCall = selectedModel || 'gemma4-26b-uncensored:latest';
+      const modelForCall = selectedModel || 'gemma4-vision:latest';
       const chatOptions = { 
         num_ctx: FIXED_CTX
       };
