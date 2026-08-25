@@ -1957,17 +1957,6 @@ function processFile(file) {
         const kb = Math.round(currentImageBase64.length * 0.75 / 1024);
         document.getElementById('token-count').textContent = `Imagen lista — ${w}×${h}px, ~${kb}KB`;
         document.getElementById('sendBtn').disabled = false;
-
-        // Background OCR via Tesseract.js if available
-        if (window.Tesseract && typeof window.Tesseract.recognize === 'function') {
-          window.Tesseract.recognize(jpegData, 'spa+eng', { logger: () => {} })
-            .then(res => {
-              if (res && res.data && res.data.text && res.data.text.trim()) {
-                currentImageOcrText = res.data.text.trim();
-                console.log('[OCR] Extracted text from image:', currentImageOcrText.slice(0, 100));
-              }
-            }).catch(err => console.warn('[OCR]', err.message));
-        }
       };
       img.src = rawData;
     };
@@ -2750,6 +2739,7 @@ async function sendMessage() {
   // Dump history
   messages.forEach(m => {
     const msgObj = { role: m.role==='ai'?'assistant':m.role, content: m.content };
+    if (m.images && m.images.length) msgObj.images = m.images;
     payload.push(msgObj);
   });
 
@@ -2762,28 +2752,13 @@ async function sendMessage() {
     removeAttachedDoc();
   }
 
-  // Capture freshly attached image and run in-browser interpretation
+  // Capture freshly attached image for direct multimodal pixel analysis
   const imageAttached = currentImageBase64 || null;
-  const imageDims = currentImageDimensions || { w: 800, h: 600 };
-  let imageOcr = currentImageOcrText || '';
 
   if (imageAttached) {
-    if (!imageOcr && window.Tesseract && typeof window.Tesseract.recognize === 'function') {
-      try {
-        const ocrRes = await window.Tesseract.recognize(`data:image/jpeg;base64,${imageAttached}`, 'spa+eng', { logger: () => {} });
-        if (ocrRes && ocrRes.data && ocrRes.data.text) {
-          imageOcr = ocrRes.data.text.trim();
-        }
-      } catch(e) {
-        console.warn('[OCR in sendMessage]', e);
-      }
-    }
-
-    let promptWithContext = userTextForApi || 'Analiza en detalle las estructuras, elementos visuales y contenido de la imagen adjunta.';
-    if (imageOcr) {
-      promptWithContext += `\n\n[Texto/etiquetas legibles en la imagen: ${imageOcr}]`;
-    }
-    userTextForApi = promptWithContext;
+    userTextForApi = userTextForApi || (isRxModeActive 
+      ? 'Analiza detalladamente este estudio radiológico: identifica región anatómica, proyección, hallazgos óseos/articulares y conclusión.'
+      : 'Por favor analiza en detalle el contenido visual y estructuras de esta imagen.');
   }
 
   const currentMsgObj = { 
