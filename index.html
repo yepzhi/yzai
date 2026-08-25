@@ -2779,13 +2779,11 @@ async function sendMessage() {
       }
     }
 
-    let imgBlock = `[ANÁLISIS DE IMAGEN ADJUNTA: ${imageDims.w}×${imageDims.h}px]`;
+    let promptWithContext = userTextForApi || 'Analiza en detalle las estructuras, elementos visuales y contenido de la imagen adjunta.';
     if (imageOcr) {
-      imgBlock += `\n--- CONTENIDO TEXTUAL Y DIAGRAMAS EXTRAÍDOS (OCR HD) ---\n${imageOcr}\n---------------------------------------------------------`;
+      promptWithContext += `\n\n[Texto/etiquetas legibles en la imagen: ${imageOcr}]`;
     }
-    userTextForApi = userTextForApi 
-      ? `${imgBlock}\n\nPregunta / Instrucción del usuario: ${userTextForApi}` 
-      : `${imgBlock}\n\nInstrucción: Analiza detalladamente la información visible en esta imagen y responde con precisión técnica y profesional.`;
+    userTextForApi = promptWithContext;
   }
 
   const currentMsgObj = { 
