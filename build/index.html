@@ -2124,43 +2124,58 @@ function removeImage() {
 }
 
 // ── INIT ───────────────────────────────────────────────────
+// Fast Endpoint Discovery with Parallel Probing & LocalStorage Cache
 async function discoverEndpoint() {
-  const host = window.location.hostname || '127.0.0.1';
-  // Check same-origin ('') first — on yzai.yepzhi.com, Nginx proxies /api/ directly to Ollama.
-  // This completely avoids cross-origin/subdomain Cloudflare WAF 403 blocks.
+  const cached = localStorage.getItem('yzai_ollama_url');
+  const host = window.location.hostname;
   const candidates = [
-    '',
-    window.location.origin,
-    'https://yzai.yepzhi.com',
-    `http://${host}:11434`,
+    cached,
+    'https://api-yzai.yepzhi.com',
     'http://127.0.0.1:11434',
+    `http://${host}:11434`,
     'http://yzai.local:11434',
-    'http://192.168.1.127:11434',
-    'http://192.168.1.222:11434',
-    'http://192.168.1.86:11434',
-    'http://192.168.1.72:11434',
-    'https://api-yzai.yepzhi.com'
-  ];
-  for (const url of candidates) {
-    if (url === undefined || url === null) continue;
+    window.location.origin
+  ].filter((u, idx, self) => u !== null && u !== undefined && self.indexOf(u) === idx);
+
+  async function probe(url) {
+    const c = new AbortController();
+    const t = setTimeout(() => c.abort(), 1200);
+    const testUrl = url ? `${url}/api/tags?clave=secreta123` : `/api/tags?clave=secreta123`;
     try {
-      const c = new AbortController();
-      const t = setTimeout(() => c.abort(), 2500);
-      const testUrl = url ? `${url}/api/tags?clave=secreta123` : `/api/tags?clave=secreta123`;
       const r = await fetch(testUrl, { signal: c.signal });
       clearTimeout(t);
-      if (!r.ok) continue;
-      // Validate it's real Ollama JSON — not an HTML page (Cloudflare Pages
-      // returns 200 HTML for all routes via _redirects, which fools r.ok).
+      if (!r.ok) throw new Error('not ok');
       const ct = r.headers.get('content-type') || '';
-      if (!ct.includes('application/json')) continue;
+      if (!ct.includes('application/json')) throw new Error('not json');
       const data = await r.json();
       if (Array.isArray(data.models) && data.models.length > 0) {
-        OLLAMA_URL = url;
-        console.log('[YZAI] Active Ollama endpoint:', url || '(same-origin)');
-        return;
+        return url;
       }
+      throw new Error('no models');
+    } catch (e) {
+      clearTimeout(t);
+      throw e;
+    }
+  }
+
+  // 1. Try cached endpoint first (instant 20ms load)
+  if (cached) {
+    try {
+      const valid = await probe(cached);
+      OLLAMA_URL = valid;
+      return;
     } catch(e) {}
+  }
+
+  // 2. Probe all candidates in parallel (fastest wins)
+  try {
+    const winner = await Promise.any(candidates.map(u => probe(u)));
+    OLLAMA_URL = winner;
+    localStorage.setItem('yzai_ollama_url', winner);
+    console.log('[YZAI] Active Ollama endpoint:', winner || '(same-origin)');
+  } catch(err) {
+    // Fallback default
+    OLLAMA_URL = 'https://api-yzai.yepzhi.com';
   }
 }
 
@@ -2241,8 +2256,8 @@ async function loadModels() {
 }
 
 function startPolling() {
-  if (!modelPollTimer) modelPollTimer = setInterval(loadModels, 12000);
-  if (!healthPollTimer) healthPollTimer = setInterval(checkServicesHealth, 35000);
+  if (!modelPollTimer) modelPollTimer = setInterval(() => { if (!isGenerating) loadModels(); }, 30000);
+  if (!healthPollTimer) healthPollTimer = setInterval(() => { if (!isGenerating) checkServicesHealth(); }, 60000);
 }
 
 function stopPolling() {
@@ -2475,9 +2490,6 @@ function createMsg(role, content, streaming=false, images=[]) {
   return div;
 }
 
-let lastMdParseTime = 0;
-let lastMdParsedHtml = '';
-
 function renderMd(el, text, isLiveStream = false) {
   let clean = (text || '')
     .replace(/<think>[\s\S]*?<\/think>/gi, '')
@@ -2491,22 +2503,18 @@ function renderMd(el, text, isLiveStream = false) {
     return;
   }
 
-  const now = performance.now();
-  // Throttled parsing during streaming (every 70ms) to ensure solid 60 FPS
-  if (!isLiveStream || (now - lastMdParseTime > 70)) {
-    lastMdParseTime = now;
-    if (typeof marked !== 'undefined' && marked && marked.parse) {
-      try {
-        lastMdParsedHtml = marked.parse(clean);
-      } catch(e) {
-        lastMdParsedHtml = esc(clean);
-      }
-    } else {
-      lastMdParsedHtml = esc(clean);
+  let html = '';
+  if (typeof marked !== 'undefined' && marked && marked.parse) {
+    try {
+      html = marked.parse(clean);
+    } catch(e) {
+      html = esc(clean);
     }
+  } else {
+    html = esc(clean);
   }
 
-  el.innerHTML = lastMdParsedHtml + (isLiveStream ? '<span class="cursor"></span>' : '');
+  el.innerHTML = html + (isLiveStream ? '<span class="cursor"></span>' : '');
 
   if (!isLiveStream && typeof hljs !== 'undefined' && hljs && hljs.highlightElement) {
     el.querySelectorAll('pre code').forEach(block => {
