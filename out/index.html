@@ -37,7 +37,6 @@
 <!-- Libraries -->
 <script src="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@11.9.0/build/highlight.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/marked@12/marked.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js" defer></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -98,11 +97,15 @@ body {
 .bg-mesh {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
   overflow: hidden;
+  contain: strict;
+  transform: translate3d(0,0,0);
 }
 .orb {
-  position: absolute; border-radius: 50%; filter: blur(85px);
+  position: absolute; border-radius: 50%; filter: blur(70px);
   opacity: 0.45; mix-blend-mode: screen;
   animation: float 22s infinite ease-in-out alternate;
+  will-change: transform;
+  transform: translate3d(0,0,0);
 }
 .orb-1 { width: 440px; height: 440px; background: #7c3aed; top: -120px; left: -100px; animation-delay: 0s; }
 .orb-2 { width: 340px; height: 340px; background: #2563eb; bottom: -60px; right: -60px; opacity: 0.35; animation-delay: -6s; animation-duration: 26s; }
@@ -347,25 +350,31 @@ body {
   flex-shrink: 0;
 }
 
-/* Message bubbles - Apple Glassmorphism */
-.msg { display: flex; gap: 14px; animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1); min-width: 0; width: 100%; }
-@keyframes slideUp { from{opacity:0;transform:translateY(12px) scale(0.98)} to{opacity:1;transform:translateY(0) scale(1)} }
+/* Message bubbles - High Performance & Fluid Layout */
+.msg { 
+  display: flex; gap: 14px; 
+  animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1); 
+  min-width: 0; width: 100%;
+  contain: content;
+  content-visibility: auto;
+  contain-intrinsic-size: auto 90px;
+}
+@keyframes slideUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
 .msg.user { flex-direction: row-reverse; }
 
 .avatar {
   width: 36px; height: 36px; border-radius: 14px;
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0; margin-top: 4px;
-  box-shadow: inset 0 1px 1px rgba(255,255,255,0.25), 0 6px 16px rgba(0,0,0,0.3);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.25), 0 4px 12px rgba(0,0,0,0.3);
 }
 .avatar.ai { 
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.85), rgba(99, 102, 241, 0.85)); 
-  border: 1px solid rgba(255, 255, 255, 0.2); color: #fff; 
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.95), rgba(99, 102, 241, 0.95)); 
+  border: 1px solid rgba(255, 255, 255, 0.25); color: #fff; 
 }
 .avatar.user { 
-  background: linear-gradient(135deg, rgba(51, 65, 85, 0.8), rgba(15, 23, 42, 0.8)); 
-  color: #e2e8f0; border: 1px solid rgba(255,255,255,0.15); 
+  background: linear-gradient(135deg, rgba(51, 65, 85, 0.95), rgba(15, 23, 42, 0.95)); 
+  color: #e2e8f0; border: 1px solid rgba(255,255,255,0.2); 
 }
 
 .msg-col { display: flex; flex-direction: column; max-width: calc(100% - 54px); min-width: 0; }
@@ -377,23 +386,20 @@ body {
   color: var(--text); min-width: 0; max-width: 100%;
   border-radius: 22px;
   position: relative;
-  transition: all 0.2s ease;
+  transition: border-color 0.2s ease;
+  contain: layout style;
 }
 .msg.ai .bubble { 
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: linear-gradient(145deg, rgba(20, 18, 40, 0.92) 0%, rgba(12, 10, 28, 0.96) 100%);
+  border: 1px solid rgba(139, 92, 246, 0.25);
   border-top-left-radius: 6px;
-  backdrop-filter: blur(24px) saturate(190%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 12px 32px rgba(0, 0, 0, 0.35);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15), 0 10px 28px rgba(0, 0, 0, 0.4);
 }
 .msg.user .bubble { 
-  background: linear-gradient(135deg, rgba(139, 92, 246, 0.85) 0%, rgba(79, 70, 229, 0.75) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  border: 1px solid rgba(255, 255, 255, 0.25);
   border-top-right-radius: 6px;
-  backdrop-filter: blur(24px) saturate(190%);
-  -webkit-backdrop-filter: blur(24px) saturate(190%);
-  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.4), 0 12px 32px rgba(124, 58, 237, 0.35);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.35), 0 10px 28px rgba(37, 99, 235, 0.3);
   color: #ffffff; font-weight: 400;
 }
 
@@ -1296,9 +1302,9 @@ think::before {
 
 /* Enhanced Drawer — liquid glass panel */
 .drawer {
-  background: linear-gradient(160deg, rgba(16,14,32,0.82) 0%, rgba(8,6,22,0.92) 100%) !important;
-  backdrop-filter: blur(40px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+  background: linear-gradient(160deg, rgba(16,14,32,0.92) 0%, rgba(8,6,22,0.96) 100%) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
   border-right: 1px solid rgba(139,92,246,0.2) !important;
   box-shadow: 20px 0 60px rgba(0,0,0,0.6), inset 1px 0 rgba(255,255,255,0.06) !important;
 }
@@ -1317,8 +1323,8 @@ think::before {
 .model-pill {
   background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(139,92,246,0.05) 100%) !important;
   border: 1px solid rgba(139,92,246,0.3) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
   box-shadow: 0 0 0 1px rgba(255,255,255,0.05) inset, 0 8px 32px rgba(0,0,0,0.3), 0 0 20px rgba(139,92,246,0.1) !important;
   position: relative;
   overflow: hidden;
@@ -1335,24 +1341,22 @@ think::before {
 
 /* Top bar — ultra glass */
 .top-bar {
-  background: linear-gradient(to bottom, rgba(3,2,9,0.95) 0%, rgba(3,2,9,0) 100%) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
+  background: linear-gradient(to bottom, rgba(3,2,9,0.92) 0%, rgba(3,2,9,0.4) 100%) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
 }
 
-/* AI bubble — premium frosted crystal */
+/* AI bubble — premium frosted crystal (High FPS Optimized) */
 .msg.ai .bubble {
-  background: linear-gradient(135deg, rgba(255,255,255,0.09) 0%, rgba(139,92,246,0.05) 50%, rgba(255,255,255,0.03) 100%) !important;
-  border: 1px solid rgba(255,255,255,0.16) !important;
-  backdrop-filter: blur(32px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+  background: linear-gradient(145deg, rgba(18, 15, 36, 0.94) 0%, rgba(10, 8, 24, 0.96) 100%) !important;
+  border: 1px solid rgba(139, 92, 246, 0.22) !important;
   box-shadow:
-    inset 0 1px 1px rgba(255,255,255,0.3),
-    inset 0 -1px 1px rgba(0,0,0,0.1),
-    0 16px 40px rgba(0,0,0,0.4),
-    0 0 1px rgba(139,92,246,0.2) !important;
+    inset 0 1px 1px rgba(255,255,255,0.15),
+    inset 0 -1px 1px rgba(0,0,0,0.2),
+    0 12px 32px rgba(0,0,0,0.45) !important;
   position: relative;
   overflow: hidden;
+  contain: layout style;
 }
 /* Spectrum shimmer on AI bubble top edge */
 .msg.ai .bubble::before {
@@ -1378,15 +1382,15 @@ think::before {
 
 /* Input bar — crystal glass */
 .input-bar, .composer, [class*="input-panel"] {
-  backdrop-filter: blur(32px) saturate(200%) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(200%) !important;
+  backdrop-filter: blur(16px) !important;
+  -webkit-backdrop-filter: blur(16px) !important;
 }
 
 /* Menu/action buttons — glass pills */
 .menu-btn, .action-btn {
   background: rgba(255,255,255,0.06) !important;
-  backdrop-filter: blur(16px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(16px) saturate(180%) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
   border: 1px solid rgba(255,255,255,0.12) !important;
   box-shadow: inset 0 1px rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.2) !important;
   transition: all 0.2s cubic-bezier(0.16,1,0.3,1) !important;
@@ -1405,19 +1409,11 @@ think::before {
 }
 
 /* Liquid Glass Message Bubbles */
-.msg.ai .bubble {
-  background: rgba(15, 20, 32, 0.75) !important;
-  backdrop-filter: blur(24px) saturate(190%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  box-shadow: 0 12px 36px -8px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
-}
 .msg.user .bubble {
-  background: linear-gradient(135deg, rgba(39, 126, 255, 0.85), rgba(139, 92, 246, 0.85)) !important;
-  backdrop-filter: blur(20px) !important;
-  -webkit-backdrop-filter: blur(20px) !important;
+  background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
   border: 1px solid rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 10px 30px -5px rgba(39, 126, 255, 0.35) !important;
+  box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+  contain: layout style;
 }
 
 /* Interactive Suggestion Cards Grid on Welcome */
@@ -2192,10 +2188,12 @@ async function init() {
   await loadModels();
   checkServicesHealth();
   setupPushToTalk();
-  setInterval(checkServicesHealth, 30000);
+  startPolling();
 }
 
 let lastOnlineTimestamp = Date.now();
+let modelPollTimer = null;
+let healthPollTimer = null;
 
 async function loadModels() {
   try {
@@ -2234,8 +2232,25 @@ async function loadModels() {
   }
 }
 
-// Ping periodically
-setInterval(loadModels, 10000);
+function startPolling() {
+  if (!modelPollTimer) modelPollTimer = setInterval(loadModels, 12000);
+  if (!healthPollTimer) healthPollTimer = setInterval(checkServicesHealth, 35000);
+}
+
+function stopPolling() {
+  if (modelPollTimer) { clearInterval(modelPollTimer); modelPollTimer = null; }
+  if (healthPollTimer) { clearInterval(healthPollTimer); healthPollTimer = null; }
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    stopPolling();
+  } else {
+    loadModels();
+    checkServicesHealth();
+    startPolling();
+  }
+});
 
 function setStatus(ok, text) {
   const dot = document.getElementById('statusDot');
@@ -2452,7 +2467,7 @@ function createMsg(role, content, streaming=false, images=[]) {
   return div;
 }
 
-function renderMd(el, text) {
+function renderMd(el, text, isLiveStream = false) {
   let clean = (text || '')
     .replace(/<think>[\s\S]*?<\/think>/gi, '')
     .replace(/<thought>[\s\S]*?<\/thought>/gi, '')
@@ -2473,9 +2488,9 @@ function renderMd(el, text) {
     }
   }
   
-  el.innerHTML = html || '<span class="cursor"></span>';
+  el.innerHTML = (html || '') + (isLiveStream ? '<span class="cursor"></span>' : '');
 
-  if (typeof hljs !== 'undefined' && hljs && hljs.highlightElement) {
+  if (!isLiveStream && typeof hljs !== 'undefined' && hljs && hljs.highlightElement) {
     el.querySelectorAll('pre code').forEach(block => {
       const lang = (block.className.match(/language-(\w+)/) || [])[1] || 'code';
       try { hljs.highlightElement(block); } catch(e) {}
@@ -2484,6 +2499,18 @@ function renderMd(el, text) {
         const wrap = document.createElement('div');
         wrap.className = 'code-wrap';
         wrap.innerHTML = `<div class="code-hdr"><span>${esc(lang)}</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>`;
+        pre.parentNode.insertBefore(wrap, pre);
+        wrap.appendChild(pre);
+      }
+    });
+  } else if (isLiveStream) {
+    el.querySelectorAll('pre').forEach(pre => {
+      if (!pre.parentElement.classList.contains('code-wrap')) {
+        const code = pre.querySelector('code');
+        const lang = code ? ((code.className.match(/language-(\w+)/) || [])[1] || 'code') : 'code';
+        const wrap = document.createElement('div');
+        wrap.className = 'code-wrap';
+        wrap.innerHTML = `<div class="code-hdr"><span>${esc(lang)}</span></div>`;
         pre.parentNode.insertBefore(wrap, pre);
         wrap.appendChild(pre);
       }
@@ -2820,66 +2847,79 @@ async function sendMessage() {
   let liveTimer = null;
   let collectedToolCalls = []; // For web_search tool calling
 
-  // Variables del Typewriter para máxima velocidad y suavidad
+  // Variables del Typewriter para máxima velocidad y suavidad a 60 FPS
   let targetText = '';
   let currentText = '';
-  let typewriterTimer = null;
+  let typewriterRaf = null;
+  let lastTypewriterFrame = 0;
   let streamFinished = false;
   let lastSpeakIdx = 0;
 
   function startTypewriterLoop() {
-    if (typewriterTimer) return;
+    if (typewriterRaf) return;
     
-    typewriterTimer = setInterval(() => {
-      let hasChanges = false;
-      const pendingText = targetText.length - currentText.length;
+    function typewriterStep(now) {
+      if (!now) now = performance.now();
       
-      if (pendingText > 0) {
-        const step = Math.min(pendingText, Math.max(5, Math.ceil(pendingText * 0.4)));
-        currentText += targetText.substr(currentText.length, step);
-        hasChanges = true;
-      }
-      
-      // REALTIME TTS CHUNKING: Hablar oraciones completas y fluidas
-      if (isVoiceModeActive && currentText.length > lastSpeakIdx && typeof VoiceQueue !== 'undefined') {
-        const unparsed = currentText.slice(lastSpeakIdx);
-        const match = unparsed.match(/([\s\S]*?[.!?:](\s+|\n)|[\s\S]*?\n\n)/);
-        if (match && match[0].trim().length >= 6) {
-          const chunkToSpeak = match[0];
-          lastSpeakIdx += chunkToSpeak.length;
-          VoiceQueue.push(chunkToSpeak);
+      const elapsed = now - lastTypewriterFrame;
+      if (elapsed >= 28 || streamFinished) {
+        lastTypewriterFrame = now;
+        let hasChanges = false;
+        const pendingText = targetText.length - currentText.length;
+        
+        if (pendingText > 0) {
+          const step = Math.min(pendingText, Math.max(6, Math.ceil(pendingText * 0.35)));
+          currentText += targetText.substr(currentText.length, step);
+          hasChanges = true;
         }
-      }
-
-      if (hasChanges) {
-        renderMd(bubble, currentText);
-        bubble.innerHTML += '<span class="cursor"></span>';
-        scrollBottom();
-      } else if (streamFinished) {
-        clearInterval(typewriterTimer);
-        typewriterTimer = null;
-        renderMd(bubble, targetText || '…');
-        bubble.querySelectorAll('.cursor').forEach(el => el.remove());
-
-        if (isVoiceModeActive && typeof VoiceQueue !== 'undefined') {
-          if (targetText.length > lastSpeakIdx) {
-            const tail = targetText.slice(lastSpeakIdx).trim();
-            if (tail) VoiceQueue.push(tail);
-            lastSpeakIdx = targetText.length;
+        
+        // REALTIME TTS CHUNKING: Hablar oraciones completas y fluidas
+        if (isVoiceModeActive && currentText.length > lastSpeakIdx && typeof VoiceQueue !== 'undefined') {
+          const unparsed = currentText.slice(lastSpeakIdx);
+          const match = unparsed.match(/([\s\S]*?[.!?:](\s+|\n)|[\s\S]*?\n\n)/);
+          if (match && match[0].trim().length >= 6) {
+            const chunkToSpeak = match[0];
+            lastSpeakIdx += chunkToSpeak.length;
+            VoiceQueue.push(chunkToSpeak);
           }
-          VoiceQueue.isStreamComplete = true;
-          setTimeout(() => {
-            if (!VoiceQueue.isPlaying) VoiceQueue.playNext();
-          }, 50);
         }
 
-        messages.push({ role:'ai', content:targetText });
-        saveCurrentConv();
-        setStreaming(false);
-        checkContextUsage();
-        document.getElementById('prompt').focus();
+        if (hasChanges) {
+          renderMd(bubble, currentText, true);
+          scrollBottom();
+        } else if (streamFinished) {
+          if (typewriterRaf) { cancelAnimationFrame(typewriterRaf); typewriterRaf = null; }
+          renderMd(bubble, targetText || '…', false);
+          bubble.querySelectorAll('.cursor').forEach(el => el.remove());
+
+          if (isVoiceModeActive && typeof VoiceQueue !== 'undefined') {
+            if (targetText.length > lastSpeakIdx) {
+              const tail = targetText.slice(lastSpeakIdx).trim();
+              if (tail) VoiceQueue.push(tail);
+              lastSpeakIdx = targetText.length;
+            }
+            VoiceQueue.isStreamComplete = true;
+            setTimeout(() => {
+              if (!VoiceQueue.isPlaying) VoiceQueue.playNext();
+            }, 50);
+          }
+
+          messages.push({ role:'ai', content:targetText });
+          saveCurrentConv();
+          setStreaming(false);
+          checkContextUsage();
+          const pInput = document.getElementById('prompt');
+          if (pInput) pInput.focus();
+          return;
+        }
       }
-    }, 12);
+
+      if (typewriterRaf !== null || !streamFinished || currentText.length < targetText.length) {
+        typewriterRaf = requestAnimationFrame(typewriterStep);
+      }
+    }
+
+    typewriterRaf = requestAnimationFrame(typewriterStep);
   }
 
   let loadingIndicatorActive = false;
@@ -2958,6 +2998,7 @@ async function sendMessage() {
       if (done) break;
       buf += decoder.decode(value, { stream:true });
       const lines = buf.split('\n'); buf = lines.pop();
+      let shouldExitStream = false;
       for (const line of lines) {
         if (!line.trim()) continue;
         try {
@@ -2979,6 +3020,13 @@ async function sendMessage() {
               }, 500);
             }
             
+            if (d.message?.thinking) {
+              tokenCount++;
+              if (targetText.length === 0) {
+                document.getElementById('token-count').textContent = 'Razonando...';
+              }
+            }
+
             if (d.message?.content) {
               targetText += d.message.content;
               tokenCount++;
@@ -2990,15 +3038,20 @@ async function sendMessage() {
             collectedToolCalls.push(...d.message.tool_calls);
           }
 
-          if (d.done && d.eval_count) {
+          if (d.done) {
             ollamaDone = true;
+            shouldExitStream = true;
             clearInterval(liveTimer);
             const tps = d.eval_duration ? (d.eval_count / (d.eval_duration/1e9)).toFixed(1) : null;
             const loadTime = d.load_duration ? (d.load_duration/1e9).toFixed(1) : 0;
             document.getElementById('token-count').textContent =
-              `${d.eval_count} tokens · ${tps ? tps+' t/s' : ''} (Load time: ${loadTime}s)`;
+              `${d.eval_count || tokenCount} tokens · ${tps ? tps+' t/s' : ''} (Load time: ${loadTime}s)`;
           }
         } catch(e) {}
+      }
+      if (shouldExitStream) {
+        try { await reader.cancel(); } catch(err){}
+        break;
       }
     }
 
@@ -3034,9 +3087,7 @@ async function sendMessage() {
             });
             // Reset stream state for second call
             targetText = '';
-            targetThinking = '';
             currentText = '';
-            currentThinking = '';
             firstTokenReceived = false;
             tokenCount = 0;
             startTime = Date.now();
@@ -3067,6 +3118,7 @@ async function sendMessage() {
                 document.getElementById('token-count').textContent = `Generating... ~${tps2} t/s`;
               }
             }, 500);
+            let shouldExitStream2 = false;
             while (true) {
               const { done, value } = await reader2.read();
               if (done) break;
@@ -3077,14 +3129,18 @@ async function sendMessage() {
                 try {
                   const d2 = JSON.parse(line2);
                   if (d2.message?.content) { targetText += d2.message.content; tokenCount++; startTypewriterLoop(); }
-                  if (d2.message?.thinking) { targetThinking += d2.message.thinking; startTypewriterLoop(); }
-                  if (d2.done && d2.eval_count) {
+                  if (d2.message?.thinking) { tokenCount++; }
+                  if (d2.done) {
+                    shouldExitStream2 = true;
                     clearInterval(liveTimer);
                     const tps2 = d2.eval_duration ? (d2.eval_count / (d2.eval_duration/1e9)).toFixed(1) : null;
-                    const lt2 = d2.load_duration ? (d2.load_duration/1e9).toFixed(1) : 0;
-                    document.getElementById('token-count').textContent = `${d2.eval_count} tokens · ${tps2 ? tps2+' t/s' : ''} (with web search)`;
+                    document.getElementById('token-count').textContent = `${d2.eval_count || tokenCount} tokens · ${tps2 ? tps2+' t/s' : ''} (with web search)`;
                   }
                 } catch(e) {}
+              }
+              if (shouldExitStream2) {
+                try { await reader2.cancel(); } catch(err){}
+                break;
               }
             }
           } catch(searchErr) {
@@ -3103,7 +3159,7 @@ async function sendMessage() {
   } catch(e) {
     clearTimeout(loadPollStart);
     if (liveTimer) clearInterval(liveTimer);
-    if (typewriterTimer) clearInterval(typewriterTimer);
+    if (typewriterRaf) { cancelAnimationFrame(typewriterRaf); typewriterRaf = null; }
     setStreaming(false);
 
     if (e.name === 'AbortError' || (abortCtrl && abortCtrl.signal.aborted) || !isStreaming) {
@@ -3111,7 +3167,7 @@ async function sendMessage() {
       if (typeof targetText !== 'undefined' && targetText && targetText.trim()) {
         if (!targetText.includes(stopAlert)) {
           targetText += `\n\n*(${stopAlert})*`;
-          renderMd(bubble, targetText, targetThinking);
+          renderMd(bubble, targetText, false);
           messages.push({ role:'ai', content:targetText });
           saveCurrentConv();
         }
@@ -3131,7 +3187,7 @@ async function sendMessage() {
 
     if (targetText && targetText.trim()) {
       targetText += `\n\n*(${errorMsg})*`;
-      renderMd(bubble, targetText, targetThinking);
+      renderMd(bubble, targetText, false);
       messages.push({ role:'ai', content:targetText });
       saveCurrentConv();
     } else {
@@ -3759,16 +3815,21 @@ function initScrollTracker() {
 document.addEventListener('DOMContentLoaded', initScrollTracker);
 initScrollTracker();
 
-function scrollBottom(force = false)  { 
-  const m=document.getElementById('messages-wrapper'); 
+let scrollPending = false;
+function scrollBottom(force = false) { 
+  const m = document.getElementById('messages-wrapper'); 
   if (!m) return;
   if (force) {
     userScrolledUp = false;
     m.scrollTop = m.scrollHeight;
     return;
   }
-  if (!userScrolledUp) {
-    m.scrollTop = m.scrollHeight;
+  if (!userScrolledUp && !scrollPending) {
+    scrollPending = true;
+    requestAnimationFrame(() => {
+      m.scrollTop = m.scrollHeight;
+      scrollPending = false;
+    });
   }
 }
 function clearChat()     { if (messages.length && !confirm('Clear this conversation?')) return; messages=[]; currentConvId=Date.now().toString(); renderMessages(); pickModel(selectedModel, true); }
@@ -3909,40 +3970,55 @@ function resetInputUI() {
 (function() {
   const canvas = document.getElementById('yzai-aurora');
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
+  const ctx = canvas.getContext('2d', { alpha: true });
   let W, H, dots = [], mouse = { x: -9999, y: -9999 }, time = 0, lastUserInteraction = 0;
+  let isCanvasPaused = false;
+  let animFrameId = null;
+  let lastCanvasFrame = 0;
+  const TARGET_FPS = 35;
+  const FRAME_INTERVAL = 1000 / TARGET_FPS;
+
   const ORB_COLORS = [
     [[139,92,246],[99,102,241]],   // purple → indigo
     [[59,130,246],[6,182,212]],    // blue → cyan
     [[168,85,247],[236,72,153]],   // violet → pink
   ];
   const orbs = ORB_COLORS.map((c, i) => ({
-    x: 0, y: 0, vx: (Math.random()-0.5)*0.45, vy: (Math.random()-0.5)*0.35,
-    r: 320 + i*80, colors: c, phase: i*1.8
+    x: 0, y: 0, vx: (Math.random()-0.5)*0.4, vy: (Math.random()-0.5)*0.3,
+    r: 280 + i*70, colors: c, phase: i*1.8
   }));
 
   function resize() {
-    const dpr = Math.min(devicePixelRatio||1, 2);
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
     W = innerWidth; H = innerHeight;
-    canvas.width = W*dpr; canvas.height = H*dpr;
-    canvas.style.width = W+'px'; canvas.style.height = H+'px';
-    ctx.scale(dpr,dpr);
+    canvas.width = Math.floor(W * dpr); 
+    canvas.height = Math.floor(H * dpr);
+    canvas.style.width = W + 'px'; 
+    canvas.style.height = H + 'px';
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.scale(dpr, dpr);
+    
     dots = [];
-    const sp = 36;
-    for (let r=0; r<Math.ceil(H/sp)+1; r++)
-      for (let c=0; c<Math.ceil(W/sp)+1; c++)
-        dots.push({x:c*sp, y:r*sp});
-    orbs[0].x = W*0.2; orbs[0].y = H*0.3;
-    orbs[1].x = W*0.75; orbs[1].y = H*0.65;
-    orbs[2].x = W*0.5; orbs[2].y = H*0.4;
+    const isMobile = W < 768;
+    const sp = isMobile ? 68 : Math.max(54, Math.floor(Math.min(W, H) / 16));
+    const cols = Math.ceil(W / sp) + 1;
+    const rows = Math.ceil(H / sp) + 1;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        dots.push({ x: c * sp, y: r * sp });
+      }
+    }
+    orbs[0].x = W * 0.2; orbs[0].y = H * 0.3;
+    orbs[1].x = W * 0.75; orbs[1].y = H * 0.65;
+    orbs[2].x = W * 0.5; orbs[2].y = H * 0.4;
   }
   resize();
-  window.addEventListener('resize', resize);
+  window.addEventListener('resize', resize, { passive: true });
   window.addEventListener('mousemove', e => { 
     mouse.x = e.clientX; 
     mouse.y = e.clientY; 
     lastUserInteraction = Date.now();
-  });
+  }, { passive: true });
   
   const handleTouch = (e) => {
     if (!e.touches || !e.touches[0]) return;
@@ -3950,32 +4026,44 @@ function resetInputUI() {
     mouse.y = e.touches[0].clientY;
     lastUserInteraction = Date.now();
   };
-  window.addEventListener('touchstart', handleTouch, {passive:true});
-  window.addEventListener('touchmove', handleTouch, {passive:true});
+  window.addEventListener('touchstart', handleTouch, { passive: true });
+  window.addEventListener('touchmove', handleTouch, { passive: true });
 
-  function lerpC(a,b,t) { return a.map((v,i)=>Math.round(v+(b[i]-v)*t)); }
+  function lerpC(a, b, t) { return a.map((v, i) => Math.round(v + (b[i] - v) * t)); }
 
-  function tick() {
+  function tick(now) {
+    if (isCanvasPaused) return;
+    if (!now) now = performance.now();
+
+    const delta = now - lastCanvasFrame;
+    if (delta < FRAME_INTERVAL) {
+      animFrameId = requestAnimationFrame(tick);
+      return;
+    }
+    lastCanvasFrame = now - (delta % FRAME_INTERVAL);
+
     time += 0.0075;
-    ctx.clearRect(0,0,W,H);
+    ctx.clearRect(0, 0, W, H);
     
-    // Draw rich radiant gradient orbs
+    // Radiant gradient orbs
     for (const o of orbs) {
-      o.x += o.vx + Math.sin(time+o.phase)*0.5;
-      o.y += o.vy + Math.cos(time*0.7+o.phase)*0.35;
-      if(o.x<-o.r) o.x=W+o.r; if(o.x>W+o.r) o.x=-o.r;
-      if(o.y<-o.r) o.y=H+o.r; if(o.y>H+o.r) o.y=-o.r;
-      const t=(Math.sin(time*0.5+o.phase)+1)/2;
-      const [r,g,b]=lerpC(o.colors[0],o.colors[1],t);
-      const g2=ctx.createRadialGradient(o.x,o.y,0,o.x,o.y,o.r);
-      g2.addColorStop(0,`rgba(${r},${g},${b},0.35)`);
-      g2.addColorStop(0.45,`rgba(${r},${g},${b},0.16)`);
-      g2.addColorStop(0.8,`rgba(${r},${g},${b},0.04)`);
-      g2.addColorStop(1,`rgba(${r},${g},${b},0)`);
-      ctx.beginPath(); ctx.arc(o.x,o.y,o.r,0,Math.PI*2); ctx.fillStyle=g2; ctx.fill();
+      o.x += o.vx + Math.sin(time + o.phase) * 0.4;
+      o.y += o.vy + Math.cos(time * 0.7 + o.phase) * 0.3;
+      if (o.x < -o.r) o.x = W + o.r; if (o.x > W + o.r) o.x = -o.r;
+      if (o.y < -o.r) o.y = H + o.r; if (o.y > H + o.r) o.y = -o.r;
+      const t = (Math.sin(time * 0.5 + o.phase) + 1) / 2;
+      const [r, g, b] = lerpC(o.colors[0], o.colors[1], t);
+      const g2 = ctx.createRadialGradient(o.x, o.y, 0, o.x, o.y, o.r);
+      g2.addColorStop(0, `rgba(${r},${g},${b},0.32)`);
+      g2.addColorStop(0.45, `rgba(${r},${g},${b},0.14)`);
+      g2.addColorStop(0.8, `rgba(${r},${g},${b},0.03)`);
+      g2.addColorStop(1, `rgba(${r},${g},${b},0)`);
+      ctx.beginPath(); 
+      ctx.arc(o.x, o.y, o.r, 0, Math.PI * 2); 
+      ctx.fillStyle = g2; 
+      ctx.fill();
     }
 
-    // Determine target focus (mobile autonomous probe or user interaction)
     const isTouchDevice = ('ontouchstart' in window) || (window.innerWidth < 768);
     const isUserActive = (Date.now() - lastUserInteraction) < 3000 && mouse.x > 0 && mouse.y > 0;
 
@@ -3983,72 +4071,109 @@ function resetInputUI() {
     let targetY = mouse.y;
 
     if (!isUserActive || (isTouchDevice && (mouse.x <= 0 || mouse.y <= 0))) {
-      targetX = (W * 0.5) + (W * 0.38) * Math.sin(time * 0.85) * Math.cos(time * 0.4);
-      targetY = (H * 0.45) + (H * 0.32) * Math.sin(time * 0.7 + 1.2);
+      targetX = (W * 0.5) + (W * 0.36) * Math.sin(time * 0.85) * Math.cos(time * 0.4);
+      targetY = (H * 0.45) + (H * 0.30) * Math.sin(time * 0.7 + 1.2);
     }
 
-    const node2X = (W * 0.5) + (W * 0.30) * Math.cos(time * 0.65 + 2.2);
-    const node2Y = (H * 0.5) + (H * 0.25) * Math.sin(time * 0.8 + 0.5);
+    const node2X = (W * 0.5) + (W * 0.28) * Math.cos(time * 0.65 + 2.2);
+    const node2Y = (H * 0.5) + (H * 0.22) * Math.sin(time * 0.8 + 0.5);
 
-    // Interactive Constellation + dot grid
+    // Interactive Constellation + dot grid (No shadowBlur for max FPS)
     const IR = 160;
     const nearDots = [];
     const nearDots2 = [];
 
-    for (const d of dots) {
-      const dx=d.x-targetX, dy=d.y-targetY;
-      const dist=Math.sqrt(dx*dx+dy*dy);
-      const prox=Math.max(0,1-dist/IR);
+    for (let i = 0; i < dots.length; i++) {
+      const d = dots[i];
+      const dx = d.x - targetX, dy = d.y - targetY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const prox = Math.max(0, 1 - dist / IR);
 
-      const dx2=d.x-node2X, dy2=d.y-node2Y;
-      const dist2=Math.sqrt(dx2*dx2+dy2*dy2);
-      const prox2=Math.max(0,1-dist2/(IR*0.85));
+      const dx2 = d.x - node2X, dy2 = d.y - node2Y;
+      const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+      const prox2 = Math.max(0, 1 - dist2 / (IR * 0.85));
 
-      const maxProx = Math.max(prox, prox2*0.7);
-      const base=0.20+0.07*Math.sin(time*1.2+d.x*0.02+d.y*0.015);
+      const maxProx = Math.max(prox, prox2 * 0.7);
+      const base = 0.18 + 0.06 * Math.sin(time * 1.2 + d.x * 0.02 + d.y * 0.015);
       
-      ctx.beginPath(); ctx.arc(d.x,d.y,1.6,0,Math.PI*2);
-      ctx.fillStyle=`rgba(139,92,246,${base})`; ctx.fill();
+      ctx.beginPath(); 
+      ctx.arc(d.x, d.y, 1.4, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(139,92,246,${base})`; 
+      ctx.fill();
 
-      if(maxProx > 0.01) {
-        if (prox > 0.01) nearDots.push({x:d.x, y:d.y, prox});
-        if (prox2 > 0.01) nearDots2.push({x:d.x, y:d.y, prox: prox2});
+      if (maxProx > 0.01) {
+        if (prox > 0.01) nearDots.push({ x: d.x, y: d.y, prox });
+        if (prox2 > 0.01) nearDots2.push({ x: d.x, y: d.y, prox: prox2 });
 
-        ctx.beginPath(); ctx.arc(d.x,d.y,1.6+maxProx*3.8,0,Math.PI*2);
-        const r=Math.round(139+(6-139)*maxProx), g2c=Math.round(92+(182-92)*maxProx), bl=Math.round(246+(212-246)*maxProx);
-        ctx.fillStyle=`rgba(${r},${g2c},${bl},${maxProx*0.95})`;
-        ctx.shadowColor='#06b6d4'; ctx.shadowBlur=maxProx*14;
-        ctx.fill(); ctx.shadowBlur=0;
+        const r = Math.round(139 + (6 - 139) * maxProx);
+        const g2c = Math.round(92 + (182 - 92) * maxProx);
+        const bl = Math.round(246 + (212 - 246) * maxProx);
+
+        // Native 2-layer radial bloom (100x faster than shadowBlur)
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, 1.6 + maxProx * 4.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(6,182,212,${maxProx * 0.28})`;
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(d.x, d.y, 1.4 + maxProx * 2.0, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${r},${g2c},${bl},${0.35 + maxProx * 0.65})`;
+        ctx.fill();
       }
     }
 
-    // Draw laser lines connecting target to nearby dots
+    // Laser lines connecting target to nearby dots
     if (nearDots.length > 0) {
-      for (const nd of nearDots) {
+      for (let i = 0; i < nearDots.length; i++) {
+        const nd = nearDots[i];
         ctx.beginPath();
         ctx.moveTo(targetX, targetY);
         ctx.lineTo(nd.x, nd.y);
-        ctx.strokeStyle = `rgba(6,182,212,${nd.prox * 0.45})`;
-        ctx.lineWidth = nd.prox * 1.6;
+        ctx.strokeStyle = `rgba(6,182,212,${nd.prox * 0.42})`;
+        ctx.lineWidth = nd.prox * 1.5;
         ctx.stroke();
       }
     }
 
     // Secondary node connections
     if (nearDots2.length > 0) {
-      for (const nd of nearDots2) {
+      for (let i = 0; i < nearDots2.length; i++) {
+        const nd = nearDots2[i];
         ctx.beginPath();
         ctx.moveTo(node2X, node2Y);
         ctx.lineTo(nd.x, nd.y);
-        ctx.strokeStyle = `rgba(139,92,246,${nd.prox * 0.32})`;
-        ctx.lineWidth = nd.prox * 1.2;
+        ctx.strokeStyle = `rgba(139,92,246,${nd.prox * 0.30})`;
+        ctx.lineWidth = nd.prox * 1.1;
         ctx.stroke();
       }
     }
 
-    requestAnimationFrame(tick);
+    animFrameId = requestAnimationFrame(tick);
   }
-  tick();
+
+  // Lifecycle control: Pause background animation when tab is not active
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      isCanvasPaused = true;
+      if (animFrameId) {
+        cancelAnimationFrame(animFrameId);
+        animFrameId = null;
+      }
+    } else {
+      if (isCanvasPaused) {
+        isCanvasPaused = false;
+        lastCanvasFrame = performance.now();
+        animFrameId = requestAnimationFrame(tick);
+      }
+    }
+  });
+
+  const prefersReduced = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (prefersReduced) {
+    tick(performance.now());
+  } else {
+    animFrameId = requestAnimationFrame(tick);
+  }
 })();
 
 // ── ReactBits UI Engine for yzai ──
