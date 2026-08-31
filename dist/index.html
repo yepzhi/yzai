@@ -121,7 +121,7 @@ body {
 .drawer-overlay {
   position: fixed; inset: 0; z-index: 40;
   background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(8px);
+  /* blur disabled */
   opacity: 0; pointer-events: none;
   transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -244,7 +244,7 @@ body {
   padding: 12px 16px;
   display: flex; align-items: center; gap: 12px;
   background: linear-gradient(to bottom, rgba(3,3,5,0.9) 0%, rgba(3,3,5,0) 100%);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  /* blur disabled */ -webkit-/* blur disabled */
   flex-shrink: 0; min-height: 70px; z-index: 20;
 }
 
@@ -253,7 +253,7 @@ body {
   background: var(--surface); border: 1px solid var(--border);
   color: var(--text); cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s; backdrop-filter: blur(10px);
+  transition: all 0.2s; /* blur disabled */
 }
 .menu-btn:hover, .action-btn:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.15); }
 .menu-btn:active, .action-btn:active { transform: scale(0.92); }
@@ -263,7 +263,7 @@ body {
   padding: 8px 16px; border-radius: 100px;
   background: var(--surface); border: 1px solid var(--border);
   display: flex; align-items: center; gap: 12px;
-  cursor: pointer; backdrop-filter: blur(12px);
+  cursor: pointer; /* blur disabled */
   transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 4px 20px rgba(0,0,0,0.2);
 }
@@ -333,8 +333,8 @@ body {
   font-size: 12px;
   font-weight: 500;
   color: var(--text-dim);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  /* blur disabled */
+  -webkit-/* blur disabled */
   margin-top: 24px;
   letter-spacing: 0.2px;
   box-shadow: 0 4px 20px rgba(0,0,0,0.25);
@@ -623,8 +623,8 @@ think::before {
   padding: 7px 15px;
   border-radius: 9999px;
   background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  /* blur disabled */
+  -webkit-/* blur disabled */
   border: 1px solid rgba(255, 255, 255, 0.12);
   color: var(--text-dim);
   font-size: 12px;
@@ -680,7 +680,7 @@ think::before {
 }
 .input-container {
   width: 100%; max-width: 880px; pointer-events: all;
-  background: rgba(18, 18, 26, 0.88); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  background: rgba(18, 18, 26, 0.88); /* blur disabled */
   border: 1px solid rgba(255, 255, 255, 0.14); border-radius: 22px;
   padding: 10px 14px; box-shadow: 0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.08);
   display: flex; align-items: flex-end; gap: 10px; transition: border-color 0.3s, box-shadow 0.3s;
@@ -787,7 +787,7 @@ think::before {
   margin: 4px 0;
 }
 .img-preview-container {
-  display: none; position: absolute; bottom: calc(100% + 12px); left: 24px; background: rgba(20,20,25,0.9); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 8px; border-radius: 16px; border: 1px solid var(--border-light); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 40;
+  display: none; position: absolute; bottom: calc(100% + 12px); left: 24px; background: rgba(20,20,25,0.9); /* blur disabled */ -webkit-/* blur disabled */ padding: 8px; border-radius: 16px; border: 1px solid var(--border-light); box-shadow: 0 10px 30px rgba(0,0,0,0.5); z-index: 40;
 }
 .img-preview-container.has-img { display: block; }
 .img-preview-container img { max-height: 80px; max-width: 120px; object-fit: cover; border-radius: 8px; display: block; }
@@ -886,8 +886,8 @@ think::before {
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
   white-space: nowrap;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* blur disabled */
+  -webkit-/* blur disabled */
 }
 .img-phd-btn:hover {
   background: rgba(255, 255, 255, 0.1);
@@ -916,8 +916,8 @@ think::before {
   background: rgba(0,0,0,0.5);
   padding: 4px 14px;
   border-radius: 100px;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
+  /* blur disabled */
+  -webkit-/* blur disabled */
   border: 1px solid rgba(255, 255, 255, 0.06);
   width: fit-content;
   max-width: 90vw;
@@ -927,7 +927,7 @@ think::before {
 .drag-drop-overlay {
   position: fixed; inset: 0; z-index: 99999;
   background: rgba(3, 2, 10, 0.85);
-  backdrop-filter: blur(20px);
+  /* blur disabled */
   display: flex; align-items: center; justify-content: center;
   pointer-events: none; opacity: 0; transition: opacity 0.25s ease, visibility 0.25s ease;
   visibility: hidden;
@@ -965,7 +965,7 @@ think::before {
 /* ─── MODEL BOTTOM SHEET ─────────────────────────── */
 .sheet-overlay {
   position: fixed; inset: 0; z-index: 60;
-  background: rgba(0,0,0,0.6); backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.6); /* blur disabled */
   opacity: 0; pointer-events: none; transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .sheet-overlay.open { opacity: 1; pointer-events: all; }
@@ -1004,7 +1004,7 @@ think::before {
 
 /* ─── SYSTEM MODAL ───────────────────────────────── */
 .modal-overlay {
-  position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px);
+  position: fixed; inset: 0; z-index: 80; background: rgba(0,0,0,0.8); /* blur disabled */
   display: none; align-items: flex-end; justify-content: center; padding-bottom: var(--safe-b);
   opacity: 0; transition: opacity 0.3s;
 }
@@ -1033,7 +1033,7 @@ think::before {
 /* ─── DESKTOP ENHANCEMENTS ───────────────────────── */
 @media (min-width: 768px) {
   body { flex-direction: row; position: static; height: 100vh; padding: 0; }
-  .drawer { position: static; transform: none !important; width: 280px; min-width: 280px; border-right: 1px solid var(--border-light); padding: 0; transition: none; background: rgba(10,10,15,0.6); backdrop-filter: blur(20px); }
+  .drawer { position: static; transform: none !important; width: 280px; min-width: 280px; border-right: 1px solid var(--border-light); padding: 0; transition: none; background: rgba(10,10,15,0.6); /* blur disabled */ }
   .drawer-overlay { display: none !important; }
   .close-drawer-btn { display: none; }
   .app { min-height: 0; }
@@ -1294,7 +1294,7 @@ think::before {
 .context-alert-bar {
   max-width: 760px; margin: 0 auto 10px; padding: 10px 16px; border-radius: 14px;
   font-size: 12.5px; font-weight: 600; display: none; align-items: center; justify-content: space-between;
-  backdrop-filter: blur(12px); animation: fadeIn 0.3s ease;
+  /* blur disabled */ animation: fadeIn 0.3s ease;
 }
 .context-alert-bar.amber { background: rgba(245,158,11,0.18); color: #fbbf24; border: 1px solid rgba(245,158,11,0.4); }
 .context-alert-bar.red { background: rgba(239,68,68,0.22); color: #f87171; border: 1px solid rgba(239,68,68,0.45); }
@@ -1303,8 +1303,8 @@ think::before {
 /* Enhanced Drawer — liquid glass panel */
 .drawer {
   background: linear-gradient(160deg, rgba(16,14,32,0.92) 0%, rgba(8,6,22,0.96) 100%) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
+  
+  -webkit-
   border-right: 1px solid rgba(139,92,246,0.2) !important;
   box-shadow: 20px 0 60px rgba(0,0,0,0.6), inset 1px 0 rgba(255,255,255,0.06) !important;
 }
@@ -1323,8 +1323,8 @@ think::before {
 .model-pill {
   background: linear-gradient(135deg, rgba(255,255,255,0.07) 0%, rgba(139,92,246,0.05) 100%) !important;
   border: 1px solid rgba(139,92,246,0.3) !important;
-  backdrop-filter: blur(12px) !important;
-  -webkit-backdrop-filter: blur(12px) !important;
+  
+  -webkit-
   box-shadow: 0 0 0 1px rgba(255,255,255,0.05) inset, 0 8px 32px rgba(0,0,0,0.3), 0 0 20px rgba(139,92,246,0.1) !important;
   position: relative;
   overflow: hidden;
@@ -1342,8 +1342,8 @@ think::before {
 /* Top bar — ultra glass */
 .top-bar {
   background: linear-gradient(to bottom, rgba(3,2,9,0.92) 0%, rgba(3,2,9,0.4) 100%) !important;
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
+  
+  -webkit-
 }
 
 /* AI bubble — premium frosted crystal (High FPS Optimized) */
@@ -1382,15 +1382,15 @@ think::before {
 
 /* Input bar — crystal glass */
 .input-bar, .composer, [class*="input-panel"] {
-  backdrop-filter: blur(16px) !important;
-  -webkit-backdrop-filter: blur(16px) !important;
+  
+  -webkit-
 }
 
 /* Menu/action buttons — glass pills */
 .menu-btn, .action-btn {
   background: rgba(255,255,255,0.06) !important;
-  backdrop-filter: blur(10px) !important;
-  -webkit-backdrop-filter: blur(10px) !important;
+  
+  -webkit-
   border: 1px solid rgba(255,255,255,0.12) !important;
   box-shadow: inset 0 1px rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.2) !important;
   transition: all 0.2s cubic-bezier(0.16,1,0.3,1) !important;
@@ -1430,8 +1430,8 @@ think::before {
 .welcome-chip-card {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  /* blur disabled */
+  -webkit-/* blur disabled */
   border-radius: 16px;
   padding: 12px 14px;
   display: flex;
@@ -1875,7 +1875,7 @@ const ICONS = {
 };
 
 const MODEL_META = {
-  'gemma4-26b-uncensored:latest': { badge:'26B MoE', cls:'badge-purple', desc:'Gemma 4 26B-A4B Uncensored (MoE · 4B Active · MTP)', speed:'~23 t/s' },
+  'gemma4-vision:latest': { badge:'26B MoE', cls:'badge-purple', desc:'Gemma 4 26B-A4B Uncensored (MoE · 4B Active · MTP)', speed:'~23 t/s' },
   'gemma4:latest': { badge:'26B MoE', cls:'badge-purple', desc:'Gemma 4 26B-A4B Uncensored (MoE · 4B Active · MTP)', speed:'~23 t/s' }
 };
 
@@ -1883,7 +1883,7 @@ const MODEL_META = {
 let OLLAMA_URL   = '';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
-let selectedModel = 'gemma4-26b-uncensored:latest';
+let selectedModel = 'gemma4-vision:latest';
 const FIXED_CTX   = 4096; // 4K MoE / Hybrid SWA (100% GPU VRAM)
 let selectedModelDesc = 'Gemma 4 26B-A4B MoE Uncensored (4K Ctx · 100% GPU VRAM)';
 let messages      = [];
@@ -2278,7 +2278,7 @@ function renderSheetModels(models) {}
 function pickModelWithPassword(name) {}
 function updateCtxDisplay() { updateModelHeader(); }
 function pickModel(name, silent) {
-  selectedModel = name || 'gemma4-26b-uncensored:latest';
+  selectedModel = name || 'gemma4-vision:latest';
   updateModelHeader();
 }
 
@@ -2467,6 +2467,9 @@ function createMsg(role, content, streaming=false, images=[]) {
   return div;
 }
 
+let lastMdParseTime = 0;
+let lastMdParsedHtml = '';
+
 function renderMd(el, text, isLiveStream = false) {
   let clean = (text || '')
     .replace(/<think>[\s\S]*?<\/think>/gi, '')
@@ -2475,20 +2478,27 @@ function renderMd(el, text, isLiveStream = false) {
     .replace(/<thought>[\s\S]*$/gi, '')
     .trim();
 
-  let html = '';
-  if (clean) {
+  if (!clean) {
+    el.innerHTML = isLiveStream ? '<span class="cursor"></span>' : '';
+    return;
+  }
+
+  const now = performance.now();
+  // Throttled parsing during streaming (every 70ms) to ensure solid 60 FPS
+  if (!isLiveStream || (now - lastMdParseTime > 70)) {
+    lastMdParseTime = now;
     if (typeof marked !== 'undefined' && marked && marked.parse) {
       try {
-        html = marked.parse(clean);
+        lastMdParsedHtml = marked.parse(clean);
       } catch(e) {
-        html = esc(clean);
+        lastMdParsedHtml = esc(clean);
       }
     } else {
-      html = esc(clean);
+      lastMdParsedHtml = esc(clean);
     }
   }
-  
-  el.innerHTML = (html || '') + (isLiveStream ? '<span class="cursor"></span>' : '');
+
+  el.innerHTML = lastMdParsedHtml + (isLiveStream ? '<span class="cursor"></span>' : '');
 
   if (!isLiveStream && typeof hljs !== 'undefined' && hljs && hljs.highlightElement) {
     el.querySelectorAll('pre code').forEach(block => {
@@ -2499,18 +2509,6 @@ function renderMd(el, text, isLiveStream = false) {
         const wrap = document.createElement('div');
         wrap.className = 'code-wrap';
         wrap.innerHTML = `<div class="code-hdr"><span>${esc(lang)}</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>`;
-        pre.parentNode.insertBefore(wrap, pre);
-        wrap.appendChild(pre);
-      }
-    });
-  } else if (isLiveStream) {
-    el.querySelectorAll('pre').forEach(pre => {
-      if (!pre.parentElement.classList.contains('code-wrap')) {
-        const code = pre.querySelector('code');
-        const lang = code ? ((code.className.match(/language-(\w+)/) || [])[1] || 'code') : 'code';
-        const wrap = document.createElement('div');
-        wrap.className = 'code-wrap';
-        wrap.innerHTML = `<div class="code-hdr"><span>${esc(lang)}</span></div>`;
         pre.parentNode.insertBefore(wrap, pre);
         wrap.appendChild(pre);
       }
@@ -2645,7 +2643,7 @@ REGLAS CRÍTICAS DE SÍNTESIS:
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: selectedModel || 'gemma4-26b-uncensored:latest',
+        model: selectedModel || 'gemma4-vision:latest',
         messages: [
           { role: 'system', content: systemInstruction },
           { role: 'user', content: `Historial reciente:\n${contextSlice}\n\nNueva petición del usuario que requiere búsqueda en vivo: "${userPrompt}"\n\nCadena de búsqueda web óptima:` }
@@ -2745,7 +2743,7 @@ async function sendMessage() {
     return;
   }
   if (isStreaming) return;
-  if (!selectedModel) selectedModel = 'gemma4-26b-uncensored:latest';
+  if (!selectedModel) selectedModel = 'gemma4-vision:latest';
   if (!checkRateLimit()) return;
 
   input.value = ''; autoResize(input);
