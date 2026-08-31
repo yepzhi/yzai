@@ -1659,7 +1659,7 @@ think::before {
     </div>
 
     <!-- Centered Context / Slot Status Badge (cleanly elevated above toolbar) -->
-    <div class="input-hint" id="token-count">Context: 4K · 1 Slot (100% GPU)</div>
+    <div class="input-hint" id="token-count">Context: 4K · 4 Slots (100% GPU)</div>
 
     <!-- Centered Toolbar for Mode toggles (aligned with input container width) -->
     <div class="input-top-bar">
@@ -1902,7 +1902,7 @@ let persistentMicStream = null;
 function removeAttachedDoc() {
   currentAttachedDoc = null;
   document.getElementById('docPreviewContainer').style.display = 'none';
-  document.getElementById('token-count').textContent = 'Context: 8K · Ready';
+  document.getElementById('token-count').textContent = 'Context: 4K · 4 Slots (100% GPU)';
 }
 
 const esc = (str) => String(str).replace(/[&<>"']/g, match => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
@@ -2270,7 +2270,7 @@ function updateModelHeader() {
   if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Gemma 4 MoE (A4B): Ready</span>';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 8K · 1 Slot (100% GPU)';
+    tokenCount.textContent = 'Context: 4K · 4 Slots (100% GPU)';
   }
 }
 
@@ -2835,7 +2835,7 @@ async function sendMessage() {
     bubble.innerHTML = '<span class="cursor"></span>';
   }
 
-  const ctxSize = FIXED_CTX; // 8K GPU VRAM Optimized
+  const ctxSize = FIXED_CTX; // 4K GPU VRAM Optimized
 
   setStreaming(true);
   abortCtrl = new AbortController();
@@ -3236,11 +3236,11 @@ function checkContextUsage() {
   if (percent >= 90) {
     alertBar.className = 'context-alert-bar red';
     alertBar.style.display = 'flex';
-    alertText.innerHTML = `<strong>Memoria al límite (${percent}% de 8K)</strong>: Los mensajes antiguos se comprimirán. Te recomendamos iniciar un <em>Nuevo Chat</em>.`;
+    alertText.innerHTML = `<strong>Memoria al límite (${percent}% de 4K)</strong>: Los mensajes antiguos se comprimirán. Te recomendamos iniciar un <em>Nuevo Chat</em>.`;
   } else if (percent >= 70) {
     alertBar.className = 'context-alert-bar amber';
     alertBar.style.display = 'flex';
-    alertText.innerHTML = `<strong>Memoria cerca del límite (${percent}% de 8K)</strong>: Sugerimos iniciar un <em>Nuevo Chat</em> para máxima velocidad.`;
+    alertText.innerHTML = `<strong>Memoria cerca del límite (${percent}% de 4K)</strong>: Sugerimos iniciar un <em>Nuevo Chat</em> para máxima velocidad.`;
   } else {
     alertBar.style.display = 'none';
   }
