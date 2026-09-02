@@ -291,7 +291,7 @@ body {
   object-fit: cover;
 }
 .messages {
-  padding: 20px 16px 120px;
+  padding: 20px 16px 260px;
   display: flex; flex-direction: column; gap: 24px;
   max-width: 850px; margin: 0 auto; min-height: 100%;
 }
@@ -493,24 +493,24 @@ think::before {
 .cursor { display: inline-block; width: 6px; height: 16px; background: var(--primary); animation: blink 1s step-end infinite; vertical-align: text-bottom; margin-left: 4px; border-radius: 2px; }
 .msg-time { font-size: 11px; color: var(--muted); margin-top: 6px; padding: 0 4px; font-family: var(--font-mono); display: flex; align-items: center; gap: 8px; }
 .msg-tts-btn {
-  background: rgba(255, 255, 255, 0.06);
-  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
   border-radius: 12px;
-  color: var(--text-dim, #a1a1aa);
+  color: #fff;
   font-size: 11px;
   font-weight: 500;
   font-family: var(--font-sans);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 2px 8px;
+  gap: 5px;
+  padding: 4px 10px;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 .msg-tts-btn:hover {
-  background: rgba(56, 182, 255, 0.18);
-  border-color: rgba(56, 182, 255, 0.4);
-  color: #38b6ff;
+  background: rgba(139, 92, 246, 0.25);
+  border-color: rgba(139, 92, 246, 0.5);
+  color: #a78bfa;
   transform: translateY(-1px);
 }
 .flux-progress-card {
@@ -1049,7 +1049,7 @@ think::before {
   .modal-overlay { align-items: center; padding: 0; border-radius: 24px; }
   .modal { border-radius: 24px; max-width: 500px; margin: 0 20px; transform: scale(0.95); }
   .modal-overlay.open .modal { transform: scale(1); }
-  .messages { padding: 40px 24px 170px; gap: 32px; }
+  .messages { padding: 40px 24px 260px; gap: 32px; }
   .bubble { font-size: 14px; }
   .input-wrapper { padding: 20px 24px calc(28px + var(--safe-b, 0px)); }
   .input-container { padding: 12px 18px; border-radius: 24px; }
@@ -2901,13 +2901,16 @@ async function sendMessage() {
       if (!now) now = performance.now();
       
       const elapsed = now - lastTypewriterFrame;
-      if (elapsed >= 28 || streamFinished) {
+      if (elapsed >= 16 || streamFinished) {
         lastTypewriterFrame = now;
         let hasChanges = false;
         const pendingText = targetText.length - currentText.length;
         
         if (pendingText > 0) {
-          const step = Math.min(pendingText, Math.max(6, Math.ceil(pendingText * 0.35)));
+          const maxStep = streamFinished 
+            ? Math.max(12, Math.ceil(pendingText * 0.18)) 
+            : Math.min(8, Math.max(2, Math.ceil(pendingText * 0.05)));
+          const step = Math.min(pendingText, maxStep);
           currentText += targetText.substr(currentText.length, step);
           hasChanges = true;
         }
@@ -2947,6 +2950,7 @@ async function sendMessage() {
           saveCurrentConv();
           setStreaming(false);
           checkContextUsage();
+          scrollBottom(true);
           const pInput = document.getElementById('prompt');
           if (pInput) pInput.focus();
           return;
