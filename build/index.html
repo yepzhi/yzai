@@ -2147,18 +2147,24 @@ function removeImage() {
 const removeAttachedImage = removeImage;
 
 // ── INIT ───────────────────────────────────────────────────
-// Fast Endpoint Discovery with Parallel Probing & LocalStorage Cache
+// Fast Endpoint Discovery with Same-Origin Priority & LocalStorage Cache
 async function discoverEndpoint() {
+  // If hosted on production domain, use same-origin directly (no probing flood)
+  if (window.location.hostname.includes('yzai') || window.location.hostname.includes('yepzhi.com')) {
+    OLLAMA_URL = window.location.origin;
+    localStorage.setItem('yzai_ollama_url', OLLAMA_URL);
+    return;
+  }
+
   const cached = localStorage.getItem('yzai_ollama_url');
   const host = window.location.hostname;
   const candidates = [
     cached,
+    window.location.origin,
     'https://api-yzai.yepzhi.com',
-    'http://127.0.0.1:11434',
     `http://${host}:11434`,
-    'http://yzai.local:11434',
-    window.location.origin
-  ].filter((u, idx, self) => u !== null && u !== undefined && self.indexOf(u) === idx);
+    'http://127.0.0.1:11434'
+  ].filter((u, idx, self) => u && self.indexOf(u) === idx);
 
   async function probe(url) {
     const c = new AbortController();
@@ -2181,7 +2187,7 @@ async function discoverEndpoint() {
     }
   }
 
-  // 1. Try cached endpoint first (instant 20ms load)
+  // 1. Try cached endpoint first (instant load)
   if (cached) {
     try {
       const valid = await probe(cached);
@@ -2190,16 +2196,18 @@ async function discoverEndpoint() {
     } catch(e) {}
   }
 
-  // 2. Probe all candidates in parallel (fastest wins)
-  try {
-    const winner = await Promise.any(candidates.map(u => probe(u)));
-    OLLAMA_URL = winner;
-    localStorage.setItem('yzai_ollama_url', winner);
-    console.log('[YZAI] Active Ollama endpoint:', winner || '(same-origin)');
-  } catch(err) {
-    // Fallback default
-    OLLAMA_URL = 'https://api-yzai.yepzhi.com';
+  // 2. Probe remaining candidates sequentially to avoid socket starvation
+  for (const u of candidates) {
+    try {
+      const winner = await probe(u);
+      OLLAMA_URL = winner;
+      localStorage.setItem('yzai_ollama_url', winner);
+      return;
+    } catch(err) {}
   }
+
+  // Fallback default
+  OLLAMA_URL = window.location.origin || 'https://api-yzai.yepzhi.com';
 }
 
 async function checkServicesHealth(forceCheck = false) {
@@ -2232,7 +2240,6 @@ async function init() {
   loadConversations();
   await discoverEndpoint();
   await loadModels();
-  checkServicesHealth();
   setupPushToTalk();
   startPolling();
 }
