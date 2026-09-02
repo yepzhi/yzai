@@ -2137,9 +2137,12 @@ function removeImage() {
   currentImageBase64 = null;
   currentImageDimensions = null;
   currentImageOcrText = '';
-  document.getElementById('imgPreviewContainer').style.display = 'none';
-  document.getElementById('imgPreview').src = '';
+  const container = document.getElementById('imgPreviewContainer');
+  if (container) container.style.display = 'none';
+  const thumb = document.getElementById('imgPreviewThumb') || document.getElementById('imgPreview');
+  if (thumb) thumb.src = '';
 }
+const removeAttachedImage = removeImage;
 
 // ── INIT ───────────────────────────────────────────────────
 // Fast Endpoint Discovery with Parallel Probing & LocalStorage Cache
@@ -2274,8 +2277,8 @@ async function loadModels() {
 }
 
 function startPolling() {
-  if (!modelPollTimer) modelPollTimer = setInterval(() => { if (!isGenerating) loadModels(); }, 30000);
-  if (!healthPollTimer) healthPollTimer = setInterval(() => { if (!isGenerating) checkServicesHealth(); }, 60000);
+  if (!modelPollTimer) modelPollTimer = setInterval(() => { if (!isStreaming) loadModels(); }, 30000);
+  if (!healthPollTimer) healthPollTimer = setInterval(() => { if (!isStreaming) checkServicesHealth(); }, 60000);
 }
 
 function stopPolling() {
