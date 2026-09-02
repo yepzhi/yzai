@@ -291,7 +291,7 @@ body {
   object-fit: cover;
 }
 .messages {
-  padding: 20px 16px 300px;
+  padding: 20px 16px 380px;
   display: flex; flex-direction: column; gap: 24px;
   max-width: 850px; margin: 0 auto; min-height: 100%;
 }
@@ -1953,14 +1953,14 @@ function processFile(file) {
 
   // ── 1. IMAGES → resize+compress, base64 stored internally ──
   if (isImg) {
-    document.getElementById('token-count').textContent = 'Procesando imagen...';
+    document.getElementById('token-count').textContent = 'Processing image...';
     const reader = new FileReader();
     reader.onload = (ev) => {
       const rawData = ev.target.result;
       currentImageBase64 = rawData.split(',')[1];
       document.getElementById('imgPreview').src = rawData;
       document.getElementById('imgPreviewContainer').style.display = 'block';
-      document.getElementById('token-count').textContent = 'Imagen lista';
+      document.getElementById('token-count').textContent = 'Image ready';
 
       const img = new Image();
       img.onload = () => {
@@ -1979,7 +1979,7 @@ function processFile(file) {
         currentImageOcrText = '';
         document.getElementById('imgPreview').src = jpegData;
         const kb = Math.round(currentImageBase64.length * 0.75 / 1024);
-        document.getElementById('token-count').textContent = `Imagen lista — ${w}×${h}px, ~${kb}KB`;
+        document.getElementById('token-count').textContent = `Image ready — ${w}×${h}px, ~${kb}KB`;
         document.getElementById('sendBtn').disabled = false;
       };
       img.src = rawData;
@@ -1991,7 +1991,7 @@ function processFile(file) {
   // ── 2. PDF → extract text via PDF.js SILENTLY into currentAttachedDoc ──
   if (ext === 'pdf' || file.type === 'application/pdf') {
     if (!window.pdfjsLib) {
-      document.getElementById('token-count').textContent = 'PDF.js no cargado';
+      document.getElementById('token-count').textContent = 'PDF.js not loaded';
       return;
     }
     document.getElementById('token-count').innerHTML =
@@ -2210,11 +2210,21 @@ async function discoverEndpoint() {
   OLLAMA_URL = window.location.origin || 'https://api-yzai.yepzhi.com';
 }
 
+let lastTagsCache = null;
+let lastTagsTime = 0;
+
 async function checkServicesHealth(forceCheck = false) {
   let ollamaOk = false;
   try {
-    const res = await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123`);
-    if (res.ok) ollamaOk = true;
+    if (!forceCheck && lastTagsCache && (Date.now() - lastTagsTime < 15000)) {
+      ollamaOk = true;
+    } else {
+      const res = await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123&_t=${Date.now()}-${Math.random().toString(36).substring(2,9)}`);
+      if (res.ok) {
+        ollamaOk = true;
+        // Don't update cache here, let loadModels handle the actual data
+      }
+    }
   } catch(e) {}
 
   const topDot = document.getElementById('topStatusDot');
@@ -2250,13 +2260,21 @@ let healthPollTimer = null;
 
 async function loadModels() {
   try {
-    const res = await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123`);
-    if (!res.ok) {
-      await discoverEndpoint();
-      const retry = await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123`);
-      if (!retry.ok) throw new Error('HTTP ' + retry.status);
+    let resData;
+    if (lastTagsCache && (Date.now() - lastTagsTime < 30000)) {
+      resData = lastTagsCache;
+    } else {
+      let res = await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123&_t=${Date.now()}-${Math.random().toString(36).substring(2,9)}`);
+      if (!res.ok) {
+        await discoverEndpoint();
+        res = await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123&_t=${Date.now()}-${Math.random().toString(36).substring(2,9)}`);
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+      }
+      resData = await res.json();
+      lastTagsCache = resData;
+      lastTagsTime = Date.now();
     }
-    const { models = [] } = await (res.ok ? res : await fetch(`${OLLAMA_URL}/api/tags?clave=secreta123`)).json();
+    const { models = [] } = resData;
     allModels = models;
 
     if (models.length) {
@@ -2709,7 +2727,7 @@ REGLAS CRÍTICAS DE SÍNTESIS:
 - Ejemplo 1: Si el historial habla de acciones SMCI y SOXL y el usuario dice "Búscalo en internet" o "Qué precios tienen hoy?", tú DEBES DEVOLVER EXACTAMENTE: "SMCI SOXL acciones precio hoy 2026" o "SMCI SOXL stock prices today 2026".
 - DEVUELVE EXCLUSIVAMENTE LA CADENA DE BÚSQUEDA OPTIMIZADA SIN COMILLAS, SIN SALUDOS Y SIN EXPLICACIONES.`;
 
-    const res = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
+    const res = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123&_t=${Date.now()}-${Math.random().toString(36).substring(2,9)}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -2881,10 +2899,10 @@ async function sendMessage() {
   // ── Proactive AI Contextual Web Search Injection ──
   // Si se detecta intención de búsqueda, usamos la IA local (0.3s) para sintetizar una búsqueda consciente del contexto
   if (needsWebSearch(text)) {
-    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Analizando contexto para búsqueda web…</span>`;
+    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Analyzing context for web search…</span>`;
     document.getElementById('token-count').textContent = 'Synthesizing search query...';
     const searchQuery = await generateContextualSearchQuery(text, messages);
-    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Buscando en vivo: <em>"${esc(searchQuery)}"</em>…</span>`;
+    bubble.innerHTML = `<span style="display:flex;align-items:center;gap:8px;color:var(--cyan);font-weight:500;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="spin-svg"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Live search: <em>"${esc(searchQuery)}"</em>…</span>`;
     document.getElementById('token-count').textContent = `Searching web: ${searchQuery}...`;
     try {
       const results = await executeWebSearch(searchQuery);
@@ -3028,7 +3046,7 @@ async function sendMessage() {
         keep_alive: -1,
         stream: true 
       };
-      const res = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
+      const res = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123&_t=${Date.now()}-${Math.random().toString(36).substring(2,9)}`, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         signal: abortCtrl.signal,
@@ -3166,7 +3184,7 @@ async function sendMessage() {
             document.getElementById('token-count').textContent = 'Generating response...';
             bubble.innerHTML = '<span class="cursor"></span>';
             // Second Ollama call with tool results
-            const res2 = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123`, {
+            const res2 = await fetch(`${OLLAMA_URL}/api/chat?clave=secreta123&_t=${Date.now()}-${Math.random().toString(36).substring(2,9)}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               signal: abortCtrl.signal,
@@ -3235,7 +3253,7 @@ async function sendMessage() {
     setStreaming(false);
 
     if (e.name === 'AbortError' || (abortCtrl && abortCtrl.signal.aborted) || !isStreaming) {
-      const stopAlert = 'Respuesta detenida por el usuario';
+      const stopAlert = 'Response stopped by user';
       if (typeof targetText !== 'undefined' && targetText && targetText.trim()) {
         if (!targetText.includes(stopAlert)) {
           targetText += `\n\n*(${stopAlert})*`;
@@ -3254,8 +3272,8 @@ async function sendMessage() {
 
     const isOfflineErr = e.message.includes('Failed to fetch') || e.message.includes('502') || e.message.includes('521') || e.message.includes('522') || e.message.includes('523') || e.message.includes('524');
     const errorMsg = isOfflineErr 
-      ? 'Servidor desconectado o no responde. Por favor verifica que esté encendido.'
-      : `Error de conexión: ${esc(e.message)}`;
+      ? 'Server offline or unresponsive. Please verify it is running.'
+      : `Connection error: ${esc(e.message)}`;
 
     if (targetText && targetText.trim()) {
       targetText += `\n\n*(${errorMsg})*`;
@@ -3265,7 +3283,7 @@ async function sendMessage() {
     } else {
       bubble.innerHTML = `<span style="color:var(--red);display:flex;align-items:center;gap:8px;font-weight:500;">${ICONS.warn} ${errorMsg}</span>`;
     }
-    document.getElementById('token-count').textContent = isOfflineErr ? 'Servidor desconectado' : 'Error en respuesta';
+    document.getElementById('token-count').textContent = isOfflineErr ? 'Server offline' : 'Response error';
   }
 }
 
@@ -3277,7 +3295,7 @@ function stopGeneration() {
   if (typeof stopMic === 'function') stopMic();
   setStreaming(false);
 
-  const stopAlert = 'Respuesta detenida por el usuario';
+  const stopAlert = 'Response stopped by user';
   const tokenEl = document.getElementById('token-count');
   if (tokenEl) {
     tokenEl.innerHTML = `<span style="color:var(--yellow);font-weight:600;">${stopAlert}</span>`;

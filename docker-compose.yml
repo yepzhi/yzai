@@ -76,6 +76,7 @@ services:
     command: tunnel --no-autoupdate run
     environment:
       - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:-}
+      - TUNNEL_TRANSPORT_PROTOCOL=http2
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
