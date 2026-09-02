@@ -291,7 +291,7 @@ body {
   object-fit: cover;
 }
 .messages {
-  padding: 20px 16px 260px;
+  padding: 20px 16px 300px;
   display: flex; flex-direction: column; gap: 24px;
   max-width: 850px; margin: 0 auto; min-height: 100%;
 }
@@ -512,6 +512,16 @@ think::before {
   border-color: rgba(139, 92, 246, 0.5);
   color: #a78bfa;
   transform: translateY(-1px);
+}
+.msg-tts-btn.speaking {
+  background: rgba(239, 68, 68, 0.22) !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  color: #f87171 !important;
+}
+.msg-tts-btn.speaking:hover {
+  background: rgba(239, 68, 68, 0.35) !important;
+  border-color: rgba(239, 68, 68, 0.7) !important;
+  color: #fff !important;
 }
 .flux-progress-card {
   background: var(--surface2, rgba(255, 255, 255, 0.03));
@@ -1049,7 +1059,7 @@ think::before {
   .modal-overlay { align-items: center; padding: 0; border-radius: 24px; }
   .modal { border-radius: 24px; max-width: 500px; margin: 0 20px; transform: scale(0.95); }
   .modal-overlay.open .modal { transform: scale(1); }
-  .messages { padding: 40px 24px 260px; gap: 32px; }
+  .messages { padding: 40px 24px 300px; gap: 32px; }
   .bubble { font-size: 14px; }
   .input-wrapper { padding: 20px 24px calc(28px + var(--safe-b, 0px)); }
   .input-container { padding: 12px 18px; border-radius: 24px; }
@@ -1612,20 +1622,20 @@ think::before {
         </div>
 
         <div class="welcome-chips-grid">
-          <div class="welcome-chip-card" style="border-radius:9999px;" onclick="quickPrompt('Ayúdame a diseñar una arquitectura limpia, robusta y de alto rendimiento para...')">
+          <div class="welcome-chip-card" style="border-radius:9999px;" onclick="quickPrompt('Help me design a clean, robust, and high-performance architecture for...')">
             <span class="chip-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             </span>
             <div class="chip-content">
-              <strong>Arquitectura &amp; Código</strong>
+              <strong>Architecture &amp; Code</strong>
             </div>
           </div>
-          <div class="welcome-chip-card" style="border-radius:9999px;" onclick="quickPrompt('Explícame a profundidad el funcionamiento y matemáticas de los transformadores y atención...')">
+          <div class="welcome-chip-card" style="border-radius:9999px;" onclick="quickPrompt('Explain in depth the mechanics and mathematics of transformers and attention mechanisms...')">
             <span class="chip-icon">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z"/></svg>
             </span>
             <div class="chip-content">
-              <strong>Razonamiento &amp; IA</strong>
+              <strong>Reasoning &amp; AI</strong>
             </div>
           </div>
           <div class="welcome-chip-card" style="border-radius:9999px;" onclick="toggleRxMode()">
@@ -1633,7 +1643,7 @@ think::before {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="3"/></svg>
             </span>
             <div class="chip-content">
-              <strong>Imagenología PhD</strong>
+              <strong>Medical Imaging PhD</strong>
             </div>
           </div>
           <div class="welcome-chip-card" style="border-radius:9999px;" onclick="toggleVoiceMode()">
@@ -1641,7 +1651,7 @@ think::before {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
             </span>
             <div class="chip-content">
-              <strong>Conversación de Voz</strong>
+              <strong>Voice Conversation</strong>
             </div>
           </div>
         </div>
@@ -1653,20 +1663,18 @@ think::before {
   <div class="input-wrapper">
     <!-- Image preview (thumbnail only — base64 never exposed to user) -->
     <div id="imgPreviewContainer" style="display:none;padding:6px 12px;">
-      <div style="display:flex;align-items:center;gap:8px;background:var(--surface2);border-radius:8px;padding:6px 10px;width:fit-content;">
-        <img id="imgPreview" style="height:40px;width:40px;object-fit:cover;border-radius:6px;">
-        <button onclick="removeImage()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px;display:flex;align-items:center;" title="Eliminar imagen">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+      <div style="position:relative;display:inline-block;">
+        <img id="imgPreviewThumb" class="img-preview-thumb" src="" alt="preview">
+        <button onclick="removeAttachedImage()" class="img-preview-remove" title="Remove image">&times;</button>
       </div>
     </div>
     <!-- Document / PDF preview (silently attached, text never dumped into text area) -->
     <div id="docPreviewContainer" style="display:none;padding:6px 12px;">
       <div style="display:flex;align-items:center;gap:10px;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.3);border-radius:12px;padding:6px 12px;width:fit-content;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--cyan)" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-        <span id="docPreviewTitle" style="font-size:12.5px;font-weight:600;color:#fff;">Documento.pdf</span>
-        <span id="docPreviewMeta" style="font-size:11px;color:var(--cyan);font-weight:500;">Cargado</span>
-        <button onclick="removeAttachedDoc()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px;display:flex;align-items:center;" title="Eliminar archivo">
+        <span id="docPreviewTitle" style="font-size:12.5px;font-weight:600;color:#fff;">Document.pdf</span>
+        <span id="docPreviewMeta" style="font-size:11px;color:var(--cyan);font-weight:500;">Loaded</span>
+        <button onclick="removeAttachedDoc()" style="background:none;border:none;cursor:pointer;color:var(--text-muted);padding:2px;display:flex;align-items:center;" title="Remove file">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
         </button>
       </div>
@@ -2395,20 +2403,20 @@ function welcomeHTML() {
     </div>
 
     <div class="welcome-chips-grid">
-      <div class="welcome-chip-card" style="border-radius:9999px;" onclick="quickPrompt('Ayúdame a diseñar una arquitectura limpia, robusta y de alto rendimiento para...')">
+      <div class="welcome-chip-card" style="border-radius:9999px;" onclick="quickPrompt('Help me design a clean, robust, and high-performance architecture for...')">
         <span class="chip-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         </span>
         <div class="chip-content">
-          <strong>Arquitectura &amp; Código</strong>
+          <strong>Architecture &amp; Code</strong>
         </div>
       </div>
-      <div class="welcome-chip-card" style="border-radius:9999px;" onclick="quickPrompt('Explícame a profundidad el funcionamiento y matemáticas de los transformadores y atención...')">
+      <div class="welcome-chip-card" style="border-radius:9999px;" onclick="quickPrompt('Explain in depth the mechanics and mathematics of transformers and attention mechanisms...')">
         <span class="chip-icon">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z"/></svg>
         </span>
         <div class="chip-content">
-          <strong>Razonamiento &amp; IA</strong>
+          <strong>Reasoning &amp; AI</strong>
         </div>
       </div>
       <div class="welcome-chip-card" style="border-radius:9999px;" onclick="toggleRxMode()">
@@ -2416,7 +2424,7 @@ function welcomeHTML() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#38bdf8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="3"/></svg>
         </span>
         <div class="chip-content">
-          <strong>Imagenología PhD</strong>
+          <strong>Medical Imaging PhD</strong>
         </div>
       </div>
       <div class="welcome-chip-card" style="border-radius:9999px;" onclick="toggleVoiceMode()">
@@ -2424,7 +2432,7 @@ function welcomeHTML() {
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#34d399" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
         </span>
         <div class="chip-content">
-          <strong>Conversación de Voz</strong>
+          <strong>Voice Conversation</strong>
         </div>
       </div>
     </div>
@@ -2484,11 +2492,20 @@ function createMsg(role, content, streaming=false, images=[]) {
   if (role === 'ai') {
     const speakBtn = document.createElement('button');
     speakBtn.className = 'msg-tts-btn';
-    speakBtn.title = 'Escuchar respuesta en voz alta';
-    speakBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> <span>Escuchar</span>`;
+    speakBtn.title = 'Listen to response';
+    speakBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> <span>Listen</span>`;
     speakBtn.onclick = (e) => {
       e.stopPropagation();
       unlockAudioAndVoices();
+      if (speakBtn.classList.contains('speaking')) {
+        stopAllTTS();
+        return;
+      }
+      stopAllTTS();
+      currentPlayingBtn = speakBtn;
+      speakBtn.classList.add('speaking');
+      speakBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg> <span>Stop</span>`;
+      speakBtn.title = 'Stop audio';
       const txt = bubble.innerText || bubble.textContent || '';
       speakText(txt);
     };
@@ -2496,7 +2513,7 @@ function createMsg(role, content, streaming=false, images=[]) {
 
     const copyBtn = document.createElement('button');
     copyBtn.className = 'msg-tts-btn';
-    copyBtn.title = 'Copiar respuesta';
+    copyBtn.title = 'Copy response';
     copyBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span>Copy</span>`;
     copyBtn.onclick = (e) => {
       e.stopPropagation();
@@ -2776,7 +2793,7 @@ async function sendMessage() {
   checkContextUsage();
   if (isVoiceModeActive && typeof VoiceQueue !== 'undefined') {
     VoiceQueue.clear();
-    updateVoiceLiveUI('thinking', 'Pensando...', 'Generando...');
+    updateVoiceLiveUI('thinking', 'Thinking...', 'Generating...');
   }
   if (isImagineMode) {
     toggleImagineMode();
@@ -2789,7 +2806,7 @@ async function sendMessage() {
 
   input.value = ''; autoResize(input);
   document.getElementById('welcome')?.remove();
-  document.getElementById('token-count').textContent = 'Generando...';
+  document.getElementById('token-count').textContent = 'Generating...';
 
   const payload = [];
   const directInstruction = 'INSTRUCCIÓN PRIMARIA: Responde directamente, sin prefacios, sin rodeos, sin etiquetas <think> y sin monólogo de pensamiento interno.';
@@ -2972,7 +2989,7 @@ async function sendMessage() {
     const spinSvg = `<svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>`;
     const tokenCountEl = document.getElementById('token-count');
     if (tokenCountEl) {
-      tokenCountEl.innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generando...</span>`;
+      tokenCountEl.innerHTML = `<span style="color:var(--cyan);font-weight:600;">${spinSvg} Generating...</span>`;
       loadingIndicatorActive = true;
     }
   }
@@ -3009,7 +3026,7 @@ async function sendMessage() {
         if ((res.status === 502 || res.status === 503 || res.status === 504 || res.status === 524) && !firstTokenReceived && retryCount < 8) {
           retryCount++;
           const waitTime = Math.min(10000, 2000 + retryCount * 1500);
-          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;"><svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Generando...</span>`;
+          document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;"><svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Generating...</span>`;
           await new Promise(r => setTimeout(r, waitTime));
           return attemptFetch();
         }
@@ -3020,7 +3037,7 @@ async function sendMessage() {
       if (retryCount < 8 && e.name !== 'AbortError') {
         retryCount++;
         const waitTime = Math.min(10000, 2000 + retryCount * 1500);
-        document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;"><svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Generando...</span>`;
+        document.getElementById('token-count').innerHTML = `<span style="color:var(--cyan);font-weight:600;"><svg class="spin-svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"/><path d="M12 2a10 10 0 0 1 10 10"/></svg> Generating...</span>`;
         await new Promise(r => setTimeout(r, waitTime));
         return attemptFetch();
       }
@@ -3066,7 +3083,7 @@ async function sendMessage() {
             if (d.message?.thinking) {
               tokenCount++;
               if (targetText.length === 0) {
-                document.getElementById('token-count').textContent = 'Razonando...';
+                document.getElementById('token-count').textContent = 'Reasoning...';
               }
             }
 
@@ -3397,8 +3414,19 @@ const VoiceQueue = {
 
     if (!this.queue.length) {
       this.isPlaying = false;
+      if (this.onFinish) {
+        const cb = this.onFinish;
+        this.onFinish = null;
+        cb();
+      }
+      if (typeof currentPlayingBtn !== 'undefined' && currentPlayingBtn) {
+        currentPlayingBtn.classList.remove('speaking');
+        currentPlayingBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> <span>Listen</span>`;
+        currentPlayingBtn.title = 'Listen to response';
+        currentPlayingBtn = null;
+      }
       if (this.isStreamComplete && !isStreaming && isVoiceModeActive) {
-        updateVoiceLiveUI('listening', 'Listo para escucharte', 'Micrófono activo...');
+        updateVoiceLiveUI('listening', 'Ready to listen', 'Microphone active...');
         setTimeout(() => {
           if (!isStreaming && isVoiceModeActive && !this.isPlaying && (!synthesis || !synthesis.speaking)) {
             startMic();
@@ -3435,7 +3463,7 @@ const VoiceQueue = {
     // Prevenir bug de recolección de basura (GC) en Chrome/Safari
     window._activeSpeechUtterances.add(utterance);
 
-    updateVoiceLiveUI('speaking', 'YZAI hablando...', `"${chunk}"`);
+    updateVoiceLiveUI('speaking', 'YZAI speaking...', `"${chunk}"`);
 
     let done = false;
     const finishChunk = () => {
@@ -3481,6 +3509,11 @@ const VoiceQueue = {
     this.queue = [];
     this.isPlaying = false;
     this.isStreamComplete = false;
+    if (this.onFinish) {
+      const cb = this.onFinish;
+      this.onFinish = null;
+      cb();
+    }
     if (window._activeSpeechUtterances) window._activeSpeechUtterances.clear();
     if (synthesis) {
       try { 
@@ -3491,9 +3524,23 @@ const VoiceQueue = {
   }
 };
 
-function speakText(text) {
+let currentPlayingBtn = null;
+function stopAllTTS() {
+  VoiceQueue.clear();
+  if (synthesis) {
+    try { synthesis.cancel(); } catch(e) {}
+  }
+  if (currentPlayingBtn) {
+    currentPlayingBtn.classList.remove('speaking');
+    currentPlayingBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg> <span>Listen</span>`;
+    currentPlayingBtn.title = 'Listen to response';
+    currentPlayingBtn = null;
+  }
+}
+
+function speakText(text, onComplete) {
   if (!synthesis) {
-    alert('Tu navegador no soporta síntesis de voz (TTS). Te sugerimos Google Chrome o Safari.');
+    alert('Your browser does not support speech synthesis (TTS). We suggest Google Chrome or Safari.');
     return;
   }
   try {
@@ -3501,10 +3548,13 @@ function speakText(text) {
   } catch(e) {}
 
   VoiceQueue.clear();
+  if (typeof onComplete === 'function') {
+    VoiceQueue.onFinish = onComplete;
+  }
 
   const clean = text
     .replace(/<think>[\s\S]*?<\/think>/g, '')
-    .replace(/```[\s\S]*?```/g, ' código omitido ')
+    .replace(/```[\s\S]*?```/g, ' code omitted ')
     .replace(/`([^`]+)`/g, '$1')
     .replace(/https?:\/\/[^\s]+/g, '')
     .replace(/[*_~\[\]\(\)\<\>#]/g, '')
@@ -3513,7 +3563,6 @@ function speakText(text) {
 
   if (!clean) return;
 
-  // Dividir por oraciones para que Chrome/Safari no se congelen con párrafos largos
   const sentences = clean.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g) || [clean];
   sentences.forEach(s => {
     const st = s.trim();
