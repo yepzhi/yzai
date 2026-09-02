@@ -1127,8 +1127,8 @@ think::before {
     height: 16px;
   }
   .welcome-chip-card .chip-content strong {
-    font-size: 0.65rem;
-    font-weight: 600;
+    font-size: 0.62rem;
+    font-weight: 500;
     line-height: 1.15;
     letter-spacing: -0.2px;
     white-space: normal;
@@ -1142,7 +1142,7 @@ think::before {
 
 @media (max-width: 375px) {
   .welcome-chip-card .chip-content strong {
-    font-size: 0.58rem;
+    font-size: 0.55rem;
     letter-spacing: -0.3px;
   }
 }
@@ -2485,6 +2485,21 @@ function createMsg(role, content, streaming=false, images=[]) {
       speakText(txt);
     };
     time.appendChild(speakBtn);
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'msg-tts-btn';
+    copyBtn.title = 'Copiar respuesta';
+    copyBtn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg> <span>Copy</span>`;
+    copyBtn.onclick = (e) => {
+      e.stopPropagation();
+      const txt = bubble.innerText || bubble.textContent || '';
+      navigator.clipboard.writeText(txt).then(() => {
+        const span = copyBtn.querySelector('span');
+        span.textContent = 'Copied!';
+        setTimeout(() => span.textContent = 'Copy', 2000);
+      });
+    };
+    time.appendChild(copyBtn);
   }
 
   col.append(bubble, time);
