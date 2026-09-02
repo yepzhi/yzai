@@ -134,7 +134,7 @@ body {
   background: var(--surface-solid);
   display: flex; flex-direction: column;
   transform: translateX(-100%);
-  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.48s cubic-bezier(0.34, 1.45, 0.64, 1);
   padding-top: var(--safe-t);
   padding-left: var(--safe-l);
   padding-bottom: var(--safe-b);
@@ -709,12 +709,13 @@ think::before {
 }
 .attach-btn:hover { background: rgba(255,255,255,0.05); color: var(--text); }
 
-/* ─── ATTACH POPUP MENU ──────────────────────────── */
+/* ─── ATTACH POPUP MENU (Liquid Spring Morph) ─────────────── */
 .attach-menu {
   position: absolute;
   bottom: calc(100% + 14px);
   left: 0;
   width: 330px;
+  max-width: calc(100vw - 32px);
   background: rgba(16, 16, 22, 0.95);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
@@ -727,8 +728,9 @@ think::before {
   gap: 6px;
   opacity: 0;
   pointer-events: none;
-  transform: translateY(12px) scale(0.95);
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: bottom left;
+  transform: translateY(16px) scale(0.88);
+  transition: transform 0.45s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.28s ease;
   z-index: 100;
 }
 .attach-menu.open {
