@@ -1127,7 +1127,7 @@ think::before {
     height: 16px;
   }
   .welcome-chip-card .chip-content strong {
-    font-size: 0.72rem;
+    font-size: clamp(0.55rem, 3.2vw, 0.72rem);
     font-weight: 600;
     line-height: 1.2;
     letter-spacing: -0.25px;
@@ -1139,8 +1139,9 @@ think::before {
 
 @media (max-width: 375px) {
   .welcome-chip-card .chip-content strong {
-    font-size: 0.68rem;
-    white-space: normal;
+    font-size: 0.6rem;
+    white-space: nowrap;
+    letter-spacing: -0.4px;
     text-align: left;
   }
 }
