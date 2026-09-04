@@ -1494,6 +1494,173 @@ think::before {
   font-weight: 500;
   margin-bottom: 0;
 }
+
+/* ─── VOICE STUDIO & VOICEBOX STYLES ───────────────── */
+.vs-modal {
+  max-width: 720px !important;
+  max-height: 92vh;
+  overflow-y: auto;
+  background: rgba(13, 15, 24, 0.94) !important;
+  backdrop-filter: blur(28px) saturate(180%);
+  border: 1px solid rgba(236, 72, 153, 0.25) !important;
+  box-shadow: 0 25px 60px -12px rgba(236, 72, 153, 0.2), 0 0 40px rgba(139, 92, 246, 0.15) !important;
+}
+.vs-tabs {
+  display: flex;
+  gap: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  padding: 5px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  margin-bottom: 18px;
+}
+.vs-tab-btn {
+  flex: 1;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: none;
+  background: transparent;
+  color: var(--text-dim);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.25s ease;
+}
+.vs-tab-btn.active {
+  background: linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(139, 92, 246, 0.25));
+  color: #fff;
+  border: 1px solid rgba(236, 72, 153, 0.4);
+  box-shadow: 0 4px 14px rgba(236, 72, 153, 0.2);
+}
+.vs-tab-content { display: none; }
+.vs-tab-content.active { display: block; animation: vsFadeIn 0.3s ease; }
+@keyframes vsFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.vs-box {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 18px;
+  margin-bottom: 16px;
+}
+.vs-record-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px dashed rgba(236, 72, 153, 0.35);
+  border-radius: 14px;
+  text-align: center;
+}
+.vs-visualizer-canvas {
+  width: 100%;
+  height: 60px;
+  border-radius: 8px;
+  margin-bottom: 14px;
+  background: rgba(0,0,0,0.4);
+}
+.vs-record-btn {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #ec4899, #f43f5e);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 0 25px rgba(236, 72, 153, 0.45);
+  transition: all 0.2s ease;
+}
+.vs-record-btn:hover { transform: scale(1.06); }
+.vs-record-btn.recording {
+  background: #ef4444;
+  animation: vsRecordPulse 1.2s infinite;
+}
+@keyframes vsRecordPulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+  70% { box-shadow: 0 0 0 18px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.vs-dropzone {
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px dashed rgba(255, 255, 255, 0.15);
+  border-radius: 12px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.2s;
+  background: rgba(255, 255, 255, 0.02);
+}
+.vs-dropzone:hover, .vs-dropzone.dragover {
+  border-color: #ec4899;
+  background: rgba(236, 72, 153, 0.06);
+}
+.vs-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 10px 14px;
+  color: #fff;
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+}
+.vs-input:focus { border-color: #ec4899; }
+
+.vs-btn-primary {
+  background: linear-gradient(135deg, #ec4899, #8b5cf6);
+  color: #fff;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  padding: 12px 18px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  width: 100%;
+  box-shadow: 0 4px 15px rgba(236, 72, 153, 0.3);
+}
+.vs-btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(236, 72, 153, 0.4);
+}
+.vs-btn-primary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.vs-profile-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  margin-bottom: 8px;
+}
+.vs-player-card {
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(236, 72, 153, 0.25);
+  border-radius: 14px;
+  padding: 14px;
+  margin-top: 14px;
+}
 </style>
 </head>
 <body>
@@ -1546,6 +1713,11 @@ think::before {
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
       <span>Servicios Locales &amp; MCP</span>
       <span style="margin-left:auto; font-size:10px; padding:2px 6px; border-radius:4px; background:rgba(16,185,129,0.15); color:var(--green); font-weight:600;">ONLINE</span>
+    </button>
+    <button class="drawer-action-btn" onclick="openVoiceStudioModal(); closeDrawer()" data-spotlight data-spotlight-color="rgba(236,72,153,0.15)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      <span>Voice Studio &amp; Clonación</span>
+      <span style="margin-left:auto; font-size:10px; padding:2px 6px; border-radius:4px; background:rgba(236,72,153,0.15); color:#ec4899; font-weight:600;">STUDIO 🎙️</span>
     </button>
     <a href="https://n8n-yzai.yepzhi.com" target="_blank" class="drawer-action-btn" style="text-decoration:none" data-spotlight data-spotlight-color="rgba(249,115,22,0.15)">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -1616,6 +1788,11 @@ think::before {
     <button class="voice-mode-pill" id="voiceModeBtn" onclick="toggleVoiceMode()" title="Activar Modo Voz (Conversación continua sin manos con micrófono automático y altavoz TTS)" data-starborder data-sb-color="#06b6d4" data-sb-speed="4">
       <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
       <span id="voiceModeText">Modo Voz</span>
+    </button>
+
+    <button class="voice-mode-pill" id="voiceStudioBtn" onclick="openVoiceStudioModal()" title="Voice Studio: Graba con tu iPhone, clónate con Voicebox y descarga audio" style="background: rgba(236, 72, 153, 0.12); border-color: rgba(236, 72, 153, 0.35); color: #ec4899;" data-starborder data-sb-color="#ec4899" data-sb-speed="4">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+      <span>Voice Studio</span>
     </button>
 
 
@@ -1936,6 +2113,10 @@ think::before {
           Síntesis zero-shot y clonación de audio en hardware local para modo conversacional.
         </p>
         <span style="font-size:10px; color:var(--text-dim); display:block;"><code>~/voicebox</code></span>
+        <button onclick="openVoiceStudioModal(); closeLocalServicesModal();" style="margin-top:8px; width:100%; background:rgba(236,72,153,0.18); border:1px solid rgba(236,72,153,0.35); color:#ec4899; padding:5px 8px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+          Abrir Voice Studio 🎙️
+        </button>
       </div>
 
       <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(167,139,250,0.2); border-radius:12px; padding:12px;">
@@ -1968,6 +2149,217 @@ think::before {
 
     <div class="modal-actions" style="margin-top:0;">
       <button class="btn-cancel" onclick="closeLocalServicesModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<!-- VOICE STUDIO & CLONING MODAL -->
+<div class="modal-overlay" id="voiceStudioModal">
+  <div class="modal vs-modal">
+    <!-- Header -->
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:14px;">
+      <div>
+        <h3 style="display:flex; align-items:center; gap:10px; margin:0 0 4px 0; color:#fff;">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          Voice Studio &amp; Clonación de Voz
+        </h3>
+        <p style="font-size:12.5px; color:var(--text-dim); margin:0;">
+          Generador de audio neuronal ultra-realista fonema por fonema acelerado en GPU Radeon 890M.
+        </p>
+      </div>
+      <button class="close-drawer-btn" onclick="closeVoiceStudioModal()" style="margin-top:-4px;">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+
+    <!-- Segmented Tabs -->
+    <div class="vs-tabs">
+      <button class="vs-tab-btn active" id="vsTabBtn1" onclick="switchVsTab(1)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
+        Clonar Mi Voz (Grabar / Subir)
+      </button>
+      <button class="vs-tab-btn" id="vsTabBtn2" onclick="switchVsTab(2)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        Sintetizador &amp; Descarga
+      </button>
+      <button class="vs-tab-btn" id="vsTabBtn3" onclick="switchVsTab(3)">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Hardware GPU
+      </button>
+    </div>
+
+    <!-- TAB 1: CLONAR VOZ -->
+    <div class="vs-tab-content active" id="vsTab1">
+      <div class="vs-box">
+        <h4 style="margin:0 0 6px 0; font-size:14px; color:#fff; display:flex; align-items:center; gap:8px;">
+          <span style="background:#ec4899; color:#fff; border-radius:50%; width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; font-size:11px;">1</span>
+          Graba una muestra de tu voz (o sube un audio)
+        </h4>
+        <p style="font-size:12px; color:var(--text-dim); margin:0 0 14px 0;">
+          Solo se requieren <strong>3 a 5 segundos</strong> de audio claro hablando con tu tono natural para que Voicebox capture tu timbre fonético.
+        </p>
+
+        <!-- RECORD AREA -->
+        <div class="vs-record-area">
+          <canvas id="vsVisualizer" class="vs-visualizer-canvas"></canvas>
+          <button id="vsRecordBtn" class="vs-record-btn" onclick="toggleVsRecording()" title="Iniciar Grabación con Micrófono">
+            <svg id="vsRecordIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          </button>
+          <div id="vsRecordTimer" style="font-size:13px; font-weight:700; color:#ec4899; margin-top:10px; font-family:monospace;">00:00 / 00:05</div>
+          <div id="vsRecordStatus" style="font-size:11.5px; color:var(--muted); margin-top:4px;">Pulsa para grabar desde tu iPhone o computadora</div>
+
+          <!-- AUDIO PREVIEW -->
+          <audio id="vsRecordedAudio" controls style="display:none; width:100%; margin-top:14px; height:36px;"></audio>
+        </div>
+
+        <!-- UPLOAD DROPZONE -->
+        <div class="vs-dropzone" id="vsDropzone" onclick="document.getElementById('vsFileInput').click()">
+          <input type="file" id="vsFileInput" accept="audio/*,.wav,.m4a,.mp3,.ogg,.webm" style="display:none;" onchange="handleVsFileSelect(event)">
+          <div style="font-size:12.5px; font-weight:600; color:#fff; margin-bottom:4px;">
+            📁 O selecciona un archivo grabado en tu iPhone / Mac (.wav, .m4a, .mp3)
+          </div>
+          <div id="vsDropzoneHint" style="font-size:11px; color:var(--text-dim);">
+            Arrastra tu nota de voz aquí o haz clic para explorar
+          </div>
+        </div>
+      </div>
+
+      <!-- SAVE & CLONE FORM -->
+      <div class="vs-box">
+        <h4 style="margin:0 0 12px 0; font-size:14px; color:#fff; display:flex; align-items:center; gap:8px;">
+          <span style="background:#8b5cf6; color:#fff; border-radius:50%; width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; font-size:11px;">2</span>
+          Bautiza y guarda tu perfil de voz
+        </h4>
+        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px; margin-bottom:12px;">
+          <input type="text" id="vsProfileName" class="vs-input" placeholder="Nombre de tu voz (ej. Alberto Yépiz - Mi Voz)" value="Alberto (Mi Voz)">
+          <select id="vsProfileLang" class="vs-input">
+            <option value="es" selected>Español (es)</option>
+            <option value="en">English (en)</option>
+          </select>
+        </div>
+
+        <button id="vsCloneBtn" class="vs-btn-primary" onclick="submitCloneVoice()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+          <span>⚡ Clonar Voz con Voicebox AI (Radeon 890M)</span>
+        </button>
+        <div id="vsCloneFeedback" style="font-size:12px; margin-top:10px; text-align:center; display:none;"></div>
+      </div>
+
+      <!-- SAVED PROFILES -->
+      <div class="vs-box">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+          <h4 style="margin:0; font-size:13.5px; color:#fff;">Tus Voces Clonadas</h4>
+          <button onclick="loadVoiceProfiles()" style="background:none; border:none; color:var(--cyan); font-size:11.5px; cursor:pointer;">↻ Actualizar</button>
+        </div>
+        <div id="vsProfilesList">
+          <div style="font-size:12px; color:var(--muted); text-align:center; padding:12px;">Cargando perfiles...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: SINTETIZADOR & DESCARGA -->
+    <div class="vs-tab-content" id="vsTab2">
+      <div class="vs-box">
+        <div style="margin-bottom:12px;">
+          <label style="display:block; font-size:12px; font-weight:600; color:var(--text-dim); margin-bottom:6px;">Selecciona la voz para sintetizar:</label>
+          <select id="vsVoiceSelect" class="vs-input"></select>
+        </div>
+
+        <div style="margin-bottom:12px;">
+          <label style="display:block; font-size:12px; font-weight:600; color:var(--text-dim); margin-bottom:6px;">Texto que deseas que hable tu voz clonada:</label>
+          <textarea id="vsSynthText" class="vs-input" style="height:90px; resize:vertical;" placeholder="Escribe aquí lo que quieras que diga tu voz clonada..."></textarea>
+          
+          <!-- SAMPLE PROMPTS -->
+          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
+            <button onclick="setSynthPrompt('¡Hola! Soy tu asistente de IA personal en YZAI, hablando con mi voz clonada localmente en la Mini PC.')" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:var(--text-dim); font-size:11px; padding:4px 8px; cursor:pointer;">
+              👋 Saludo Personal
+            </button>
+            <button onclick="setSynthPrompt('Todos los sistemas de YZAI, n8n y Hound MCP están operando al 100% de capacidad con la GPU Radeon 890M.')" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:var(--text-dim); font-size:11px; padding:4px 8px; cursor:pointer;">
+              🚀 Estado de Sistemas
+            </button>
+            <button onclick="setSynthPrompt('El Consejo Científico STEM evaluó el proyecto y Richard Feynman confirmó que los primeros principios se cumplen.')" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:var(--text-dim); font-size:11px; padding:4px 8px; cursor:pointer;">
+              ⚛️ Consejo Científico
+            </button>
+          </div>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;">
+          <div>
+            <label style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-dim); margin-bottom:4px;">
+              <span>Velocidad de habla</span>
+              <span id="vsSpeedLabel" style="color:#fff; font-weight:600;">1.0x</span>
+            </label>
+            <input type="range" id="vsSpeedSlider" min="0.75" max="1.5" step="0.05" value="1.0" style="width:100%; accent-color:#ec4899;" oninput="document.getElementById('vsSpeedLabel').textContent = this.value + 'x'">
+          </div>
+          <div>
+            <label style="display:block; font-size:12px; color:var(--text-dim); margin-bottom:4px;">Formato de audio</label>
+            <select id="vsFormatSelect" class="vs-input" style="padding:6px 10px;">
+              <option value="mp3" selected>MP3 (Ultraligero / Móvil)</option>
+              <option value="wav">WAV (Audio Studio Lossless)</option>
+            </select>
+          </div>
+        </div>
+
+        <button id="vsGenerateBtn" class="vs-btn-primary" onclick="submitSynthesize()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+          <span id="vsGenBtnText">⚡ Generar Audio con Radeon 890M</span>
+        </button>
+
+        <!-- RESULT AUDIO & DOWNLOAD -->
+        <div id="vsPlayerBox" class="vs-player-card" style="display:none;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <strong style="font-size:13px; color:#ec4899; display:flex; align-items:center; gap:6px;">
+              <span class="status-core" style="background:#ec4899; width:8px; height:8px; display:inline-block; border-radius:50%;"></span>
+              Audio Sintetizado Listo
+            </strong>
+            <span id="vsAudioMeta" style="font-size:11px; color:var(--muted);">22.05 kHz · 64 kbps</span>
+          </div>
+          <audio id="vsResultAudio" controls style="width:100%; margin-bottom:12px;"></audio>
+          
+          <div style="display:flex; gap:8px; flex-wrap:wrap;">
+            <a id="vsDownloadBtn" href="#" download="yzai_cloned_voice.mp3" style="flex:1; text-decoration:none; background:rgba(236,72,153,0.18); border:1px solid rgba(236,72,153,0.4); color:#ec4899; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:600; text-align:center; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+              ⬇️ Descargar Archivo de Audio
+            </a>
+            <button id="vsSetDefaultBtn" onclick="setDefaultYzaiVoice()" style="background:rgba(16,185,129,0.18); border:1px solid rgba(16,185,129,0.4); color:#10b981; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+              🌟 Activar como Voz de YZAI
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: HARDWARE -->
+    <div class="vs-tab-content" id="vsTab3">
+      <div class="vs-box">
+        <h4 style="margin:0 0 10px 0; font-size:14px; color:#fff;">Arquitectura de Voz en Mini PC</h4>
+        <div style="display:grid; grid-template-columns: 1fr; gap:8px; font-size:12px;">
+          <div style="display:flex; justify-content:space-between; padding:8px 10px; background:rgba(0,0,0,0.3); border-radius:8px;">
+            <span style="color:var(--text-dim);">Acelerador de Fonemas:</span>
+            <span style="color:#fff; font-weight:600;">AMD Radeon 890M (RDNA 3.5)</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 10px; background:rgba(0,0,0,0.3); border-radius:8px;">
+            <span style="color:var(--text-dim);">Procesador Host:</span>
+            <span style="color:#fff; font-weight:600;">AMD Ryzen AI 9 HX 370 (12 Cores / 24 Threads)</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 10px; background:rgba(0,0,0,0.3); border-radius:8px;">
+            <span style="color:var(--text-dim);">Motor de Síntesis:</span>
+            <span style="color:var(--cyan); font-weight:600;">Voicebox Zero-Shot &amp; OpenedAI XTTS</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 10px; background:rgba(0,0,0,0.3); border-radius:8px;">
+            <span style="color:var(--text-dim);">Directorio de Muestras:</span>
+            <span style="color:var(--green); font-family:monospace;">/home/yepzhi/voicebox/output/</span>
+          </div>
+          <div style="display:flex; justify-content:space-between; padding:8px 10px; background:rgba(0,0,0,0.3); border-radius:8px;">
+            <span style="color:var(--text-dim);">Latencia Primera Inferencia:</span>
+            <span style="color:#f59e0b; font-weight:600;">&lt; 150 ms</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Actions -->
+    <div class="modal-actions" style="margin-top:10px;">
+      <button class="btn-cancel" onclick="closeVoiceStudioModal()">Cerrar</button>
     </div>
   </div>
 </div>
@@ -3668,7 +4060,7 @@ const VoiceQueue = {
     };
 
     // Watchdog timer: si el navegador no dispara onend, avanzar después de tiempo estimado
-    const estimatedDuration = Math.max(3500, (chunk.length / 8) * 1000 + 3500);
+    const estimatedDuration = Math.max(4500, (chunk.length / 8) * 1000 + 4500);
     this.watchdogTimer = setTimeout(() => {
       if (this.isPlaying) {
         console.log('[Voice Watchdog] Forcing next chunk');
@@ -3676,14 +4068,55 @@ const VoiceQueue = {
       }
     }, estimatedDuration);
 
-    try {
-      activateMediaAudioSession();
-      synthesis.speak(utterance);
-      if (synthesis.paused) synthesis.resume();
-    } catch (e) {
-      console.warn('[Speech speak failed]', e);
-      finishChunk();
+    const fallbackSpeech = () => {
+      if (done) return;
+      try {
+        activateMediaAudioSession();
+        if (synthesis.paused) synthesis.resume();
+        synthesis.speak(utterance);
+      } catch (e) {
+        console.warn('[Speech speak failed]', e);
+        finishChunk();
+      }
+    };
+
+    // Try Neural TTS first (Radeon 890M / Cloned Voice)
+    const activeNeuralVoice = localStorage.getItem('yzai_neural_voice') || 'echo';
+    const useNeural = localStorage.getItem('yzai_use_neural_voice') !== 'false';
+
+    if (useNeural && typeof fetch !== 'undefined') {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 6500);
+
+      fetch('/api/voice/synthesize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: chunk, voice: activeNeuralVoice, speed: 1.05, format: 'mp3' }),
+        signal: controller.signal
+      }).then(async res => {
+        clearTimeout(timeout);
+        if (!res.ok) throw new Error('Neural TTS non-200 response');
+        const blob = await res.blob();
+        const audioUrl = URL.createObjectURL(blob);
+        const audio = new Audio(audioUrl);
+        updateVoiceLiveUI('speaking', 'YZAI speaking (Neural)...', `"${chunk}"`);
+        audio.onended = () => {
+          URL.revokeObjectURL(audioUrl);
+          finishChunk();
+        };
+        audio.onerror = () => {
+          URL.revokeObjectURL(audioUrl);
+          fallbackSpeech();
+        };
+        audio.play().catch(fallbackSpeech);
+      }).catch(err => {
+        clearTimeout(timeout);
+        fallbackSpeech();
+      });
+      return;
     }
+
+    fallbackSpeech();
   },
 
   clear() {
@@ -4471,6 +4904,470 @@ function resetInputUI() {
     animFrameId = requestAnimationFrame(tick);
   }
 })();
+
+// ── VOICE STUDIO & VOICEBOX CLONING ENGINE ──────────────
+let vsMediaRecorder = null;
+let vsAudioChunks = [];
+let vsRecordedBlob = null;
+let vsRecordedBase64 = null;
+let vsRecordTimerInterval = null;
+let vsRecordSeconds = 0;
+let vsAudioContext = null;
+let vsAnalyser = null;
+let vsVisualizerAnimId = null;
+
+function openVoiceStudioModal() {
+  const m = document.getElementById('voiceStudioModal');
+  if (m) {
+    m.classList.add('open');
+    loadVoiceProfiles();
+    checkVsGpuHealth();
+  }
+}
+
+function closeVoiceStudioModal() {
+  const m = document.getElementById('voiceStudioModal');
+  if (m) m.classList.remove('open');
+  if (vsMediaRecorder && vsMediaRecorder.state === 'recording') {
+    stopVsRecording();
+  }
+}
+
+function switchVsTab(tabNum) {
+  for (let i = 1; i <= 3; i++) {
+    const btn = document.getElementById('vsTabBtn' + i);
+    const content = document.getElementById('vsTab' + i);
+    if (btn) btn.classList.toggle('active', i === tabNum);
+    if (content) content.classList.toggle('active', i === tabNum);
+  }
+  if (tabNum === 2) {
+    loadVoiceProfiles();
+  }
+}
+
+async function checkVsGpuHealth() {
+  try {
+    const res = await fetch('/api/voice/health');
+    if (res.ok) {
+      const data = await res.json();
+      console.log('[Voice Studio] GPU Engine Status:', data);
+    }
+  } catch (e) {}
+}
+
+async function toggleVsRecording() {
+  if (vsMediaRecorder && vsMediaRecorder.state === 'recording') {
+    stopVsRecording();
+  } else {
+    await startVsRecording();
+  }
+}
+
+async function startVsRecording() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true,
+        sampleRate: 44100
+      }
+    });
+
+    vsAudioChunks = [];
+    vsRecordSeconds = 0;
+
+    // Visualizer setup
+    try {
+      const AudioCtx = window.AudioContext || window.webkitAudioContext;
+      vsAudioContext = new AudioCtx();
+      const source = vsAudioContext.createMediaStreamSource(stream);
+      vsAnalyser = vsAudioContext.createAnalyser();
+      vsAnalyser.fftSize = 64;
+      source.connect(vsAnalyser);
+      drawVsVisualizer();
+    } catch (e) {
+      console.warn('AudioContext visualizer error:', e);
+    }
+
+    // MediaRecorder
+    let mimeType = 'audio/webm';
+    if (MediaRecorder.isTypeSupported('audio/mp4')) mimeType = 'audio/mp4';
+    else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) mimeType = 'audio/webm;codecs=opus';
+
+    vsMediaRecorder = new MediaRecorder(stream, { mimeType });
+    vsMediaRecorder.ondataavailable = e => {
+      if (e.data && e.data.size > 0) vsAudioChunks.push(e.data);
+    };
+
+    vsMediaRecorder.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      if (vsVisualizerAnimId) cancelAnimationFrame(vsVisualizerAnimId);
+      if (vsAudioContext && vsAudioContext.state !== 'closed') vsAudioContext.close();
+
+      vsRecordedBlob = new Blob(vsAudioChunks, { type: vsMediaRecorder.mimeType || 'audio/webm' });
+      const audioUrl = URL.createObjectURL(vsRecordedBlob);
+      const audioEl = document.getElementById('vsRecordedAudio');
+      if (audioEl) {
+        audioEl.src = audioUrl;
+        audioEl.style.display = 'block';
+      }
+
+      // Convert blob to base64
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        vsRecordedBase64 = reader.result;
+        const hint = document.getElementById('vsDropzoneHint');
+        if (hint) hint.innerHTML = `<span style="color:#10b981;font-weight:600;">✓ Muestra de voz grabada (${vsRecordSeconds}s) lista para clonar</span>`;
+      };
+      reader.readAsDataURL(vsRecordedBlob);
+
+      const statusEl = document.getElementById('vsRecordStatus');
+      if (statusEl) statusEl.textContent = 'Grabación completada. Escucha tu muestra o clona tu voz.';
+    };
+
+    vsMediaRecorder.start(100);
+
+    const btn = document.getElementById('vsRecordBtn');
+    if (btn) btn.classList.add('recording');
+    const statusEl = document.getElementById('vsRecordStatus');
+    if (statusEl) statusEl.textContent = 'Grabando voz... habla con claridad (recomendado 3 a 5 seg)';
+
+    const timerEl = document.getElementById('vsRecordTimer');
+    vsRecordTimerInterval = setInterval(() => {
+      vsRecordSeconds++;
+      if (timerEl) {
+        timerEl.textContent = `00:0${vsRecordSeconds} / 00:05`;
+      }
+      if (vsRecordSeconds >= 5) {
+        stopVsRecording();
+      }
+    }, 1000);
+
+  } catch (err) {
+    console.error('Error starting mic for Voice Studio:', err);
+    alert('No se pudo acceder al micrófono. Por favor permite el acceso en tu navegador o sube un archivo de voz.');
+  }
+}
+
+function stopVsRecording() {
+  if (vsRecordTimerInterval) {
+    clearInterval(vsRecordTimerInterval);
+    vsRecordTimerInterval = null;
+  }
+  const btn = document.getElementById('vsRecordBtn');
+  if (btn) btn.classList.remove('recording');
+
+  if (vsMediaRecorder && vsMediaRecorder.state === 'recording') {
+    vsMediaRecorder.stop();
+  }
+}
+
+function drawVsVisualizer() {
+  const canvas = document.getElementById('vsVisualizer');
+  if (!canvas || !vsAnalyser) return;
+  const ctx = canvas.getContext('2d');
+  const bufferLength = vsAnalyser.frequencyBinCount;
+  const dataArray = new Uint8Array(bufferLength);
+
+  const draw = () => {
+    vsVisualizerAnimId = requestAnimationFrame(draw);
+    vsAnalyser.getByteFrequencyData(dataArray);
+
+    ctx.fillStyle = 'rgba(10, 10, 18, 0.4)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const barWidth = (canvas.width / bufferLength) * 2;
+    let x = 0;
+
+    for (let i = 0; i < bufferLength; i++) {
+      const barHeight = (dataArray[i] / 255) * canvas.height * 0.9;
+      const grad = ctx.createLinearGradient(0, canvas.height, 0, 0);
+      grad.addColorStop(0, '#ec4899');
+      grad.addColorStop(1, '#8b5cf6');
+
+      ctx.fillStyle = grad;
+      ctx.fillRect(x, canvas.height - barHeight, barWidth - 1, barHeight);
+      x += barWidth;
+    }
+  };
+  draw();
+}
+
+function handleVsFileSelect(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onloadend = () => {
+    vsRecordedBase64 = reader.result;
+    const hint = document.getElementById('vsDropzoneHint');
+    if (hint) hint.innerHTML = `<span style="color:#10b981;font-weight:600;">✓ Archivo cargado: ${file.name} (${(file.size/1024).toFixed(1)} KB)</span>`;
+
+    const audioEl = document.getElementById('vsRecordedAudio');
+    if (audioEl) {
+      audioEl.src = vsRecordedBase64;
+      audioEl.style.display = 'block';
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+// Drag & drop handlers
+document.addEventListener('DOMContentLoaded', () => {
+  const vsDrop = document.getElementById('vsDropzone');
+  if (vsDrop) {
+    ['dragenter', 'dragover'].forEach(n => {
+      vsDrop.addEventListener(n, e => { e.preventDefault(); vsDrop.classList.add('dragover'); }, false);
+    });
+    ['dragleave', 'drop'].forEach(n => {
+      vsDrop.addEventListener(n, e => { e.preventDefault(); vsDrop.classList.remove('dragover'); }, false);
+    });
+    vsDrop.addEventListener('drop', e => {
+      const dt = e.dataTransfer;
+      const files = dt.files;
+      if (files && files.length) {
+        handleVsFileSelect({ target: { files } });
+      }
+    });
+  }
+});
+
+async function submitCloneVoice() {
+  const nameInput = document.getElementById('vsProfileName');
+  const langSelect = document.getElementById('vsProfileLang');
+  const fb = document.getElementById('vsCloneFeedback');
+  const btn = document.getElementById('vsCloneBtn');
+
+  const name = (nameInput ? nameInput.value : '').trim() || 'Alberto (Mi Voz)';
+  const lang = langSelect ? langSelect.value : 'es';
+
+  if (!vsRecordedBase64) {
+    alert('Por favor graba una muestra de tu voz de 3 a 5 segundos o sube un archivo de audio primero.');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = `<span>Procesando audio y clonando en Radeon 890M...</span>`;
+  if (fb) {
+    fb.style.display = 'block';
+    fb.style.color = 'var(--cyan)';
+    fb.textContent = 'Enviando fonemas a Voicebox AI en la Mini PC...';
+  }
+
+  try {
+    const res = await fetch('/api/voice/clone', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name,
+        audioBase64: vsRecordedBase64,
+        format: vsRecordedBlob ? (vsRecordedBlob.type.includes('mp4') ? 'm4a' : 'webm') : 'wav',
+        lang
+      })
+    });
+
+    const data = await res.json();
+    if (res.ok && data.success) {
+      if (fb) {
+        fb.style.color = 'var(--green)';
+        fb.innerHTML = `<strong>✓ ¡Voz clonada exitosamente!</strong> Tu perfil está listo en Voicebox.`;
+      }
+      localStorage.setItem('yzai_neural_voice', data.profile.id);
+      localStorage.setItem('yzai_use_neural_voice', 'true');
+      await loadVoiceProfiles();
+      setTimeout(() => switchVsTab(2), 1200);
+    } else {
+      throw new Error(data.error || 'Error al clonar voz');
+    }
+  } catch (err) {
+    console.error('Clone voice error:', err);
+    if (fb) {
+      fb.style.color = '#ef4444';
+      fb.textContent = 'Error: ' + err.message;
+    }
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg> <span>⚡ Clonar Voz con Voicebox AI (Radeon 890M)</span>`;
+  }
+}
+
+async function loadVoiceProfiles() {
+  try {
+    const res = await fetch('/api/voice/profiles');
+    if (!res.ok) return;
+    const data = await res.json();
+
+    // 1. Render Saved Profiles in Tab 1
+    const listEl = document.getElementById('vsProfilesList');
+    if (listEl) {
+      if (!data.cloned || data.cloned.length === 0) {
+        listEl.innerHTML = `<div style="font-size:12px; color:var(--muted); text-align:center; padding:12px;">Aún no tienes voces clonadas. Graba tu voz arriba para comenzar.</div>`;
+      } else {
+        listEl.innerHTML = data.cloned.map(p => `
+          <div class="vs-profile-card">
+            <div>
+              <div style="font-size:13px; font-weight:600; color:#fff; display:flex; align-items:center; gap:6px;">
+                <span style="color:#ec4899;">🎙️</span> ${escapeHtml(p.name)}
+                <span style="font-size:9.5px; padding:2px 6px; border-radius:4px; background:rgba(236,72,153,0.18); color:#ec4899; font-weight:700;">CLONADA</span>
+              </div>
+              <div style="font-size:11px; color:var(--muted); margin-top:2px;">
+                ${p.wavFile} · ${new Date(p.date).toLocaleDateString()}
+              </div>
+            </div>
+            <div style="display:flex; gap:6px;">
+              <button onclick="playVsSample('${p.id}')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:6px; padding:4px 8px; font-size:11px; cursor:pointer;">
+                ▶ Escuchar
+              </button>
+              <button onclick="selectVoiceForSynth('${p.id}')" style="background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3); color:#a78bfa; border-radius:6px; padding:4px 8px; font-size:11px; cursor:pointer;">
+                Usar en Sintetizador
+              </button>
+              <button onclick="deleteVoiceProfile('${p.id}')" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444; border-radius:6px; padding:4px 6px; font-size:11px; cursor:pointer;" title="Eliminar">
+                ✕
+              </button>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // 2. Populate Voice Select Dropdown in Tab 2
+    const selectEl = document.getElementById('vsVoiceSelect');
+    if (selectEl) {
+      const currentVal = selectEl.value;
+      let html = '';
+      if (data.cloned && data.cloned.length > 0) {
+        html += `<optgroup label="Tus Voces Clonadas (Voicebox)">`;
+        data.cloned.forEach(p => {
+          html += `<option value="${p.id}">🎙️ ${p.name} (Clonada Local)</option>`;
+        });
+        html += `</optgroup>`;
+      }
+      if (data.presets && data.presets.length > 0) {
+        html += `<optgroup label="Voces Neuronales Preinstaladas (Radeon 890M)">`;
+        data.presets.forEach(pr => {
+          html += `<option value="${pr.id}">⚡ ${pr.name}</option>`;
+        });
+        html += `</optgroup>`;
+      }
+      selectEl.innerHTML = html;
+      if (currentVal) selectEl.value = currentVal;
+      else if (data.cloned && data.cloned[0]) selectEl.value = data.cloned[0].id;
+    }
+  } catch (err) {
+    console.warn('Error loading voice profiles:', err);
+  }
+}
+
+function playVsSample(id) {
+  const audio = new Audio(`/api/voice/file/${id}.wav`);
+  audio.play().catch(e => console.warn('Playback error:', e));
+}
+
+function selectVoiceForSynth(id) {
+  switchVsTab(2);
+  const sel = document.getElementById('vsVoiceSelect');
+  if (sel) sel.value = id;
+}
+
+async function deleteVoiceProfile(id) {
+  if (!confirm('¿Seguro que deseas eliminar este perfil de voz clonado?')) return;
+  try {
+    const res = await fetch(`/api/voice/profiles/${id}`, { method: 'DELETE' });
+    if (res.ok) {
+      loadVoiceProfiles();
+    }
+  } catch (e) {
+    alert('Error al eliminar: ' + e.message);
+  }
+}
+
+function setSynthPrompt(text) {
+  const ta = document.getElementById('vsSynthText');
+  if (ta) ta.value = text;
+}
+
+async function submitSynthesize() {
+  const textEl = document.getElementById('vsSynthText');
+  const voiceEl = document.getElementById('vsVoiceSelect');
+  const speedEl = document.getElementById('vsSpeedSlider');
+  const formatEl = document.getElementById('vsFormatSelect');
+  const btn = document.getElementById('vsGenerateBtn');
+  const btnTxt = document.getElementById('vsGenBtnText');
+
+  const text = (textEl ? textEl.value : '').trim();
+  const voice = voiceEl ? voiceEl.value : 'echo';
+  const speed = speedEl ? parseFloat(speedEl.value) : 1.0;
+  const format = formatEl ? formatEl.value : 'mp3';
+
+  if (!text) {
+    alert('Por favor escribe el texto que deseas sintetizar.');
+    return;
+  }
+
+  btn.disabled = true;
+  if (btnTxt) btnTxt.textContent = 'Generando audio fonema por fonema (Radeon 890M)...';
+
+  try {
+    const res = await fetch('/api/voice/synthesize', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text, voice, speed, format })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Error al generar audio');
+    }
+
+    const blob = await res.blob();
+    const audioUrl = URL.createObjectURL(blob);
+
+    const playerBox = document.getElementById('vsPlayerBox');
+    const resultAudio = document.getElementById('vsResultAudio');
+    const downloadBtn = document.getElementById('vsDownloadBtn');
+    const metaEl = document.getElementById('vsAudioMeta');
+
+    if (playerBox) playerBox.style.display = 'block';
+    if (resultAudio) {
+      resultAudio.src = audioUrl;
+      resultAudio.play().catch(() => {});
+    }
+    if (downloadBtn) {
+      downloadBtn.href = audioUrl;
+      downloadBtn.download = `yzai_voice_${voice}.${format}`;
+      downloadBtn.textContent = `⬇️ Descargar .${format.toUpperCase()} (${(blob.size/1024).toFixed(1)} KB)`;
+    }
+    if (metaEl) {
+      metaEl.textContent = `${format.toUpperCase()} · ${(blob.size/1024).toFixed(1)} KB · Radeon 890M`;
+    }
+  } catch (err) {
+    console.error('Synthesize error:', err);
+    alert('Error al sintetizar audio: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    if (btnTxt) btnTxt.textContent = '⚡ Generar Audio con Radeon 890M';
+  }
+}
+
+function setDefaultYzaiVoice() {
+  const voiceEl = document.getElementById('vsVoiceSelect');
+  const voice = voiceEl ? voiceEl.value : 'echo';
+  localStorage.setItem('yzai_neural_voice', voice);
+  localStorage.setItem('yzai_use_neural_voice', 'true');
+
+  const btn = document.getElementById('vsSetDefaultBtn');
+  if (btn) {
+    btn.style.background = '#10b981';
+    btn.style.color = '#fff';
+    btn.textContent = '✓ Voz Activada para YZAI';
+    setTimeout(() => {
+      btn.style.background = 'rgba(16,185,129,0.18)';
+      btn.style.color = '#10b981';
+      btn.textContent = '🌟 Activar como Voz de YZAI';
+    }, 2500);
+  }
+}
 
 // ── ReactBits UI Engine for yzai ──
 (function() {
