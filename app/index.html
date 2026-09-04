@@ -1717,7 +1717,7 @@ think::before {
     <button class="drawer-action-btn" onclick="openVoiceStudioModal(); closeDrawer()" data-spotlight data-spotlight-color="rgba(236,72,153,0.15)">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
       <span>Voice Studio &amp; Clonación</span>
-      <span style="margin-left:auto; font-size:10px; padding:2px 6px; border-radius:4px; background:rgba(236,72,153,0.15); color:#ec4899; font-weight:600;">STUDIO 🎙️</span>
+      <span style="margin-left:auto; font-size:10px; padding:2px 6px; border-radius:4px; background:rgba(236,72,153,0.15); color:#ec4899; font-weight:600; display:inline-flex; align-items:center; gap:4px;">STUDIO <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg></span>
     </button>
     <a href="https://n8n-yzai.yepzhi.com" target="_blank" class="drawer-action-btn" style="text-decoration:none" data-spotlight data-spotlight-color="rgba(249,115,22,0.15)">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -2073,8 +2073,9 @@ think::before {
         Búsqueda paralela en 10 motores (DuckDuckGo, Brave, Google, Yandex, Mojeek) con reranking neuronal local, anti-bot fetch, crawl recursivo y OCR de PDFs. 100% libre de API keys y sin límites.
       </p>
       <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
-        <button onclick="triggerHoundDemo(); closeLocalServicesModal();" style="background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#10b981; padding:6px 12px; border-radius:8px; font-size:11.5px; font-weight:600; cursor:pointer;">
-          Probar Búsqueda Profunda 🔍
+        <button onclick="triggerHoundDemo(); closeLocalServicesModal();" style="background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); color:#10b981; padding:6px 12px; border-radius:8px; font-size:11.5px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <span>Probar Búsqueda Profunda</span>
         </button>
         <span style="font-size:11px; color:var(--muted);">Daemon seguro: <code>https://hound-yzai.yepzhi.com/mcp</code></span>
       </div>
@@ -2114,8 +2115,8 @@ think::before {
         </p>
         <span style="font-size:10px; color:var(--text-dim); display:block;"><code>~/voicebox</code></span>
         <button onclick="openVoiceStudioModal(); closeLocalServicesModal();" style="margin-top:8px; width:100%; background:rgba(236,72,153,0.18); border:1px solid rgba(236,72,153,0.35); color:#ec4899; padding:5px 8px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px;">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-          Abrir Voice Studio 🎙️
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          <span>Abrir Voice Studio</span>
         </button>
       </div>
 
@@ -2215,8 +2216,9 @@ think::before {
         <!-- UPLOAD DROPZONE -->
         <div class="vs-dropzone" id="vsDropzone" onclick="document.getElementById('vsFileInput').click()">
           <input type="file" id="vsFileInput" accept="audio/*,.wav,.m4a,.mp3,.ogg,.webm" style="display:none;" onchange="handleVsFileSelect(event)">
-          <div style="font-size:12.5px; font-weight:600; color:#fff; margin-bottom:4px;">
-            📁 O selecciona un archivo grabado en tu iPhone / Mac (.wav, .m4a, .mp3)
+          <div style="font-size:12.5px; font-weight:600; color:#fff; margin-bottom:4px; display:flex; align-items:center; justify-content:center; gap:6px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <span>O selecciona un archivo grabado en tu iPhone / Mac (.wav, .m4a, .mp3)</span>
           </div>
           <div id="vsDropzoneHint" style="font-size:11px; color:var(--text-dim);">
             Arrastra tu nota de voz aquí o haz clic para explorar
@@ -2239,8 +2241,8 @@ think::before {
         </div>
 
         <button id="vsCloneBtn" class="vs-btn-primary" onclick="submitCloneVoice()">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-          <span>⚡ Clonar Voz con Voicebox AI (Radeon 890M)</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+          <span>Clonar Voz con Voicebox AI (Radeon 890M)</span>
         </button>
         <div id="vsCloneFeedback" style="font-size:12px; margin-top:10px; text-align:center; display:none;"></div>
       </div>
@@ -2271,14 +2273,17 @@ think::before {
           
           <!-- SAMPLE PROMPTS -->
           <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;">
-            <button onclick="setSynthPrompt('¡Hola! Soy tu asistente de IA personal en YZAI, hablando con mi voz clonada localmente en la Mini PC.')" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:var(--text-dim); font-size:11px; padding:4px 8px; cursor:pointer;">
-              👋 Saludo Personal
+            <button onclick="setSynthPrompt('¡Hola! Soy tu asistente de IA personal en YZAI, hablando con mi voz clonada localmente en la Mini PC.')" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:var(--text-dim); font-size:11px; padding:4px 8px; cursor:pointer; display:inline-flex; align-items:center; gap:5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span>Saludo Personal</span>
             </button>
-            <button onclick="setSynthPrompt('Todos los sistemas de YZAI, n8n y Hound MCP están operando al 100% de capacidad con la GPU Radeon 890M.')" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:var(--text-dim); font-size:11px; padding:4px 8px; cursor:pointer;">
-              🚀 Estado de Sistemas
+            <button onclick="setSynthPrompt('Todos los sistemas de YZAI, n8n y Hound MCP están operando al 100% de capacidad con la GPU Radeon 890M.')" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:var(--text-dim); font-size:11px; padding:4px 8px; cursor:pointer; display:inline-flex; align-items:center; gap:5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <span>Estado de Sistemas</span>
             </button>
-            <button onclick="setSynthPrompt('El Consejo Científico STEM evaluó el proyecto y Richard Feynman confirmó que los primeros principios se cumplen.')" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:var(--text-dim); font-size:11px; padding:4px 8px; cursor:pointer;">
-              ⚛️ Consejo Científico
+            <button onclick="setSynthPrompt('El Consejo Científico STEM evaluó el proyecto y Richard Feynman confirmó que los primeros principios se cumplen.')" style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:6px; color:var(--text-dim); font-size:11px; padding:4px 8px; cursor:pointer; display:inline-flex; align-items:center; gap:5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+              <span>Consejo Científico</span>
             </button>
           </div>
         </div>
@@ -2302,7 +2307,7 @@ think::before {
 
         <button id="vsGenerateBtn" class="vs-btn-primary" onclick="submitSynthesize()">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-          <span id="vsGenBtnText">⚡ Generar Audio con Radeon 890M</span>
+          <span id="vsGenBtnText">Generar Audio con Radeon 890M</span>
         </button>
 
         <!-- RESULT AUDIO & DOWNLOAD -->
@@ -2318,10 +2323,12 @@ think::before {
           
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <a id="vsDownloadBtn" href="#" download="yzai_cloned_voice.mp3" style="flex:1; text-decoration:none; background:rgba(236,72,153,0.18); border:1px solid rgba(236,72,153,0.4); color:#ec4899; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:600; text-align:center; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
-              ⬇️ Descargar Archivo de Audio
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              <span>Descargar Archivo de Audio</span>
             </a>
             <button id="vsSetDefaultBtn" onclick="setDefaultYzaiVoice()" style="background:rgba(16,185,129,0.18); border:1px solid rgba(16,185,129,0.4); color:#10b981; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
-              🌟 Activar como Voz de YZAI
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <span>Activar como Voz de YZAI</span>
             </button>
           </div>
         </div>
@@ -3327,7 +3334,7 @@ Estructura de respuesta:
 Reglas estrictas:
 - Ve directo al análisis de la imagen proporcionada. NO incluyas introducciones genéricas, no expliques qué es un doctorado ni des conferencias teóricas no solicitadas.
 - Si no hay imagen adjunta, simplemente invita al usuario a adjuntar el estudio radiológico.
-- Cierra con: "> ⚠️ **Nota:** Lectura técnica orientativa generada por IA. Correlacionar clínicamente con médico especialista."`;
+- Cierra con: "> **Aviso:** Lectura técnica orientativa generada por IA. Correlacionar clínicamente con médico especialista."`;
 
 let isRxModeActive = false;
 
@@ -3405,7 +3412,7 @@ async function sendMessage() {
 
   if (currentAttachedDoc) {
     userTextForApi = `[DOCUMENTO ADJUNTO: ${currentAttachedDoc.name}]\n\`\`\`${currentAttachedDoc.ext}\n${currentAttachedDoc.text}\n\`\`\`\n\n${text}`;
-    chatBubbleText = `📄 **[${currentAttachedDoc.name}]**\n\n${text}`;
+    chatBubbleText = `**[${currentAttachedDoc.name}]**\n\n${text}`;
     removeAttachedDoc();
   }
 
@@ -5018,7 +5025,7 @@ async function startVsRecording() {
       reader.onloadend = () => {
         vsRecordedBase64 = reader.result;
         const hint = document.getElementById('vsDropzoneHint');
-        if (hint) hint.innerHTML = `<span style="color:#10b981;font-weight:600;">✓ Muestra de voz grabada (${vsRecordSeconds}s) lista para clonar</span>`;
+        if (hint) hint.innerHTML = `<span style="color:#10b981;font-weight:600;display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Muestra de voz grabada (${vsRecordSeconds}s) lista para clonar</span>`;
       };
       reader.readAsDataURL(vsRecordedBlob);
 
@@ -5102,7 +5109,7 @@ function handleVsFileSelect(e) {
   reader.onloadend = () => {
     vsRecordedBase64 = reader.result;
     const hint = document.getElementById('vsDropzoneHint');
-    if (hint) hint.innerHTML = `<span style="color:#10b981;font-weight:600;">✓ Archivo cargado: ${file.name} (${(file.size/1024).toFixed(1)} KB)</span>`;
+    if (hint) hint.innerHTML = `<span style="color:#10b981;font-weight:600;display:inline-flex;align-items:center;gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Archivo cargado: ${file.name} (${(file.size/1024).toFixed(1)} KB)</span>`;
 
     const audioEl = document.getElementById('vsRecordedAudio');
     if (audioEl) {
@@ -5171,7 +5178,7 @@ async function submitCloneVoice() {
     if (res.ok && data.success) {
       if (fb) {
         fb.style.color = 'var(--green)';
-        fb.innerHTML = `<strong>✓ ¡Voz clonada exitosamente!</strong> Tu perfil está listo en Voicebox.`;
+        fb.innerHTML = `<span style="display:inline-flex;align-items:center;gap:4px;"><strong><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg> ¡Voz clonada exitosamente!</strong> Tu perfil está listo en Voicebox.</span>`;
       }
       localStorage.setItem('yzai_neural_voice', data.profile.id);
       localStorage.setItem('yzai_use_neural_voice', 'true');
@@ -5188,7 +5195,7 @@ async function submitCloneVoice() {
     }
   } finally {
     btn.disabled = false;
-    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg> <span>⚡ Clonar Voz con Voicebox AI (Radeon 890M)</span>`;
+    btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> <span>Clonar Voz con Voicebox AI (Radeon 890M)</span>`;
   }
 }
 
@@ -5208,7 +5215,7 @@ async function loadVoiceProfiles() {
           <div class="vs-profile-card">
             <div>
               <div style="font-size:13px; font-weight:600; color:#fff; display:flex; align-items:center; gap:6px;">
-                <span style="color:#ec4899;">🎙️</span> ${escapeHtml(p.name)}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg> ${escapeHtml(p.name)}
                 <span style="font-size:9.5px; padding:2px 6px; border-radius:4px; background:rgba(236,72,153,0.18); color:#ec4899; font-weight:700;">CLONADA</span>
               </div>
               <div style="font-size:11px; color:var(--muted); margin-top:2px;">
@@ -5216,14 +5223,14 @@ async function loadVoiceProfiles() {
               </div>
             </div>
             <div style="display:flex; gap:6px;">
-              <button onclick="playVsSample('${p.id}')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:6px; padding:4px 8px; font-size:11px; cursor:pointer;">
-                ▶ Escuchar
+              <button onclick="playVsSample('${p.id}')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:6px; padding:4px 8px; font-size:11px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Escuchar
               </button>
               <button onclick="selectVoiceForSynth('${p.id}')" style="background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3); color:#a78bfa; border-radius:6px; padding:4px 8px; font-size:11px; cursor:pointer;">
                 Usar en Sintetizador
               </button>
-              <button onclick="deleteVoiceProfile('${p.id}')" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444; border-radius:6px; padding:4px 6px; font-size:11px; cursor:pointer;" title="Eliminar">
-                ✕
+              <button onclick="deleteVoiceProfile('${p.id}')" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444; border-radius:6px; padding:4px 6px; font-size:11px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;" title="Eliminar">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
             </div>
           </div>
@@ -5239,14 +5246,14 @@ async function loadVoiceProfiles() {
       if (data.cloned && data.cloned.length > 0) {
         html += `<optgroup label="Tus Voces Clonadas (Voicebox)">`;
         data.cloned.forEach(p => {
-          html += `<option value="${p.id}">🎙️ ${p.name} (Clonada Local)</option>`;
+          html += `<option value="${p.id}">${p.name} (Clonada Local)</option>`;
         });
         html += `</optgroup>`;
       }
       if (data.presets && data.presets.length > 0) {
         html += `<optgroup label="Voces Neuronales Preinstaladas (Radeon 890M)">`;
         data.presets.forEach(pr => {
-          html += `<option value="${pr.id}">⚡ ${pr.name}</option>`;
+          html += `<option value="${pr.id}">${pr.name}</option>`;
         });
         html += `</optgroup>`;
       }
@@ -5336,7 +5343,7 @@ async function submitSynthesize() {
     if (downloadBtn) {
       downloadBtn.href = audioUrl;
       downloadBtn.download = `yzai_voice_${voice}.${format}`;
-      downloadBtn.textContent = `⬇️ Descargar .${format.toUpperCase()} (${(blob.size/1024).toFixed(1)} KB)`;
+      downloadBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar .${format.toUpperCase()} (${(blob.size/1024).toFixed(1)} KB)`;
     }
     if (metaEl) {
       metaEl.textContent = `${format.toUpperCase()} · ${(blob.size/1024).toFixed(1)} KB · Radeon 890M`;
@@ -5346,7 +5353,7 @@ async function submitSynthesize() {
     alert('Error al sintetizar audio: ' + err.message);
   } finally {
     btn.disabled = false;
-    if (btnTxt) btnTxt.textContent = '⚡ Generar Audio con Radeon 890M';
+    if (btnTxt) btnTxt.textContent = 'Generar Audio con Radeon 890M';
   }
 }
 
@@ -5360,11 +5367,11 @@ function setDefaultYzaiVoice() {
   if (btn) {
     btn.style.background = '#10b981';
     btn.style.color = '#fff';
-    btn.textContent = '✓ Voz Activada para YZAI';
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> <span>Voz Activada para YZAI</span>`;
     setTimeout(() => {
       btn.style.background = 'rgba(16,185,129,0.18)';
       btn.style.color = '#10b981';
-      btn.textContent = '🌟 Activar como Voz de YZAI';
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> <span>Activar como Voz de YZAI</span>`;
     }, 2500);
   }
 }
