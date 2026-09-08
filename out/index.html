@@ -2912,7 +2912,21 @@ function loadConversations() {
   catch(e) { conversations = []; }
   renderConvList();
 }
-function saveConversations() { localStorage.setItem('yzai_convs', JSON.stringify(conversations.slice(0,50))); }
+function saveConversations() {
+  try {
+    localStorage.setItem('yzai_convs', JSON.stringify(conversations.slice(0,50)));
+  } catch(e) {
+    try {
+      const sanitized = conversations.slice(0,20).map(c => ({
+        ...c,
+        messages: (c.messages || []).map(m => ({ role: m.role, content: m.content }))
+      }));
+      localStorage.setItem('yzai_convs', JSON.stringify(sanitized));
+    } catch(err2) {
+      console.warn('Could not save conversations to localStorage:', err2);
+    }
+  }
+}
 
 function renderConvList() {
   const el = document.getElementById('convList');
@@ -3529,8 +3543,58 @@ async function sendMessage() {
   let streamFinished = false;
   let lastSpeakIdx = 0;
 
+  let isFinalized = false;
+  function finalizeStreamingResponse() {
+    if (isFinalized) return;
+    isFinalized = true;
+    streamFinished = true;
+
+    if (typewriterRaf) {
+      cancelAnimationFrame(typewriterRaf);
+      typewriterRaf = null;
+    }
+
+    try {
+      renderMd(bubble, targetText || '…', false);
+    } catch(err) {
+      console.warn('renderMd error:', err);
+      bubble.textContent = targetText || '…';
+    }
+    bubble.querySelectorAll('.cursor').forEach(el => el.remove());
+
+    if (isVoiceModeActive && typeof VoiceQueue !== 'undefined') {
+      try {
+        if (targetText.length > lastSpeakIdx) {
+          const tail = targetText.slice(lastSpeakIdx).trim();
+          if (tail) VoiceQueue.push(tail);
+          lastSpeakIdx = targetText.length;
+        }
+        VoiceQueue.isStreamComplete = true;
+        setTimeout(() => {
+          if (!VoiceQueue.isPlaying) VoiceQueue.playNext();
+        }, 50);
+      } catch(e) { console.warn('VoiceQueue error:', e); }
+    }
+
+    try {
+      const lastMsg = messages[messages.length - 1];
+      if (!lastMsg || lastMsg.role !== 'ai' || lastMsg.content !== targetText) {
+        messages.push({ role:'ai', content: targetText });
+      }
+      saveCurrentConv();
+    } catch(e) {
+      console.warn('saveCurrentConv error:', e);
+    }
+
+    setStreaming(false);
+    checkContextUsage();
+    scrollBottom(true);
+    const pInput = document.getElementById('prompt');
+    if (pInput) pInput.focus();
+  }
+
   function startTypewriterLoop() {
-    if (typewriterRaf) return;
+    if (typewriterRaf || isFinalized) return;
     
     function typewriterStep(now) {
       if (!now) now = performance.now();
@@ -3543,7 +3607,7 @@ async function sendMessage() {
         
         if (pendingText > 0) {
           const maxStep = streamFinished 
-            ? Math.max(12, Math.ceil(pendingText * 0.18)) 
+            ? Math.max(16, Math.ceil(pendingText * 0.25)) 
             : Math.min(8, Math.max(2, Math.ceil(pendingText * 0.05)));
           const step = Math.min(pendingText, maxStep);
           currentText += targetText.substr(currentText.length, step);
@@ -3564,36 +3628,19 @@ async function sendMessage() {
         if (hasChanges) {
           renderMd(bubble, currentText, true);
           scrollBottom();
-        } else if (streamFinished) {
-          if (typewriterRaf) { cancelAnimationFrame(typewriterRaf); typewriterRaf = null; }
-          renderMd(bubble, targetText || '…', false);
-          bubble.querySelectorAll('.cursor').forEach(el => el.remove());
-
-          if (isVoiceModeActive && typeof VoiceQueue !== 'undefined') {
-            if (targetText.length > lastSpeakIdx) {
-              const tail = targetText.slice(lastSpeakIdx).trim();
-              if (tail) VoiceQueue.push(tail);
-              lastSpeakIdx = targetText.length;
-            }
-            VoiceQueue.isStreamComplete = true;
-            setTimeout(() => {
-              if (!VoiceQueue.isPlaying) VoiceQueue.playNext();
-            }, 50);
-          }
-
-          messages.push({ role:'ai', content:targetText });
-          saveCurrentConv();
-          setStreaming(false);
-          checkContextUsage();
-          scrollBottom(true);
-          const pInput = document.getElementById('prompt');
-          if (pInput) pInput.focus();
+        }
+        
+        // Immediate completion when buffer catches up and stream is done
+        if (streamFinished && currentText.length >= targetText.length) {
+          finalizeStreamingResponse();
           return;
         }
       }
 
-      if (typewriterRaf !== null || !streamFinished || currentText.length < targetText.length) {
+      if (!isFinalized && (!streamFinished || currentText.length < targetText.length)) {
         typewriterRaf = requestAnimationFrame(typewriterStep);
+      } else if (streamFinished && !isFinalized) {
+        finalizeStreamingResponse();
       }
     }
 
@@ -3831,10 +3878,20 @@ async function sendMessage() {
     }
 
     streamFinished = true;
-    startTypewriterLoop(); // Forzar el drenado final del búfer
-    
     clearTimeout(loadPollStart);
     if (liveTimer) clearInterval(liveTimer);
+
+    if (currentText.length >= targetText.length) {
+      finalizeStreamingResponse();
+    } else {
+      startTypewriterLoop();
+      // Hard timeout guarantee: Stop button will NEVER remain stuck open
+      const remaining = Math.max(0, targetText.length - currentText.length);
+      const safetyDelay = Math.min(800, Math.max(120, remaining * 8));
+      setTimeout(() => {
+        finalizeStreamingResponse();
+      }, safetyDelay);
+    }
   } catch(e) {
     clearTimeout(loadPollStart);
     if (liveTimer) clearInterval(liveTimer);
