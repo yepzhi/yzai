@@ -1,3 +1,8 @@
+---
+description: Deployment rule for YZAI
+globs: ["**/*"]
+---
+
 # Deployment Rule for YZAI
 
 Whenever any modification is made to the codebase (HTML, CSS, JS, scripts, or configs):
