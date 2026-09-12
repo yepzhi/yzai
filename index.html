@@ -2322,14 +2322,10 @@ think::before {
           <audio id="vsResultAudio" controls style="width:100%; margin-bottom:12px;"></audio>
           
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
-            <a id="vsDownloadBtn" href="#" download="yzai_cloned_voice.mp3" style="flex:1; text-decoration:none; background:rgba(236,72,153,0.18); border:1px solid rgba(236,72,153,0.4); color:#ec4899; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:600; text-align:center; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
+            <a id="vsDownloadBtn" href="#" download="yzai_audio.mp3" style="flex:1; text-decoration:none; background:rgba(236,72,153,0.18); border:1px solid rgba(236,72,153,0.4); color:#ec4899; padding:10px 14px; border-radius:8px; font-size:12.5px; font-weight:600; text-align:center; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>Descargar Archivo de Audio</span>
+              <span>Descargar Archivo de Audio MP3</span>
             </a>
-            <button id="vsSetDefaultBtn" onclick="setDefaultYzaiVoice()" style="background:rgba(16,185,129,0.18); border:1px solid rgba(16,185,129,0.4); color:#10b981; padding:8px 14px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:6px;">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-              <span>Activar como Voz de YZAI</span>
-            </button>
           </div>
         </div>
       </div>
@@ -4182,26 +4178,30 @@ const VoiceQueue = {
       }
     };
 
-    // Try Neural TTS first (Radeon 890M / Cloned Voice)
-    const activeNeuralVoice = localStorage.getItem('yzai_neural_voice') || 'echo';
+    // Try Piper Neural TTS (es_MX-claude-high / stembot - High Definition, same as StemBot)
     const useNeural = localStorage.getItem('yzai_use_neural_voice') !== 'false';
 
     if (useNeural && typeof fetch !== 'undefined') {
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 6500);
+      const timeout = setTimeout(() => controller.abort(), 10000);
 
-      fetch('/api/voice/synthesize', {
+      fetch('/v1/audio/speech', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: chunk, voice: activeNeuralVoice, speed: 1.05, format: 'mp3' }),
+        body: JSON.stringify({
+          input: chunk,
+          model: 'tts-1',
+          voice: 'stembot',
+          speed: 0.95
+        }),
         signal: controller.signal
       }).then(async res => {
         clearTimeout(timeout);
-        if (!res.ok) throw new Error('Neural TTS non-200 response');
+        if (!res.ok) throw new Error('Piper Neural TTS non-200 response');
         const blob = await res.blob();
         const audioUrl = URL.createObjectURL(blob);
         const audio = new Audio(audioUrl);
-        updateVoiceLiveUI('speaking', 'YZAI speaking (Neural)...', `"${chunk}"`);
+        updateVoiceLiveUI('speaking', 'YZAI hablando (Voz Neural)...', `"${chunk}"`);
         audio.onended = () => {
           URL.revokeObjectURL(audioUrl);
           finishChunk();
@@ -5273,10 +5273,8 @@ async function submitCloneVoice() {
     if (res.ok && data.success) {
       if (fb) {
         fb.style.color = 'var(--green)';
-        fb.innerHTML = `<span style="display:inline-flex;align-items:center;gap:4px;"><strong><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg> ¡Voz clonada exitosamente!</strong> Tu perfil está listo en Voicebox.</span>`;
+        fb.innerHTML = `<span style="display:inline-flex;align-items:center;gap:4px;"><strong><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg> ¡Voz clonada exitosamente!</strong> Tu muestra de audio se guardó en Voicebox.</span>`;
       }
-      localStorage.setItem('yzai_neural_voice', data.profile.id);
-      localStorage.setItem('yzai_use_neural_voice', 'true');
       await loadVoiceProfiles();
       setTimeout(() => switchVsTab(2), 1200);
     } else {
@@ -5296,9 +5294,11 @@ async function submitCloneVoice() {
 
 async function loadVoiceProfiles() {
   try {
-    const res = await fetch('/api/voice/profiles');
-    if (!res.ok) return;
-    const data = await res.json();
+    let data = { cloned: [] };
+    try {
+      const res = await fetch('/api/voice/profiles');
+      if (res.ok) data = await res.json();
+    } catch(e) {}
 
     // 1. Render Saved Profiles in Tab 1
     const listEl = document.getElementById('vsProfilesList');
@@ -5321,9 +5321,6 @@ async function loadVoiceProfiles() {
               <button onclick="playVsSample('${p.id}')" style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); color:#fff; border-radius:6px; padding:4px 8px; font-size:11px; cursor:pointer; display:inline-flex; align-items:center; gap:4px;">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> Escuchar
               </button>
-              <button onclick="selectVoiceForSynth('${p.id}')" style="background:rgba(139,92,246,0.15); border:1px solid rgba(139,92,246,0.3); color:#a78bfa; border-radius:6px; padding:4px 8px; font-size:11px; cursor:pointer;">
-                Usar en Sintetizador
-              </button>
               <button onclick="deleteVoiceProfile('${p.id}')" style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); color:#ef4444; border-radius:6px; padding:4px 6px; font-size:11px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center;" title="Eliminar">
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
               </button>
@@ -5333,28 +5330,27 @@ async function loadVoiceProfiles() {
       }
     }
 
-    // 2. Populate Voice Select Dropdown in Tab 2
+    // 2. Populate Voice Select Dropdown in Tab 2 with Piper Neural Models
     const selectEl = document.getElementById('vsVoiceSelect');
     if (selectEl) {
       const currentVal = selectEl.value;
-      let html = '';
-      if (data.cloned && data.cloned.length > 0) {
-        html += `<optgroup label="Tus Voces Clonadas (Voicebox)">`;
+      let html = `
+        <optgroup label="Voces Neuronales Piper (100% Locales en Ryzen AI / Radeon 890M)">
+          <option value="stembot" selected>Voz Oficial YZAI (Español México - Claude High)</option>
+          <option value="fable">English High Definition (Paula Lessac High)</option>
+          <option value="en_US-libritts_r-medium">English Multi-Speaker (LibriTTS R)</option>
+          <option value="es_MX-ald-medium">Español México (Ald Medium)</option>
+        </optgroup>
+      `;
+      if (data && data.cloned && data.cloned.length > 0) {
+        html += `<optgroup label="Tus Muestras de Audio Clonadas (Voicebox)">`;
         data.cloned.forEach(p => {
-          html += `<option value="${p.id}">${p.name} (Clonada Local)</option>`;
-        });
-        html += `</optgroup>`;
-      }
-      if (data.presets && data.presets.length > 0) {
-        html += `<optgroup label="Voces Neuronales Preinstaladas (Radeon 890M)">`;
-        data.presets.forEach(pr => {
-          html += `<option value="${pr.id}">${pr.name}</option>`;
+          html += `<option value="${p.id}">${escapeHtml(p.name)} (Muestra Local)</option>`;
         });
         html += `</optgroup>`;
       }
       selectEl.innerHTML = html;
       if (currentVal) selectEl.value = currentVal;
-      else if (data.cloned && data.cloned[0]) selectEl.value = data.cloned[0].id;
     }
   } catch (err) {
     console.warn('Error loading voice profiles:', err);
@@ -5393,14 +5389,12 @@ async function submitSynthesize() {
   const textEl = document.getElementById('vsSynthText');
   const voiceEl = document.getElementById('vsVoiceSelect');
   const speedEl = document.getElementById('vsSpeedSlider');
-  const formatEl = document.getElementById('vsFormatSelect');
   const btn = document.getElementById('vsGenerateBtn');
   const btnTxt = document.getElementById('vsGenBtnText');
 
   const text = (textEl ? textEl.value : '').trim();
-  const voice = voiceEl ? voiceEl.value : 'echo';
-  const speed = speedEl ? parseFloat(speedEl.value) : 1.0;
-  const format = formatEl ? formatEl.value : 'mp3';
+  const voice = voiceEl ? voiceEl.value : 'stembot';
+  const speed = speedEl ? parseFloat(speedEl.value) : 0.95;
 
   if (!text) {
     alert('Por favor escribe el texto que deseas sintetizar.');
@@ -5408,18 +5402,22 @@ async function submitSynthesize() {
   }
 
   btn.disabled = true;
-  if (btnTxt) btnTxt.textContent = 'Generando audio fonema por fonema (Radeon 890M)...';
+  if (btnTxt) btnTxt.textContent = 'Generando audio neuronal en Mini PC...';
 
   try {
-    const res = await fetch('/api/voice/synthesize', {
+    const res = await fetch('/v1/audio/speech', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ text, voice, speed, format })
+      body: JSON.stringify({
+        input: text,
+        model: 'tts-1',
+        voice: voice,
+        speed: speed
+      })
     });
 
     if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Error al generar audio');
+      throw new Error(`Error en motor TTS local (HTTP ${res.status})`);
     }
 
     const blob = await res.blob();
@@ -5437,37 +5435,18 @@ async function submitSynthesize() {
     }
     if (downloadBtn) {
       downloadBtn.href = audioUrl;
-      downloadBtn.download = `yzai_voice_${voice}.${format}`;
-      downloadBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar .${format.toUpperCase()} (${(blob.size/1024).toFixed(1)} KB)`;
+      downloadBtn.download = `yzai_audio_${voice}.mp3`;
+      downloadBtn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Descargar Audio MP3 (${(blob.size/1024).toFixed(1)} KB)`;
     }
     if (metaEl) {
-      metaEl.textContent = `${format.toUpperCase()} · ${(blob.size/1024).toFixed(1)} KB · Radeon 890M`;
+      metaEl.textContent = `MP3 · ${(blob.size/1024).toFixed(1)} KB · Piper Neural (Ryzen AI / Radeon 890M)`;
     }
   } catch (err) {
     console.error('Synthesize error:', err);
     alert('Error al sintetizar audio: ' + err.message);
   } finally {
     btn.disabled = false;
-    if (btnTxt) btnTxt.textContent = 'Generar Audio con Radeon 890M';
-  }
-}
-
-function setDefaultYzaiVoice() {
-  const voiceEl = document.getElementById('vsVoiceSelect');
-  const voice = voiceEl ? voiceEl.value : 'echo';
-  localStorage.setItem('yzai_neural_voice', voice);
-  localStorage.setItem('yzai_use_neural_voice', 'true');
-
-  const btn = document.getElementById('vsSetDefaultBtn');
-  if (btn) {
-    btn.style.background = '#10b981';
-    btn.style.color = '#fff';
-    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> <span>Voz Activada para YZAI</span>`;
-    setTimeout(() => {
-      btn.style.background = 'rgba(16,185,129,0.18)';
-      btn.style.color = '#10b981';
-      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg> <span>Activar como Voz de YZAI</span>`;
-    }, 2500);
+    if (btnTxt) btnTxt.textContent = 'Generar Audio con Piper Neural (Ryzen AI / Radeon 890M)';
   }
 }
 
