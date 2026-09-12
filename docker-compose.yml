@@ -94,6 +94,17 @@ services:
       - GENERIC_TIMEZONE=America/Hermosillo
     volumes:
       - n8n_data:/home/node/.n8n
+  voicestudio:
+    image: ghcr.io/debpalash/omnivoice-studio:stable
+    container_name: voicestudio
+    restart: always
+    ports:
+      - "3900:3900"
+    environment:
+      - OMNIVOICE_API_KEY=yzai-voicestudio-local
+    volumes:
+      - voicestudio-data:/app/omnivoice_data
+      - /home/yepzhi/.cache/huggingface:/root/.cache/huggingface
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -102,3 +113,5 @@ volumes:
   config:
   open-webui:
   n8n_data:
+  voicestudio-data:
+

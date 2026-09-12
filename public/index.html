@@ -2105,18 +2105,18 @@ think::before {
 
     <!-- VOICEBOX & OPENHUMAN GRID -->
     <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:16px;">
-      <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(6,182,212,0.2); border-radius:12px; padding:12px;">
+      <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(236,72,153,0.3); border-radius:12px; padding:12px;">
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-          <strong style="color:var(--cyan); font-size:12.5px;">Voicebox Neural Audio</strong>
-          <span style="font-size:9.5px; color:var(--cyan); background:rgba(6,182,212,0.1); padding:2px 6px; border-radius:4px;">TTS / CLONING</span>
+          <strong style="color:#ec4899; font-size:12.5px;">VoiceStudio AI (OmniVoice)</strong>
+          <span style="font-size:9.5px; color:#ec4899; background:rgba(236,72,153,0.15); padding:2px 6px; border-radius:4px;">16 ENGINES / CLONING</span>
         </div>
         <p style="font-size:11.5px; color:var(--muted); margin:0 0 6px 0; line-height:1.4;">
-          Síntesis zero-shot y clonación de audio en hardware local para modo conversacional.
+          Suite local de clonación zero-shot, diseño de voces, doblaje de video y producción de audiolibros.
         </p>
-        <span style="font-size:10px; color:var(--text-dim); display:block;"><code>~/voicebox</code></span>
-        <button onclick="openVoiceStudioModal(); closeLocalServicesModal();" style="margin-top:8px; width:100%; background:rgba(236,72,153,0.18); border:1px solid rgba(236,72,153,0.35); color:#ec4899; padding:5px 8px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px;">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-          <span>Abrir Voice Studio</span>
+        <span style="font-size:10px; color:var(--text-dim); display:block;"><code>http://localhost:3900</code></span>
+        <button onclick="window.open('http://' + window.location.hostname + ':3900', '_blank');" style="margin-top:8px; width:100%; background:rgba(236,72,153,0.18); border:1px solid rgba(236,72,153,0.35); color:#ec4899; padding:5px 8px; border-radius:6px; font-size:11px; font-weight:600; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:5px;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          <span>Abrir VoiceStudio Web (Puerto 3900)</span>
         </button>
       </div>
 
