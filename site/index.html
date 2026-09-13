@@ -1714,6 +1714,11 @@ think::before {
       <span>Servicios Locales &amp; MCP</span>
       <span style="margin-left:auto; font-size:10px; padding:2px 6px; border-radius:4px; background:rgba(16,185,129,0.15); color:var(--green); font-weight:600;">ONLINE</span>
     </button>
+    <button class="drawer-action-btn" id="drawerVoiceModeBtn" onclick="toggleVoiceMode(); closeDrawer()" data-spotlight data-spotlight-color="rgba(6,182,212,0.15)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+      <span>Modo Voz (Manos Libres)</span>
+      <span id="drawerVoiceModeBadge" style="margin-left:auto; font-size:10px; padding:2px 6px; border-radius:4px; background:rgba(6,182,212,0.15); color:#06b6d4; font-weight:600;">OFF</span>
+    </button>
     <button class="drawer-action-btn" onclick="openVoiceStudioModal(); closeDrawer()" data-spotlight data-spotlight-color="rgba(236,72,153,0.15)">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
       <span>Voice Studio &amp; Clonación</span>
@@ -1779,21 +1784,6 @@ think::before {
       </div>
       <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
     </div>
-
-    <button class="voice-mode-pill" id="localServicesBtn" onclick="openLocalServicesModal()" title="Servicios Locales &amp; Superpoderes MCP (Hound, n8n, Voicebox, Hardware)" style="background: rgba(16, 185, 129, 0.12); border-color: rgba(16, 185, 129, 0.35); color: #10b981;" data-starborder data-sb-color="#10b981" data-sb-speed="4">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
-      <span>MCP &amp; Servicios</span>
-    </button>
-
-    <button class="voice-mode-pill" id="voiceModeBtn" onclick="toggleVoiceMode()" title="Activar Modo Voz (Conversación continua sin manos con micrófono automático y altavoz TTS)" data-starborder data-sb-color="#06b6d4" data-sb-speed="4">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-      <span id="voiceModeText">Modo Voz</span>
-    </button>
-
-    <button class="voice-mode-pill" id="voiceStudioBtn" onclick="openVoiceStudioModal()" title="Voice Studio: Graba con tu iPhone, clónate con Voicebox y descarga audio" style="background: rgba(236, 72, 153, 0.12); border-color: rgba(236, 72, 153, 0.35); color: #ec4899;" data-starborder data-sb-color="#ec4899" data-sb-speed="4">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
-      <span>Voice Studio</span>
-    </button>
 
 
     <button class="action-btn" onclick="newChat()" aria-label="New chat" title="New chat" data-spotlight data-spotlight-size="120">
@@ -1862,6 +1852,14 @@ think::before {
             </span>
             <div class="chip-content">
               <strong>Voice Conversation</strong>
+            </div>
+          </div>
+          <div class="welcome-chip-card" style="border-radius:9999px;" onclick="openVoiceStudioModal()">
+            <span class="chip-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </span>
+            <div class="chip-content">
+              <strong>Voice Studio &amp; Clonación</strong>
             </div>
           </div>
         </div>
@@ -2196,18 +2194,32 @@ think::before {
           <span style="background:#ec4899; color:#fff; border-radius:50%; width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; font-size:11px;">1</span>
           Graba una muestra de tu voz (o sube un audio)
         </h4>
-        <p style="font-size:12px; color:var(--text-dim); margin:0 0 14px 0;">
-          Solo se requieren <strong>3 a 5 segundos</strong> de audio claro hablando con tu tono natural para que Voicebox capture tu timbre fonético.
+        <p style="font-size:12px; color:var(--text-dim); margin:0 0 12px 0; line-height:1.5;">
+          Para una clonación con timbre natural y sin artefactos, se recomiendan entre <strong>15 y 25 segundos</strong> (mínimo 10s, máximo 30s) de habla continua y pausada en un ambiente sin eco ni ruido.
         </p>
+
+        <!-- SCRIPT CARD FOR GUIDED RECORDING -->
+        <div class="vs-script-card" style="background: rgba(236,72,153,0.06); border: 1px solid rgba(236,72,153,0.25); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
+          <div style="font-size: 11.5px; font-weight: 700; color: #ec4899; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+            <span style="display: flex; align-items: center; gap: 5px;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              Guión sugerido para leer en voz alta (Español México / LATAM)
+            </span>
+            <span style="font-size: 10.5px; color: var(--text-dim); font-weight: 400; text-transform: none;">Lectura ~18 segundos</span>
+          </div>
+          <p style="margin: 0; font-size: 12.5px; line-height: 1.55; color: #f1f5f9; font-style: italic;">
+            «Hola, estoy grabando mi muestra vocal para YZAI. Desarrollamos inteligencia artificial con modelos abiertos y tecnología sustentable desde México. Con este audio calibramos el timbre fonético y la entonación natural de mi voz para la plataforma.»
+          </p>
+        </div>
 
         <!-- RECORD AREA -->
         <div class="vs-record-area">
           <canvas id="vsVisualizer" class="vs-visualizer-canvas"></canvas>
-          <button id="vsRecordBtn" class="vs-record-btn" onclick="toggleVsRecording()" title="Iniciar Grabación con Micrófono">
+          <button id="vsRecordBtn" class="vs-record-btn" onclick="toggleVsRecording()" title="Iniciar / Detener Grabación">
             <svg id="vsRecordIcon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
           </button>
-          <div id="vsRecordTimer" style="font-size:13px; font-weight:700; color:#ec4899; margin-top:10px; font-family:monospace;">00:00 / 00:05</div>
-          <div id="vsRecordStatus" style="font-size:11.5px; color:var(--muted); margin-top:4px;">Pulsa para grabar desde tu iPhone o computadora</div>
+          <div id="vsRecordTimer" style="font-size:13px; font-weight:700; color:#ec4899; margin-top:10px; font-family:monospace;">00:00 / 00:30</div>
+          <div id="vsRecordStatus" style="font-size:11.5px; color:var(--muted); margin-top:4px;">Pulsa para iniciar · Lee el guión y pulsa de nuevo al terminar (mínimo 10s)</div>
 
           <!-- AUDIO PREVIEW -->
           <audio id="vsRecordedAudio" controls style="display:none; width:100%; margin-top:14px; height:36px;"></audio>
@@ -2235,8 +2247,8 @@ think::before {
         <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px; margin-bottom:12px;">
           <input type="text" id="vsProfileName" class="vs-input" placeholder="Nombre de tu voz (ej. Alberto Yépiz - Mi Voz)" value="Alberto (Mi Voz)">
           <select id="vsProfileLang" class="vs-input">
-            <option value="es" selected>Español (es)</option>
-            <option value="en">English (en)</option>
+            <option value="es-MX" selected>Español México / LATAM (es-MX)</option>
+            <option value="en-US">English (en-US)</option>
           </select>
         </div>
 
@@ -3034,6 +3046,14 @@ function welcomeHTML() {
         </span>
         <div class="chip-content">
           <strong>Voice Conversation</strong>
+        </div>
+      </div>
+      <div class="welcome-chip-card" style="border-radius:9999px;" onclick="openVoiceStudioModal()">
+        <span class="chip-icon">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ec4899" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </span>
+        <div class="chip-content">
+          <strong>Voice Studio &amp; Clonación</strong>
         </div>
       </div>
     </div>
@@ -4033,23 +4053,40 @@ function getBestNaturalVoice() {
   if (!voices.length && availableVoices.length) voices = availableVoices;
   if (!voices.length) return null;
 
-  // 1. Voces Neuronales / Naturales en Español (Edge, Chrome, Google Cloud)
+  // Criterio estricto para priorizar Español MÉXICO / LATAM (es-MX, es-419, es-US, Paulina, Dalia, Sabina, etc.)
+  const isMxOrLatam = (v) => {
+    const l = (v.lang || '').toLowerCase();
+    const n = (v.name || '').toLowerCase();
+    return l.includes('es-mx') || l.includes('es-419') || l.includes('es-us') || 
+           n.includes('mexico') || n.includes('méxico') || n.includes('latin') ||
+           /Paulina|Dalia|Sabina|Mia|Raul|Raúl|Andrés|Andres/i.test(v.name);
+  };
+
+  // 1. Voces Neuronales / Naturales en Español México / LATAM (Edge, Chrome, Azure, Google Cloud)
+  const naturalMx = voices.find(v => isMxOrLatam(v) && (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Online')));
+  if (naturalMx) return naturalMx;
+
+  // 2. Voces Apple Siri / Mejoradas en Español México (iOS / macOS: Paulina, Dalia, Sabina)
+  const appleMx = voices.find(v => isMxOrLatam(v) && (v.name.includes('Enhanced') || v.name.includes('Premium') || v.name.includes('Siri') || /Paulina|Dalia|Sabina/i.test(v.name)));
+  if (appleMx) return appleMx;
+
+  // 3. Voces de Google en Español México / LATAM / US
+  const googleLatam = voices.find(v => isMxOrLatam(v) && v.name.includes('Google'));
+  if (googleLatam) return googleLatam;
+
+  // 4. Cualquier voz con locale de México o Latinoamérica
+  const regionalMx = voices.find(v => isMxOrLatam(v));
+  if (regionalMx) return regionalMx;
+
+  // 5. Fallback a otras voces neuronales en Español (si no hubiera es-MX instalada)
   const naturalEs = voices.find(v => (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Online')) && v.lang.toLowerCase().startsWith('es'));
   if (naturalEs) return naturalEs;
 
-  // 2. Voces Apple Siri / Mejoradas en Español (macOS / iOS: Paulina, Jorge, Mónica, Juan, Diego, Carlos, Helena, Soledad)
-  const appleEs = voices.find(v => (v.name.includes('Enhanced') || v.name.includes('Premium') || v.name.includes('Siri') || /Paulina|Jorge|Mónica|Monica|Juan|Diego|Carlos|Helena|Soledad|Francisca/i.test(v.name)) && v.lang.toLowerCase().startsWith('es'));
-  if (appleEs) return appleEs;
+  // 6. Fallback a cualquier voz en Español
+  const generalEs = voices.find(v => v.lang.toLowerCase().startsWith('es'));
+  if (generalEs) return generalEs;
 
-  // 3. Voces de Google en Español
-  const googleEs = voices.find(v => v.name.includes('Google') && v.lang.toLowerCase().startsWith('es'));
-  if (googleEs) return googleEs;
-
-  // 4. Cualquier voz regional en Español (es-MX, es-US, es-419, es-ES)
-  const regionalEs = voices.find(v => /^es[-_]/i.test(v.lang)) || voices.find(v => v.lang.toLowerCase().startsWith('es'));
-  if (regionalEs) return regionalEs;
-
-  // 5. Voz predeterminada del sistema
+  // 7. Voz predeterminada del sistema
   const def = voices.find(v => v.default);
   if (def) return def;
 
@@ -4567,9 +4604,15 @@ async function toggleVoiceMode() {
   const btn = document.getElementById('voiceModeBtn');
   const txt = document.getElementById('voiceModeText');
   const overlay = document.getElementById('voiceLiveOverlay');
+  const drawerBadge = document.getElementById('drawerVoiceModeBadge');
   if (isVoiceModeActive) {
     if (btn) btn.classList.add('active');
     if (txt) txt.textContent = 'Modo Voz: ON';
+    if (drawerBadge) {
+      drawerBadge.textContent = 'ON';
+      drawerBadge.style.background = 'rgba(16,185,129,0.2)';
+      drawerBadge.style.color = 'var(--green)';
+    }
     if (overlay) overlay.classList.add('active');
     VoiceQueue.clear();
 
@@ -4594,6 +4637,11 @@ async function toggleVoiceMode() {
   } else {
     if (btn) btn.classList.remove('active');
     if (txt) txt.textContent = 'Modo Voz';
+    if (drawerBadge) {
+      drawerBadge.textContent = 'OFF';
+      drawerBadge.style.background = 'rgba(6,182,212,0.15)';
+      drawerBadge.style.color = '#06b6d4';
+    }
     if (overlay) overlay.classList.remove('active');
     VoiceQueue.clear();
     stopMic();
