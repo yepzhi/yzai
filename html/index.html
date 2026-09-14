@@ -2294,6 +2294,10 @@ think::before {
 
           <!-- AUDIO PREVIEW -->
           <audio id="vsRecordedAudio" controls style="display:none; width:100%; margin-top:14px; height:36px;"></audio>
+          <button id="vsPlayRecordedBtn" onclick="toggleVsRecordedPlay()" style="display:none; background:rgba(236,72,153,0.18); border:1px solid rgba(236,72,153,0.4); color:#ec4899; padding:8px 16px; border-radius:8px; font-size:12px; font-weight:600; cursor:pointer; margin-top:10px; align-items:center; justify-content:center; gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span>Escuchar Muestra Grabada</span>
+          </button>
         </div>
 
         <!-- UPLOAD DROPZONE -->
@@ -2403,6 +2407,10 @@ think::before {
             <span id="vsAudioMeta" style="font-size:11px; color:var(--muted);">22.05 kHz · 64 kbps</span>
           </div>
           <audio id="vsResultAudio" controls style="width:100%; margin-bottom:12px;"></audio>
+          <button id="vsPlayResultBtn" onclick="toggleVsResultPlay()" style="display:none; width:100%; background:rgba(236,72,153,0.18); border:1px solid rgba(236,72,153,0.4); color:#ec4899; padding:10px 14px; border-radius:8px; font-size:12.5px; font-weight:600; cursor:pointer; margin-bottom:12px; align-items:center; justify-content:center; gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            <span>Escuchar Audio Generado</span>
+          </button>
           
           <div style="display:flex; gap:8px; flex-wrap:wrap;">
             <a id="vsDownloadBtn" href="#" download="yzai_audio.mp3" style="flex:1; text-decoration:none; background:rgba(236,72,153,0.18); border:1px solid rgba(236,72,153,0.4); color:#ec4899; padding:10px 14px; border-radius:8px; font-size:12.5px; font-weight:600; text-align:center; display:inline-flex; align-items:center; justify-content:center; gap:6px;">
@@ -5244,6 +5252,9 @@ async function startVsRecording() {
         audioEl.style.display = 'block';
       }
 
+      const playBtn = document.getElementById('vsPlayRecordedBtn');
+      if (playBtn) playBtn.style.display = 'inline-flex';
+
       // Convert blob to base64
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -5283,6 +5294,52 @@ async function startVsRecording() {
   } catch (err) {
     console.error('Error starting mic for Voice Studio:', err);
     alert('No se pudo acceder al micrófono. Por favor permite el acceso en tu navegador o sube un archivo de voz.');
+  }
+}
+
+let vsRecordedAudioSource = null;
+let vsRecordedAudioContext = null;
+
+async function toggleVsRecordedPlay() {
+  if (!vsRecordedBlob && !vsRecordedBase64) return;
+  const btn = document.getElementById('vsPlayRecordedBtn');
+  if (vsRecordedAudioSource) {
+    try { vsRecordedAudioSource.stop(); } catch(e) {}
+    vsRecordedAudioSource = null;
+    if (btn) btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> <span>Escuchar Muestra Grabada</span>`;
+    return;
+  }
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!vsRecordedAudioContext || vsRecordedAudioContext.state === 'closed') {
+      vsRecordedAudioContext = new AudioCtx();
+    }
+    if (vsRecordedAudioContext.state === 'suspended') {
+      await vsRecordedAudioContext.resume();
+    }
+    let arrayBuffer;
+    if (vsRecordedBlob) {
+      arrayBuffer = await vsRecordedBlob.arrayBuffer();
+    } else if (vsRecordedBase64) {
+      const cleanB64 = vsRecordedBase64.includes(',') ? vsRecordedBase64.split(',')[1] : vsRecordedBase64;
+      const binary = atob(cleanB64);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+      arrayBuffer = bytes.buffer;
+    }
+    const decoded = await vsRecordedAudioContext.decodeAudioData(arrayBuffer);
+    const source = vsRecordedAudioContext.createBufferSource();
+    source.buffer = decoded;
+    source.connect(vsRecordedAudioContext.destination);
+    source.onended = () => {
+      vsRecordedAudioSource = null;
+      if (btn) btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> <span>Escuchar Muestra Grabada</span>`;
+    };
+    source.start(0);
+    vsRecordedAudioSource = source;
+    if (btn) btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> <span>Detener Reproducción</span>`;
+  } catch(err) {
+    console.warn('Web Audio playback error:', err);
   }
 }
 
@@ -5345,6 +5402,8 @@ function handleVsFileSelect(e) {
       audioEl.src = vsRecordedBase64;
       audioEl.style.display = 'block';
     }
+    const playBtn = document.getElementById('vsPlayRecordedBtn');
+    if (playBtn) playBtn.style.display = 'inline-flex';
   };
   reader.readAsDataURL(file);
 }
@@ -5571,14 +5630,17 @@ async function submitSynthesize() {
     }
 
     const blob = await res.blob();
+    vsLastResultBlob = blob;
     const audioUrl = URL.createObjectURL(blob);
 
     const playerBox = document.getElementById('vsPlayerBox');
     const resultAudio = document.getElementById('vsResultAudio');
+    const playResultBtn = document.getElementById('vsPlayResultBtn');
     const downloadBtn = document.getElementById('vsDownloadBtn');
     const metaEl = document.getElementById('vsAudioMeta');
 
     if (playerBox) playerBox.style.display = 'block';
+    if (playResultBtn) playResultBtn.style.display = 'inline-flex';
     if (resultAudio) {
       resultAudio.src = audioUrl;
       resultAudio.play().catch(() => {});
@@ -5597,6 +5659,44 @@ async function submitSynthesize() {
   } finally {
     btn.disabled = false;
     if (btnTxt) btnTxt.textContent = 'Generar Audio con Piper Neural (Ryzen AI / Radeon 890M)';
+  }
+}
+
+let vsResultAudioSource = null;
+let vsResultAudioContext = null;
+let vsLastResultBlob = null;
+
+async function toggleVsResultPlay() {
+  if (!vsLastResultBlob) return;
+  const btn = document.getElementById('vsPlayResultBtn');
+  if (vsResultAudioSource) {
+    try { vsResultAudioSource.stop(); } catch(e) {}
+    vsResultAudioSource = null;
+    if (btn) btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> <span>Escuchar Audio Generado</span>`;
+    return;
+  }
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!vsResultAudioContext || vsResultAudioContext.state === 'closed') {
+      vsResultAudioContext = new AudioCtx();
+    }
+    if (vsResultAudioContext.state === 'suspended') {
+      await vsResultAudioContext.resume();
+    }
+    const arrayBuffer = await vsLastResultBlob.arrayBuffer();
+    const decoded = await vsResultAudioContext.decodeAudioData(arrayBuffer);
+    const source = vsResultAudioContext.createBufferSource();
+    source.buffer = decoded;
+    source.connect(vsResultAudioContext.destination);
+    source.onended = () => {
+      vsResultAudioSource = null;
+      if (btn) btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg> <span>Escuchar Audio Generado</span>`;
+    };
+    source.start(0);
+    vsResultAudioSource = source;
+    if (btn) btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg> <span>Detener Reproducción</span>`;
+  } catch(err) {
+    console.warn('Web Audio result playback error:', err);
   }
 }
 
