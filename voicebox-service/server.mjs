@@ -197,8 +197,9 @@ const server = http.createServer(async (req, res) => {
       try {
         await execAsync(`sudo cp "${finalWav}" /var/lib/docker/volumes/voices/_data/${voiceId}.wav`);
         await execAsync(`sudo chmod 644 /var/lib/docker/volumes/voices/_data/${voiceId}.wav`);
-        // Register in openedai-speech container
+        // Register in openedai-speech container (tts-1-hd for XTTS and tts-1 for Piper fast inference)
         await execAsync(`docker exec openedai-speech /app/add_voice.py "voices/${voiceId}.wav" -n "${voiceId}" -l "${lang}" || true`);
+        await execAsync(`docker exec openedai-speech python3 -c "import yaml; f=open('config/voice_to_speaker.yaml','r'); c=yaml.safe_load(f) or {}; f.close(); c.setdefault('tts-1',{})['${voiceId}']={'model':'voices/es_MX-claude-high.onnx','speaker':None}; f=open('config/voice_to_speaker.yaml','w'); yaml.dump(c,f); f.close()" || true`);
       } catch (dockerErr) {
         console.warn("Docker voice registration notice:", dockerErr.message);
       }

@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#030209">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; connect-src * 'unsafe-inline' blob: data: http: https: ws: wss:;">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' https: data: blob:; media-src 'self' https: blob: data:; connect-src * 'unsafe-inline' blob: data: http: https: ws: wss:;">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -5127,6 +5127,16 @@ function resetInputUI() {
 })();
 
 // ── VOICE STUDIO & VOICEBOX CLONING ENGINE ──────────────
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 let vsMediaRecorder = null;
 let vsAudioChunks = [];
 let vsRecordedBlob = null;
@@ -5527,7 +5537,7 @@ async function submitSynthesize() {
   const btnTxt = document.getElementById('vsGenBtnText');
 
   const text = (textEl ? textEl.value : '').trim();
-  const voice = voiceEl ? voiceEl.value : 'stembot';
+  const voice = (voiceEl && voiceEl.value) ? voiceEl.value : 'stembot';
   const speed = speedEl ? parseFloat(speedEl.value) : 0.95;
 
   if (!text) {
@@ -5551,7 +5561,13 @@ async function submitSynthesize() {
     });
 
     if (!res.ok) {
-      throw new Error(`Error en motor TTS local (HTTP ${res.status})`);
+      let detail = `HTTP ${res.status}`;
+      try {
+        const errJson = await res.json();
+        if (errJson.message) detail = errJson.message;
+        else if (errJson.error) detail = errJson.error;
+      } catch (e) {}
+      throw new Error(`Error en motor TTS local (${detail})`);
     }
 
     const blob = await res.blob();
