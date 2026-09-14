@@ -1500,6 +1500,7 @@ think::before {
   max-width: 720px !important;
   max-height: 92vh;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: rgba(13, 15, 24, 0.94) !important;
   backdrop-filter: blur(28px) saturate(180%);
   border: 1px solid rgba(236, 72, 153, 0.25) !important;
@@ -1529,7 +1530,9 @@ think::before {
   justify-content: center;
   gap: 8px;
   transition: all 0.25s ease;
+  white-space: nowrap;
 }
+.vs-tab-lbl-short { display: none; }
 .vs-tab-btn.active {
   background: linear-gradient(135deg, rgba(236, 72, 153, 0.25), rgba(139, 92, 246, 0.25));
   color: #fff;
@@ -1547,6 +1550,18 @@ think::before {
   padding: 18px;
   margin-bottom: 16px;
 }
+.vs-form-grid-2-1 {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.vs-form-grid-1-1 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
 .vs-record-area {
   display: flex;
   flex-direction: column;
@@ -1560,7 +1575,7 @@ think::before {
 }
 .vs-visualizer-canvas {
   width: 100%;
-  height: 60px;
+  height: 56px;
   border-radius: 8px;
   margin-bottom: 14px;
   background: rgba(0,0,0,0.4);
@@ -1578,6 +1593,7 @@ think::before {
   cursor: pointer;
   box-shadow: 0 0 25px rgba(236, 72, 153, 0.45);
   transition: all 0.2s ease;
+  -webkit-tap-highlight-color: transparent;
 }
 .vs-record-btn:hover { transform: scale(1.06); }
 .vs-record-btn.recording {
@@ -1660,6 +1676,58 @@ think::before {
   border-radius: 14px;
   padding: 14px;
   margin-top: 14px;
+}
+
+/* Mobile responsive optimizations for Voice Studio */
+@media (max-width: 640px) {
+  .vs-modal {
+    max-height: 94vh;
+    padding: 16px 14px calc(24px + var(--safe-b, 0px)) !important;
+    border-radius: 24px 24px 0 0 !important;
+    width: 100% !important;
+  }
+  .vs-tabs {
+    gap: 4px;
+    padding: 4px;
+    margin-bottom: 14px;
+  }
+  .vs-tab-btn {
+    padding: 8px 6px;
+    font-size: 11.5px;
+    gap: 4px;
+  }
+  .vs-tab-lbl-full { display: none; }
+  .vs-tab-lbl-short { display: inline; }
+  .vs-box {
+    padding: 14px 12px;
+    margin-bottom: 12px;
+    border-radius: 14px;
+  }
+  .vs-form-grid-2-1,
+  .vs-form-grid-1-1 {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .vs-record-area {
+    padding: 14px 10px;
+  }
+  .vs-visualizer-canvas {
+    height: 38px;
+    margin-bottom: 10px;
+  }
+  .vs-record-btn {
+    width: 62px;
+    height: 62px;
+  }
+  .vs-script-card {
+    padding: 10px 12px !important;
+    margin-bottom: 12px !important;
+  }
+  .vs-dropzone {
+    padding: 10px;
+    margin-top: 10px;
+  }
 }
 </style>
 </head>
@@ -2175,15 +2243,18 @@ think::before {
     <div class="vs-tabs">
       <button class="vs-tab-btn active" id="vsTabBtn1" onclick="switchVsTab(1)">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/></svg>
-        Clonar Mi Voz (Grabar / Subir)
+        <span class="vs-tab-lbl-full">Clonar Mi Voz (Grabar / Subir)</span>
+        <span class="vs-tab-lbl-short">Clonar Voz</span>
       </button>
       <button class="vs-tab-btn" id="vsTabBtn2" onclick="switchVsTab(2)">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
-        Sintetizador &amp; Descarga
+        <span class="vs-tab-lbl-full">Sintetizador &amp; Descarga</span>
+        <span class="vs-tab-lbl-short">Sintetizar</span>
       </button>
       <button class="vs-tab-btn" id="vsTabBtn3" onclick="switchVsTab(3)">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-        Hardware GPU
+        <span class="vs-tab-lbl-full">Hardware GPU</span>
+        <span class="vs-tab-lbl-short">Hardware</span>
       </button>
     </div>
 
@@ -2200,7 +2271,7 @@ think::before {
 
         <!-- SCRIPT CARD FOR GUIDED RECORDING -->
         <div class="vs-script-card" style="background: rgba(236,72,153,0.06); border: 1px solid rgba(236,72,153,0.25); border-radius: 10px; padding: 12px 14px; margin-bottom: 14px;">
-          <div style="font-size: 11.5px; font-weight: 700; color: #ec4899; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: flex; align-items: center; justify-content: space-between;">
+          <div style="font-size: 11.5px; font-weight: 700; color: #ec4899; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 4px;">
             <span style="display: flex; align-items: center; gap: 5px;">
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
               Guión sugerido para leer en voz alta (Español México / LATAM)
@@ -2244,7 +2315,7 @@ think::before {
           <span style="background:#8b5cf6; color:#fff; border-radius:50%; width:20px; height:20px; display:inline-flex; align-items:center; justify-content:center; font-size:11px;">2</span>
           Bautiza y guarda tu perfil de voz
         </h4>
-        <div style="display:grid; grid-template-columns: 2fr 1fr; gap:10px; margin-bottom:12px;">
+        <div class="vs-form-grid-2-1">
           <input type="text" id="vsProfileName" class="vs-input" placeholder="Nombre de tu voz (ej. Alberto Yépiz - Mi Voz)" value="Alberto (Mi Voz)">
           <select id="vsProfileLang" class="vs-input">
             <option value="es-MX" selected>Español México / LATAM (es-MX)</option>
@@ -2300,7 +2371,7 @@ think::before {
           </div>
         </div>
 
-        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom:14px;">
+        <div class="vs-form-grid-1-1">
           <div>
             <label style="display:flex; justify-content:space-between; font-size:12px; color:var(--text-dim); margin-bottom:4px;">
               <span>Velocidad de habla</span>
@@ -5155,7 +5226,7 @@ async function startVsRecording() {
       if (vsVisualizerAnimId) cancelAnimationFrame(vsVisualizerAnimId);
       if (vsAudioContext && vsAudioContext.state !== 'closed') vsAudioContext.close();
 
-      vsRecordedBlob = new Blob(vsAudioChunks, { type: vsMediaRecorder.mimeType || 'audio/webm' });
+      vsRecordedBlob = new Blob(vsAudioChunks, { type: vsMediaRecorder.mimeType || mimeType });
       const audioUrl = URL.createObjectURL(vsRecordedBlob);
       const audioEl = document.getElementById('vsRecordedAudio');
       if (audioEl) {
@@ -5173,23 +5244,28 @@ async function startVsRecording() {
       reader.readAsDataURL(vsRecordedBlob);
 
       const statusEl = document.getElementById('vsRecordStatus');
-      if (statusEl) statusEl.textContent = 'Grabación completada. Escucha tu muestra o clona tu voz.';
+      if (statusEl) statusEl.textContent = `Grabación completada (${vsRecordSeconds}s). Escucha tu muestra o clona tu voz abajo.`;
     };
 
-    vsMediaRecorder.start(100);
+    // Calling start() without a timeslice creates a single, complete container on stop()
+    // rather than fragmented chunks that corrupt the MP4 moov atom on iOS Safari / Chrome.
+    vsMediaRecorder.start();
 
     const btn = document.getElementById('vsRecordBtn');
     if (btn) btn.classList.add('recording');
     const statusEl = document.getElementById('vsRecordStatus');
-    if (statusEl) statusEl.textContent = 'Grabando voz... habla con claridad (recomendado 3 a 5 seg)';
+    if (statusEl) statusEl.textContent = 'Grabando voz... habla con claridad (lee el guión sugerido, pulsa para detener)';
 
     const timerEl = document.getElementById('vsRecordTimer');
+    if (timerEl) timerEl.textContent = '00:00 / 00:30';
+
     vsRecordTimerInterval = setInterval(() => {
       vsRecordSeconds++;
       if (timerEl) {
-        timerEl.textContent = `00:0${vsRecordSeconds} / 00:05`;
+        const secs = String(vsRecordSeconds).padStart(2, '0');
+        timerEl.textContent = `00:${secs} / 00:30`;
       }
-      if (vsRecordSeconds >= 5) {
+      if (vsRecordSeconds >= 30) {
         stopVsRecording();
       }
     }, 1000);
@@ -5290,10 +5366,10 @@ async function submitCloneVoice() {
   const btn = document.getElementById('vsCloneBtn');
 
   const name = (nameInput ? nameInput.value : '').trim() || 'Alberto (Mi Voz)';
-  const lang = langSelect ? langSelect.value : 'es';
+  const lang = langSelect ? langSelect.value : 'es-MX';
 
   if (!vsRecordedBase64) {
-    alert('Por favor graba una muestra de tu voz de 3 a 5 segundos o sube un archivo de audio primero.');
+    alert('Por favor graba una muestra de tu voz (mínimo 5s a 30s) o sube un archivo de audio primero.');
     return;
   }
 
@@ -5306,14 +5382,23 @@ async function submitCloneVoice() {
   }
 
   try {
+    let format = 'webm';
+    if (vsRecordedBlob && vsRecordedBlob.type) {
+      const t = vsRecordedBlob.type.toLowerCase();
+      if (t.includes('mp4') || t.includes('m4a')) format = 'm4a';
+      else if (t.includes('wav')) format = 'wav';
+      else if (t.includes('ogg')) format = 'ogg';
+      else if (t.includes('mp3') || t.includes('mpeg')) format = 'mp3';
+    }
+
     const res = await fetch('/api/voice/clone', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         name,
         audioBase64: vsRecordedBase64,
-        format: vsRecordedBlob ? (vsRecordedBlob.type.includes('mp4') ? 'm4a' : 'webm') : 'wav',
-        lang
+        format,
+        lang: lang.startsWith('en') ? 'en' : 'es'
       })
     });
 
@@ -5321,7 +5406,8 @@ async function submitCloneVoice() {
     if (res.ok && data.success) {
       if (fb) {
         fb.style.color = 'var(--green)';
-        fb.innerHTML = `<span style="display:inline-flex;align-items:center;gap:4px;"><strong><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg> ¡Voz clonada exitosamente!</strong> Tu muestra de audio se guardó en Voicebox.</span>`;
+        const dur = (data.profile && data.profile.duration) ? data.profile.duration : `${vsRecordSeconds}s`;
+        fb.innerHTML = `<span style="display:inline-flex;align-items:center;gap:4px;"><strong><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;vertical-align:middle;"><polyline points="20 6 9 17 4 12"/></svg> ¡Voz clonada exitosamente (${dur})!</strong> Tu muestra de audio se guardó en Voicebox.</span>`;
       }
       await loadVoiceProfiles();
       setTimeout(() => switchVsTab(2), 1200);
