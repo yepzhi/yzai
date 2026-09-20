@@ -1847,8 +1847,8 @@ think::before {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z" fill="url(#aiGrad)"/><circle cx="12" cy="12" r="2.5" fill="#ffffff" opacity="0.9"/></svg>
       </div>
       <div class="model-pill-info">
-        <div class="model-pill-name" id="activeName">@yepzhi AI · Gemma 4 26B MoE</div>
-        <div class="model-pill-sub" id="activeSub"><span style="color:#3FB950;font-weight:600;">Gemma 4 MoE (A4B): Ready</span></div>
+        <div class="model-pill-name" id="activeName">@yepzhi AI · Qwen 3.6 35B MoE</div>
+        <div class="model-pill-sub" id="activeSub"><span style="color:#3FB950;font-weight:600;">Qwen 3.6 MoE (A3B): Ready</span></div>
       </div>
       <div class="status-dot" id="topStatusDot" style="margin: 0 4px;" title="Status"></div>
     </div>
@@ -1961,44 +1961,25 @@ think::before {
     </div>
 
     <!-- Centered Context / Slot Status Badge (cleanly elevated above toolbar) -->
-    <div class="input-hint" id="token-count">Context: 4K · 4 Slots (100% GPU)</div>
+    <div class="input-hint" id="token-count">Context: 8K · 16 Slots (100% GPU)</div>
 
     <!-- Centered Toolbar for Mode toggles (aligned with input container width) -->
     <div class="input-top-bar">
-      <button class="img-phd-btn" id="imgPhdBtn" onclick="toggleRxMode()" title="Activar / Desactivar Modo Imagenología Médica (PhD)">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/></svg>
-        <span>Img PhD mode</span>
-      </button>
+      <div class="speed-indicator" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--green);background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:20px;padding:3px 10px;font-weight:600;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+        <span>Modo Texto Puro Ultra-Rápido (~30 t/s)</span>
+      </div>
     </div>
 
     <div class="input-container">
-      <input type="file" id="fileInput" accept="image/*,.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.jsx,.tsx,.py,.sh,.bash,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r" style="display:none" onchange="handleFileSelect(event)">
+      <input type="file" id="fileInput" accept=".pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.jsx,.tsx,.py,.sh,.bash,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r" style="display:none" onchange="handleFileSelect(event)">
       <div class="attach-menu-wrapper" style="position:relative; display:flex; align-items:center;">
-        <button class="attach-btn" id="attachBtn" onclick="toggleAttachMenu(event)" aria-label="Attach" title="Adjuntar Archivos y Visión" style="color:var(--text-muted); transition: color 0.2s;">
+        <button class="attach-btn" id="attachBtn" onclick="toggleAttachMenu(event)" aria-label="Attach" title="Adjuntar Archivos y Código" style="color:var(--text-muted); transition: color 0.2s;">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
         </button>
         <div class="attach-menu" id="attachMenu">
           <div class="attach-menu-header">
-            <span class="attach-menu-badge">Visión + Docs + RX</span>
-          </div>
-          <div class="attach-menu-item" onclick="toggleRxMode(true); triggerFileInput('image/*,application/pdf');">
-            <div class="attach-item-icon" style="background:rgba(6,182,212,0.2);color:#38bdf8;">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="3"/></svg>
-            </div>
-            <div class="attach-item-info">
-              <div class="attach-item-title" style="color:#38bdf8;font-weight:700;">Modo Imagenología RX (PhD)</div>
-              <div class="attach-item-desc">Radiografías, TAC, RM, Ecografías o Informes PDF Médicos</div>
-            </div>
-          </div>
-          <div class="attach-menu-divider"></div>
-          <div class="attach-menu-item" onclick="triggerFileInput('image/*')">
-            <div class="attach-item-icon" style="background:rgba(236,72,153,0.15);color:var(--secondary);">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-            </div>
-            <div class="attach-item-info">
-              <div class="attach-item-title">Imágenes y Visión Multimodal</div>
-              <div class="attach-item-desc">PNG, JPG, WEBP, GIF, SVG (Comprensión, OCR, Diagramas)</div>
-            </div>
+            <span class="attach-menu-badge">Documentos y Código</span>
           </div>
           <div class="attach-menu-item" onclick="triggerFileInput('.pdf,.txt,.md')">
             <div class="attach-item-icon" style="background:rgba(6,182,212,0.15);color:var(--cyan);">
@@ -2028,13 +2009,13 @@ think::before {
             </div>
           </div>
           <div class="attach-menu-divider"></div>
-          <div class="attach-menu-item" onclick="triggerFileInput('image/*,.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.jsx,.tsx,.py,.sh,.bash,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r')">
+          <div class="attach-menu-item" onclick="triggerFileInput('.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.jsx,.tsx,.py,.sh,.bash,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r')">
             <div class="attach-item-icon" style="background:rgba(255,255,255,0.08);color:#fff;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             </div>
             <div class="attach-item-info">
               <div class="attach-item-title">Todos los Archivos Admitidos</div>
-              <div class="attach-item-desc">Seleccionar cualquier formato compatible</div>
+              <div class="attach-item-desc">Documentos, tablas, bases de datos y código fuente</div>
             </div>
           </div>
         </div>
@@ -2072,7 +2053,7 @@ think::before {
       <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; font-size:12px;">
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Modelo Activo</span>
-          <strong style="color:#fff; font-size:12px;">Gemma 4 26B-A4B MoE Uncensored</strong>
+          <strong style="color:#fff; font-size:12px;">Qwen 3.6 35B-A3B MoE (Q3_K_M)</strong>
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Procesador / GPU</span>
@@ -2080,11 +2061,11 @@ think::before {
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Residencia en VRAM</span>
-          <strong style="color:var(--green); font-size:12px;">100% GPU (17 GB fijos)</strong>
+          <strong style="color:var(--green); font-size:12px;">100% GPU (15.9 GB fijos · 8.1 GB libres)</strong>
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Concurrencia & Contexto</span>
-          <strong style="color:var(--secondary); font-size:12px;">MoE 4B Active · 4K Ctx (1 Slot Dedicated)</strong>
+          <strong style="color:var(--secondary); font-size:12px;">MoE 3B Active · 8K Ctx (16 Paralelos · GQA)</strong>
         </div>
         <div style="background:rgba(0,0,0,0.25); padding:9px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.05);">
           <span style="color:var(--muted); display:block; font-size:10px; margin-bottom:2px;">Sandbox de Código</span>
@@ -2210,7 +2191,7 @@ think::before {
       </div>
       <div style="display:flex; justify-content:space-between;">
         <span style="color:var(--muted);">Modelo de Lenguaje:</span>
-        <span style="color:var(--green); font-weight:600;">Gemma 4 26B-A4B MoE (17GB fijos VRAM)</span>
+        <span style="color:var(--green); font-weight:600;">Qwen 3.6 35B-A3B MoE (15.9GB fijos VRAM · Q3_K_M)</span>
       </div>
     </div>
 
@@ -2525,6 +2506,7 @@ const ICONS = {
 };
 
 const MODEL_META = {
+  'qwen36-yzai:latest': { badge:'35B MoE', cls:'badge-green', desc:'Qwen 3.6 35B-A3B (MoE · 3B Active · GQA)', speed:'~30 t/s' },
   'gemma4-vision:latest': { badge:'26B MoE', cls:'badge-purple', desc:'Gemma 4 26B-A4B Uncensored (MoE · 4B Active · MTP)', speed:'~23 t/s' },
   'gemma4:latest': { badge:'26B MoE', cls:'badge-purple', desc:'Gemma 4 26B-A4B Uncensored (MoE · 4B Active · MTP)', speed:'~23 t/s' }
 };
@@ -2533,9 +2515,9 @@ const MODEL_META = {
 let OLLAMA_URL   = '';
 const SEARCH_URL = 'https://search-yzai.yepzhi.com';
 
-let selectedModel = 'gemma4-vision:latest';
-const FIXED_CTX   = 4096; // 4K MoE / Hybrid SWA (100% GPU VRAM)
-let selectedModelDesc = 'Gemma 4 26B-A4B MoE Uncensored (4K Ctx · 100% GPU VRAM)';
+let selectedModel = 'qwen36-yzai:latest';
+const FIXED_CTX   = 8192; // 8K MoE / GQA (100% GPU VRAM)
+let selectedModelDesc = 'Qwen 3.6 35B-A3B MoE (8K Ctx · 100% GPU VRAM)';
 let messages      = [];
 let conversations = [];
 let currentConvId = Date.now().toString();
@@ -2552,7 +2534,7 @@ let persistentMicStream = null;
 function removeAttachedDoc() {
   currentAttachedDoc = null;
   document.getElementById('docPreviewContainer').style.display = 'none';
-  document.getElementById('token-count').textContent = 'Context: 4K · 4 Slots (100% GPU)';
+  document.getElementById('token-count').textContent = 'Context: 8K · 16 Slots (100% GPU)';
 }
 
 const esc = (str) => String(str).replace(/[&<>"']/g, match => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
@@ -2573,40 +2555,10 @@ function processFile(file) {
   const ext = (file.name || '').split('.').pop().toLowerCase();
   const isImg = (file.type && file.type.startsWith('image/')) || ['png','jpg','jpeg','webp','gif','bmp','tiff','svg','heic','heif'].includes(ext);
 
-  // ── 1. IMAGES → resize+compress, base64 stored internally ──
+  // ── 1. IMAGES → Text-only guidance for ultra speed ──
   if (isImg) {
-    document.getElementById('token-count').textContent = 'Processing image...';
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const rawData = ev.target.result;
-      currentImageBase64 = rawData.split(',')[1];
-      document.getElementById('imgPreview').src = rawData;
-      document.getElementById('imgPreviewContainer').style.display = 'block';
-      document.getElementById('token-count').textContent = 'Image ready';
-
-      const img = new Image();
-      img.onload = () => {
-        let w = img.naturalWidth, h = img.naturalHeight;
-        if (w > IMG_MAX_PX || h > IMG_MAX_PX) {
-          const ratio = Math.min(IMG_MAX_PX/w, IMG_MAX_PX/h);
-          w = Math.round(w * ratio); h = Math.round(h * ratio);
-        }
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(img, 0, 0, w, h);
-        const jpegData = canvas.toDataURL('image/jpeg', 0.85);
-        currentImageBase64 = jpegData.split(',')[1];
-        currentImageDimensions = { w, h };
-        currentImageOcrText = '';
-        document.getElementById('imgPreview').src = jpegData;
-        const kb = Math.round(currentImageBase64.length * 0.75 / 1024);
-        document.getElementById('token-count').textContent = `Image ready — ${w}×${h}px, ~${kb}KB`;
-        document.getElementById('sendBtn').disabled = false;
-      };
-      img.src = rawData;
-    };
-    reader.readAsDataURL(file);
+    document.getElementById('token-count').innerHTML =
+      `<span style="color:var(--yellow);display:inline-flex;align-items:center;gap:6px;">${ICONS.warn} Modo Texto Puro Activo (Qwen 3.6 MoE): Imágenes deshabilitadas para máxima concurrencia (~30 t/s). Adjunta archivos PDF o texto.</span>`;
     return;
   }
 
@@ -2865,8 +2817,8 @@ async function checkServicesHealth(forceCheck = false) {
   const drawerText = document.getElementById('statusText');
 
   if (ollamaOk) {
-    if (topDot) { topDot.style.background = '#3FB950'; topDot.title = 'Server Live · Gemma 4 26B MoE Ready'; }
-    if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Gemma 4 MoE (A4B): Ready</span>';
+    if (topDot) { topDot.style.background = '#3FB950'; topDot.title = 'Server Live · Qwen 3.6 35B MoE Ready'; }
+    if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Qwen 3.6 MoE (A3B): Ready</span>';
     if (drawerDot) drawerDot.style.background = '#3FB950';
     if (drawerText) drawerText.innerHTML = 'AI Server <strong style="color:#3FB950">operational and ready</strong>';
     updateModelHeader();
@@ -2910,15 +2862,16 @@ async function loadModels() {
     allModels = models;
 
     if (models.length) {
-      const gemmaModel = models.find(m => m.name === 'gemma4-vision:latest') 
-        || models.find(m => m.name.includes('gemma4-vision'))
-        || models.find(m => m.name.toLowerCase().includes('gemma4') && !m.name.includes('.bak'))
+      const qwenModel = models.find(m => m.name === 'qwen36-yzai:latest') 
+        || models.find(m => m.name.includes('qwen36'))
+        || models.find(m => m.name.toLowerCase().includes('qwen') && !m.name.includes('.bak'))
+        || models.find(m => m.name === 'gemma4-vision:latest')
         || models[0];
-      selectedModel = gemmaModel ? gemmaModel.name : 'gemma4-vision:latest';
+      selectedModel = qwenModel ? qwenModel.name : 'qwen36-yzai:latest';
     }
 
     lastOnlineTimestamp = Date.now();
-    setStatus(true, `Server Live · Gemma 4 26B MoE Multimodal (Vision+Text)`);
+    setStatus(true, `Server Live · Qwen 3.6 35B MoE Ultra-Speed Text`);
     updateModelHeader();
   } catch(e) {
     const offlineSec = Math.floor((Date.now() - lastOnlineTimestamp) / 1000);
@@ -2968,12 +2921,12 @@ function setStatus(ok, text) {
 
 function updateModelHeader() {
   const activeName = document.getElementById('activeName');
-  if (activeName) activeName.textContent = '@yepzhi AI · Gemma 4 26B MoE';
+  if (activeName) activeName.textContent = '@yepzhi AI · Qwen 3.6 35B MoE';
   const activeSub = document.getElementById('activeSub');
-  if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Gemma 4 MoE (A4B): Ready</span>';
+  if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Qwen 3.6 MoE (A3B): Ready</span>';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 4K · 4 Slots (100% GPU)';
+    tokenCount.textContent = 'Context: 8K · 16 Slots (100% GPU)';
   }
 }
 
@@ -2981,7 +2934,7 @@ function renderSheetModels(models) {}
 function pickModelWithPassword(name) {}
 function updateCtxDisplay() { updateModelHeader(); }
 function pickModel(name, silent) {
-  selectedModel = name || 'gemma4-vision:latest';
+  selectedModel = name || 'qwen36-yzai:latest';
   updateModelHeader();
 }
 
@@ -3401,7 +3354,7 @@ REGLAS CRÍTICAS DE SÍNTESIS:
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: selectedModel || 'gemma4-vision:latest',
+        model: selectedModel || 'qwen36-yzai:latest',
         messages: [
           { role: 'system', content: systemInstruction },
           { role: 'user', content: `Historial reciente:\n${contextSlice}\n\nNueva petición del usuario que requiere búsqueda en vivo: "${userPrompt}"\n\nCadena de búsqueda web óptima:` }
@@ -3528,7 +3481,7 @@ async function sendMessage() {
     return;
   }
   if (isStreaming) return;
-  if (!selectedModel) selectedModel = 'gemma4-vision:latest';
+  if (!selectedModel) selectedModel = 'qwen36-yzai:latest';
   if (!checkRateLimit()) return;
 
   input.value = ''; autoResize(input);
@@ -3761,7 +3714,7 @@ async function sendMessage() {
   let retryCount = 0;
   async function attemptFetch() {
     try {
-      const modelForCall = selectedModel || 'gemma4-vision:latest';
+      const modelForCall = selectedModel || 'qwen36-yzai:latest';
       const chatOptions = { 
         num_ctx: FIXED_CTX,
         think: false
