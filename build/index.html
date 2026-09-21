@@ -115,7 +115,7 @@
 html { height: 100%; }
 body {
   font-family: var(--font-body);
-  background: #ffffff;
+  background: #061a70;
   color: var(--text-main);
   height: 100%;
   overflow: hidden;
@@ -130,7 +130,7 @@ body {
   letter-spacing: -0.015em;
 }
 
-/* ── stemOS Radiant Sky Dome & Aurora Atmosphere ── */
+/* ── stemOS All-Blue Radiant Sky Dome & Math Aurora Atmosphere ── */
 .stemos-atmosphere {
   position: fixed;
   inset: 0;
@@ -138,61 +138,57 @@ body {
   z-index: 0;
   overflow: hidden;
   background: linear-gradient(180deg, 
-    #061a70 0%, 
-    #0d2b99 12%, 
-    #0056e0 26%, 
-    #0284c7 48%, 
-    #38bdf8 68%, 
-    #7dd3fc 84%, 
-    #e0f2fe 95%, 
-    #ffffff 100%
+    #051557 0%, 
+    #061a70 14%, 
+    #0a2894 32%, 
+    #004eb8 52%, 
+    #026ba6 72%, 
+    #03437d 88%, 
+    #051859 100%
   );
+}
+.aurora-math-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
 }
 .stemos-sky-dome {
   position: absolute;
   inset: -60px;
-  background-image: linear-gradient(180deg, 
-    rgba(6, 26, 112, 0.92) 0%, 
-    rgba(13, 43, 153, 0.90) 15%, 
-    rgba(0, 86, 224, 0.88) 32%, 
-    rgba(2, 132, 199, 0.85) 52%, 
-    rgba(56, 189, 248, 0.80) 72%, 
-    rgba(125, 211, 252, 0.60) 88%, 
-    rgba(255, 255, 255, 0) 100%
-  );
-  filter: blur(45px);
+  background-image: radial-gradient(circle at 50% 12%, rgba(56, 189, 248, 0.32) 0%, rgba(2, 132, 199, 0.18) 45%, transparent 75%);
+  filter: blur(40px);
   pointer-events: none;
+  z-index: 2;
 }
-.stemos-aurora-orb {
-  position: absolute;
-  filter: blur(80px);
-  border-radius: 50%;
-  pointer-events: none;
-  opacity: 0.45;
-  animation: cs-float 22s infinite alternate ease-in-out;
+
+/* ── SOFT APPEAR & CONSTRUCTION REVEAL (stemOS Editorial Physics) ── */
+.soft-element {
+  opacity: 0;
+  transform: translateY(24px) scale(0.97);
+  filter: blur(12px);
+  animation: softConstruct 1.05s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: var(--delay, 0.15s);
+  will-change: transform, opacity, filter;
 }
-.stemos-orb-1 {
-  width: 650px;
-  height: 650px;
-  background: radial-gradient(circle, rgba(255, 255, 255, 0.55) 0%, rgba(125, 211, 252, 0.3) 50%, transparent 70%);
-  top: -10%;
-  left: -15%;
-}
-.stemos-orb-2 {
-  width: 580px;
-  height: 580px;
-  background: radial-gradient(circle, rgba(16, 185, 129, 0.38) 0%, rgba(56, 189, 248, 0.28) 50%, transparent 70%);
-  bottom: -10%;
-  right: -10%;
-  animation-delay: -7s;
-}
-.stemos-orb-3 {
-  width: 420px;
-  height: 420px;
-  background: radial-gradient(circle, rgba(56, 189, 248, 0.38) 0%, transparent 70%);
-  top: 35%;
-  left: 50%;
-  animation-delay: -12s;
+
+@keyframes softConstruct {
+  0% {
+    opacity: 0;
+    transform: translateY(26px) scale(0.96);
+    filter: blur(14px);
+  }
+  50% {
+    opacity: 0.85;
+    filter: blur(2.5px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0px);
+  }
 }
 @keyframes cs-float {
   0% { transform: translate(0, 0) scale(1); }
@@ -421,19 +417,20 @@ body {
   font-family: var(--font-display);
   font-size: clamp(2rem, 4vw, 2.6rem);
   font-weight: 800;
-  color: #0f172a;
+  color: #ffffff !important;
+  text-shadow: 0 4px 24px rgba(4, 15, 60, 0.5);
   margin-bottom: 10px;
   letter-spacing: -0.02em;
-  animation: welcomeAppear 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
 }
 .welcome h2 span, .welcome-title span {
-  color: #10b981;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #38bdf8;
+  background: linear-gradient(135deg, #38bdf8 0%, #34d399 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
-.welcome p {
-  font-size: 15px; line-height: 1.6; color: #475569; max-width: 460px; font-weight: 400;
+.welcome p, .welcome-subtitle {
+  font-size: 15px; line-height: 1.6; color: #e0f2fe !important; max-width: 520px; font-weight: 500;
+  text-shadow: 0 2px 12px rgba(4, 15, 60, 0.6);
 }
 .bilingual-badge {
   display: inline-flex;
@@ -826,11 +823,13 @@ think::before {
 .input-wrapper {
   position: absolute; bottom: 0; left: 0; right: 0;
   padding: 16px 16px calc(24px + var(--safe-b, 0px));
-  background: linear-gradient(to top, rgba(248,250,252,0.98) 40%, rgba(248,250,252,0.8) 75%, transparent);
+  background: linear-gradient(to top, rgba(4, 15, 60, 0.92) 35%, rgba(4, 15, 60, 0.55) 75%, transparent 100%);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   pointer-events: none; z-index: 30; display: flex; flex-direction: column; align-items: center;
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
-/* Solid dark underlay shield to prevent transparent bleed-through behind iOS keyboard toolbar */
+/* Solid deep blue underlay shield */
 .input-wrapper::after {
   content: '';
   position: absolute;
@@ -839,18 +838,32 @@ think::before {
   right: 0;
   height: 100vh;
   height: 100dvh;
-  background: #f8fafc;
+  background: #040f3c;
   pointer-events: none;
   z-index: -1;
 }
 .input-container {
   width: 100%; max-width: 880px; pointer-events: all;
-  background: #ffffff;
-  border: 1px solid rgba(16, 185, 129, 0.24); border-radius: 22px;
-  padding: 10px 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.05), 0 2px 8px rgba(16, 185, 129, 0.05);
-  display: flex; align-items: flex-end; gap: 10px; transition: border-color 0.3s, box-shadow 0.3s;
+  background: rgba(255, 255, 255, 0.97) !important;
+  backdrop-filter: blur(28px) saturate(200%) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(200%) !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+  border-radius: 24px !important;
+  padding: 12px 18px;
+  box-shadow: 
+    0 24px 50px -10px rgba(0, 0, 0, 0.42), 
+    0 0 25px rgba(56, 189, 248, 0.28), 
+    inset 0 2px 2px rgba(255, 255, 255, 1) !important;
+  display: flex; align-items: flex-end; gap: 10px;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
-.input-container:focus-within { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2), 0 12px 35px rgba(16, 185, 129, 0.12); }
+.input-container:focus-within {
+  border-color: #38bdf8 !important;
+  box-shadow: 
+    0 28px 60px -8px rgba(0, 0, 0, 0.5), 
+    0 0 35px rgba(56, 189, 248, 0.45), 
+    inset 0 2px 2px rgba(255, 255, 255, 1) !important;
+}
 
 .attach-btn {
   background: none; border: none; color: var(--muted); padding: 8px; border-radius: 12px; cursor: pointer; transition: all 0.2s; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
@@ -1071,6 +1084,9 @@ think::before {
   stroke: #10b981;
 }
 
+.input-hint:empty {
+  display: none !important;
+}
 .input-hint {
   text-align: center;
   font-size: 11.5px;
@@ -1530,11 +1546,54 @@ think::before {
 
 /* stemOS Top Bar Fused Capsule */
 .top-bar {
-  background: rgba(255, 255, 255, 0.92) !important;
-  backdrop-filter: blur(20px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(20px) saturate(180%) !important;
-  border-bottom: 1px solid rgba(14, 165, 233, 0.16) !important;
-  box-shadow: 0 4px 20px rgba(13, 43, 153, 0.05) !important;
+  background: rgba(4, 15, 60, 0.78) !important;
+  backdrop-filter: blur(24px) saturate(190%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(190%) !important;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.22) !important;
+  box-shadow: 0 4px 25px rgba(2, 6, 23, 0.4) !important;
+}
+
+.stemos-brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+.stemos-squircle-logo {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #10b981 0%, #0284c7 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+}
+.stemos-brand-text {
+  font-family: var(--font-head);
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #ffffff !important;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  letter-spacing: -0.02em;
+}
+.stemos-brand-text span:first-child {
+  color: #38bdf8 !important;
+}
+.stemos-pro-badge {
+  font-size: 10px;
+  font-weight: 700;
+  color: #10b981 !important;
+  background: rgba(16, 185, 129, 0.15) !important;
+  border: 1px solid rgba(16, 185, 129, 0.35) !important;
+  padding: 2px 8px;
+  border-radius: 99px;
+  letter-spacing: 0.02em;
+  font-family: var(--font-mono);
 }
 
 /* stemOS Model Telemetry Capsule */
@@ -2091,7 +2150,7 @@ think::before {
 </svg>
 
 <!-- stemOS Radiant Sky Dome Atmosphere -->
-<div class="stemos-atmosphere" aria-hidden="true">
+<div class="stemos-atmosphere" id="stemosAtmosphere" aria-hidden="true">
   <div class="stemos-sky-dome"></div>
   <div class="stemos-aurora-orb stemos-orb-1"></div>
   <div class="stemos-aurora-orb stemos-orb-2"></div>
@@ -2184,7 +2243,7 @@ think::before {
 <div class="app">
 
   <!-- TOP BAR (stemOS Style Fused Capsule) -->
-  <div class="top-bar">
+  <div class="top-bar soft-element" style="--delay: 0.05s;">
     <div style="display:flex; align-items:center; gap:10px;">
       <button class="menu-btn" onclick="toggleDrawer()" aria-label="Menu" title="Conversaciones y Ajustes">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
@@ -2240,7 +2299,7 @@ think::before {
       <div class="welcome" id="welcome">
         <div class="hero-brand-section">
           <div class="hero-logo-aura"></div>
-          <div class="hero-emblem-squircle">
+          <div class="hero-emblem-squircle soft-element" style="--delay: 0.15s;">
             <!-- Green eco leaf + AI icon (logo eco hoja) -->
             <svg width="42" height="42" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.5 10-10 10Z" fill="url(#ecoLeafGrad)"/>
@@ -2248,9 +2307,9 @@ think::before {
               <circle cx="16" cy="8" r="2" fill="#ffffff" opacity="0.9"/>
             </svg>
           </div>
-          <h2 class="welcome-title">Welcome to <span>yzai</span></h2>
-          <p class="welcome-subtitle">Ultra efficient AI assistant powered by local hardware.</p>
-          <div class="stemos-bilingual-badge">
+          <h2 class="welcome-title soft-element" style="--delay: 0.25s;">Welcome to <span>yzai</span></h2>
+          <p class="welcome-subtitle soft-element" style="--delay: 0.35s;">Ultra efficient AI assistant powered by local hardware.</p>
+          <div class="stemos-bilingual-badge soft-element" style="--delay: 0.45s;">
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"/></svg>
             <span>Español &amp; English · Escribe en el idioma que prefieras</span>
           </div>
@@ -2258,73 +2317,73 @@ think::before {
 
         <!-- stemOS Hardware & Eco Telemetry HUD -->
         <div class="stemos-telemetry-grid">
-          <!-- Card 1: 15W / 80W Eco Draw -->
-          <div class="stemos-telemetry-card" title="Consumo ultra-eficiente de energía">
+          <!-- Card 1: Eco Power -->
+          <div class="stemos-telemetry-card soft-element" style="--delay: 0.55s;" title="Eco Power · Consumo ultra-eficiente">
             <div class="card-top">
-              <span class="stemos-mcp-badge" style="background:rgba(16,185,129,0.12);color:#059669;border-color:rgba(16,185,129,0.25);display:inline-flex;align-items:center;gap:4px;">
+              <span class="stemos-mcp-badge" style="background:rgba(16,185,129,0.15);color:#059669;border-color:rgba(16,185,129,0.3);display:inline-flex;align-items:center;gap:4px;">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
                 <span>ECO POWER</span>
               </span>
-              <div class="card-icon" style="background:rgba(16,185,129,0.12);color:#10b981;">
+              <div class="card-icon" style="background:rgba(16,185,129,0.14);color:#10b981;">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
               </div>
             </div>
-            <div class="card-val">15W <small>reposo</small> <span style="color:#cbd5e1;font-weight:400;">/</span> 80W <small style="color:#0284c7;font-weight:700;">máx</small></div>
+            <div class="card-val">15W <small>idle</small> <span style="color:#94a3b8;font-weight:400;">/</span> 80W <small style="color:#0284c7;font-weight:700;">max</small></div>
             <div class="micro-bar"><div class="micro-bar-fill" style="width:25%;background:linear-gradient(90deg,#10b981,#0284c7);"></div></div>
-            <div class="card-sub">Ultra-eficiente 7nm · Mini PC Node</div>
+            <div class="card-sub">Ultra-efficient 7nm · Node</div>
           </div>
 
-          <!-- Card 2: 100 usuarios simultáneos -->
-          <div class="stemos-telemetry-card" title="Capacidad de concurrencia de slots">
+          <!-- Card 2: Concurrent Up to -->
+          <div class="stemos-telemetry-card soft-element" style="--delay: 0.65s;" title="Concurrencia de usuarios simultáneos">
             <div class="card-top">
-              <span class="stemos-mcp-badge" style="background:rgba(14,165,233,0.12);color:#0284c7;border-color:rgba(14,165,233,0.25);display:inline-flex;align-items:center;gap:4px;">
+              <span class="stemos-mcp-badge" style="background:rgba(14,165,233,0.15);color:#0284c7;border-color:rgba(14,165,233,0.3);display:inline-flex;align-items:center;gap:4px;">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-                <span>CONCURRENCIA</span>
+                <span>CONCURRENT UP TO</span>
               </span>
-              <div class="card-icon" style="background:rgba(14,165,233,0.12);color:#0ea5e9;">
+              <div class="card-icon" style="background:rgba(14,165,233,0.14);color:#0ea5e9;">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
               </div>
             </div>
-            <div class="card-val">100 <small>usuarios</small></div>
+            <div class="card-val">100 <small>users</small></div>
             <div class="micro-bar"><div class="micro-bar-fill" style="width:85%;background:linear-gradient(90deg,#0ea5e9,#38bdf8);"></div></div>
-            <div class="card-sub">16 Slots Concurrentes · 0 Espera</div>
+            <div class="card-sub">at same time</div>
           </div>
 
-          <!-- Card 3: Powering stemBOT -->
-          <div class="stemos-telemetry-card" title="Motor neuronal que alimenta la plataforma stemOS / stemBOT">
+          <!-- Card 3: stemOS AI Core -->
+          <div class="stemos-telemetry-card soft-element" style="--delay: 0.75s;" title="stemOS AI Core · Feynman Engine & JóvenesSTEM Core">
             <div class="card-top">
-              <span class="stemos-mcp-badge" style="background:rgba(99,102,241,0.12);color:#4f46e5;border-color:rgba(99,102,241,0.25);display:inline-flex;align-items:center;gap:4px;">
+              <span class="stemos-mcp-badge" style="background:rgba(99,102,241,0.15);color:#4f46e5;border-color:rgba(99,102,241,0.3);display:inline-flex;align-items:center;gap:4px;">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>
-                <span>stemOS CORE</span>
+                <span>STEMOS AI CORE</span>
               </span>
-              <div class="card-icon" style="background:rgba(99,102,241,0.12);color:#6366f1;">
+              <div class="card-icon" style="background:rgba(99,102,241,0.14);color:#6366f1;">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z"/><path d="M12 22V12"/><path d="M21 7l-9 5-9-5"/></svg>
               </div>
             </div>
-            <div class="card-val" style="color:#0284c7;font-size:1.18rem;">Powering <span style="color:#059669;">stemBOT</span></div>
+            <div class="card-val" style="font-size:1.15rem;color:#0284c7;">Feynman Engine</div>
             <div class="micro-bar"><div class="micro-bar-fill" style="width:100%;background:linear-gradient(90deg,#6366f1,#10b981);"></div></div>
-            <div class="card-sub">MoE 35B Local · Privacidad Total</div>
+            <div class="card-sub">JóvenesSTEM AI Core · stemBOT Engine</div>
           </div>
 
-          <!-- Card 4: Ultra-Speed Throughput -->
-          <div class="stemos-telemetry-card" title="Velocidad y latencia de inferencia">
+          <!-- Card 4: Mixture of Experts with -->
+          <div class="stemos-telemetry-card soft-element" style="--delay: 0.85s;" title="Mixture of Experts with 35B Parameters">
             <div class="card-top">
-              <span class="stemos-mcp-badge" style="background:rgba(245,158,11,0.12);color:#d97706;border-color:rgba(245,158,11,0.25);display:inline-flex;align-items:center;gap:4px;">
+              <span class="stemos-mcp-badge" style="background:rgba(245,158,11,0.15);color:#d97706;border-color:rgba(245,158,11,0.3);display:inline-flex;align-items:center;gap:4px;">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                <span>ULTRA-SPEED</span>
+                <span>MIXTURE OF EXPERTS WITH</span>
               </span>
-              <div class="card-icon" style="background:rgba(245,158,11,0.12);color:#f59e0b;">
+              <div class="card-icon" style="background:rgba(245,158,11,0.14);color:#f59e0b;">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
               </div>
             </div>
-            <div class="card-val">~30 <small>tokens/s</small></div>
+            <div class="card-val">35B <small>parameters</small></div>
             <div class="micro-bar"><div class="micro-bar-fill" style="width:90%;background:linear-gradient(90deg,#f59e0b,#10b981);"></div></div>
-            <div class="card-sub">Modo Texto Puro · 8K Ctx VRAM</div>
+            <div class="card-sub">Ultra-Speed · ~30 tokens/s</div>
           </div>
         </div>
 
         <div class="welcome-chips-grid">
-          <div class="welcome-chip-card" onclick="quickPrompt('Help me design a clean, robust, and high-performance architecture for...')">
+          <div class="welcome-chip-card soft-element" style="--delay: 0.95s;" onclick="quickPrompt('Help me design a clean, robust, and high-performance architecture for...')">
             <span class="chip-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             </span>
@@ -2333,7 +2392,7 @@ think::before {
               <span>Clean design, robust APIs and modern frameworks</span>
             </div>
           </div>
-          <div class="welcome-chip-card" onclick="quickPrompt('Explain in depth the mechanics and mathematics of transformers and attention mechanisms...')">
+          <div class="welcome-chip-card soft-element" style="--delay: 1.05s;" onclick="quickPrompt('Explain in depth the mechanics and mathematics of transformers and attention mechanisms...')">
             <span class="chip-icon">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z"/></svg>
             </span>
@@ -2373,20 +2432,17 @@ think::before {
     </div>
 
     <!-- Centered Context / Slot Status Badge (cleanly elevated above toolbar) -->
-    <div class="input-hint" id="token-count">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align: -2px; margin-right: 4px;"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.5 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>
-      <span>15W reposo · 80W máx · 100 usuarios simultáneos · Powering stemBOT · 8K Ctx · 16 Slots · 100% GPU VRAM</span>
-    </div>
+    <div class="input-hint" id="token-count" style="display:none;"></div>
 
     <!-- Centered Toolbar for Mode toggles (aligned with input container width) -->
-    <div class="input-top-bar">
+    <div class="input-top-bar soft-element" style="--delay: 1.15s;">
       <div class="speed-indicator" style="display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--green);background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.25);border-radius:20px;padding:3px 10px;font-weight:600;">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         <span>Modo Texto Puro Ultra-Rápido (~30 t/s)</span>
       </div>
     </div>
 
-    <div class="input-container">
+    <div class="input-container soft-element" style="--delay: 1.25s;">
       <input type="file" id="fileInput" accept=".pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.jsx,.tsx,.py,.sh,.bash,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r" style="display:none" onchange="handleFileSelect(event)">
       <div class="attach-menu-wrapper" style="position:relative; display:flex; align-items:center;">
         <button class="attach-btn" id="attachBtn" onclick="toggleAttachMenu(event)" aria-label="Attach" title="Adjuntar Archivos y Código" style="color:var(--text-muted); transition: color 0.2s;">
@@ -2904,6 +2960,264 @@ think::before {
 </div>
 
 <script>
+// ── stemOS / JSweb Math Aurora Background Canvas ─────────
+class AuroraCanvas {
+  constructor(container) {
+    if (!container) return;
+    this.container = container;
+    this.canvas = document.createElement('canvas');
+    this.ctx = this.canvas.getContext('2d');
+    this.orbs = [];
+    this.dots = [];
+    this.mouse = { x: -9999, y: -9999 };
+    this.time = 0;
+    this.raf = null;
+    this._setup();
+  }
+
+  _setup() {
+    const c = this.canvas;
+    Object.assign(c.style, {
+      position: 'absolute',
+      inset: '0',
+      width: '100%',
+      height: '100%',
+      pointerEvents: 'none',
+      zIndex: '1',
+    });
+    this.container.insertBefore(c, this.container.firstChild);
+
+    this._resize();
+    this._initOrbs();
+    this._initDots();
+
+    this.lastUserInteraction = 0;
+    this.isVisible = true;
+
+    if (typeof IntersectionObserver !== 'undefined') {
+      this.io = new IntersectionObserver((entries) => {
+        this.isVisible = entries[0] && entries[0].isIntersecting;
+        if (this.isVisible && !this.raf) {
+          this.raf = requestAnimationFrame(() => this._tick());
+        }
+      }, { threshold: 0.05 });
+      this.io.observe(this.container);
+    }
+
+    window.addEventListener('resize', () => { this._resize(); this._initDots(); });
+    window.addEventListener('mousemove', (e) => {
+      const rect = this.canvas.getBoundingClientRect();
+      this.mouse.x = e.clientX - rect.left;
+      this.mouse.y = e.clientY - rect.top;
+      this.lastUserInteraction = Date.now();
+    });
+
+    const handleTouch = (e) => {
+      if (!e.touches || !e.touches[0]) return;
+      const rect = this.canvas.getBoundingClientRect();
+      this.mouse.x = e.touches[0].clientX - rect.left;
+      this.mouse.y = e.touches[0].clientY - rect.top;
+      this.lastUserInteraction = Date.now();
+    };
+    window.addEventListener('touchstart', handleTouch, { passive: true });
+    window.addEventListener('touchmove', handleTouch, { passive: true });
+
+    this._tick();
+  }
+
+  _resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = this.container.offsetWidth || window.innerWidth;
+    const h = this.container.offsetHeight || window.innerHeight;
+    this.canvas.width  = w * dpr;
+    this.canvas.height = h * dpr;
+    this.canvas.style.width  = w + 'px';
+    this.canvas.style.height = h + 'px';
+    this.ctx.scale(dpr, dpr);
+    this.W = w;
+    this.H = h;
+  }
+
+  _initOrbs() {
+    const BRAND = {
+      primary:  [24, 104, 255],
+      teal:     [0,  168, 150],
+      mid:      [26, 157, 255],
+      deep:     [6,   26, 112],
+      accent:   [56, 189, 248],
+    };
+    const colorSets = [
+      [BRAND.primary, BRAND.mid],
+      [BRAND.teal, BRAND.accent],
+      [BRAND.mid, BRAND.teal],
+      [BRAND.primary, BRAND.deep],
+    ];
+    this.orbs = colorSets.map((colors, i) => ({
+      x: (this.W || 800) * (0.2 + 0.25 * i),
+      y: (this.H || 600) * (0.2 + 0.2 * (i % 2)),
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.35,
+      r: 280 + i * 80,
+      colors,
+      phase: i * Math.PI * 0.5,
+    }));
+  }
+
+  _initDots() {
+    const isTouch = ('ontouchstart' in window) || (window.innerWidth < 768);
+    const spacing = isTouch ? 54 : 36;
+    this.dots = [];
+    const cols = Math.ceil(this.W / spacing) + 1;
+    const rows = Math.ceil(this.H / spacing) + 1;
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        this.dots.push({ x: c * spacing, y: r * spacing });
+      }
+    }
+  }
+
+  _tick() {
+    if (!this.isVisible) {
+      this.raf = null;
+      return;
+    }
+    this.time += 0.007;
+    const { ctx, W, H, time, mouse } = this;
+    if (!W || !H) {
+      this.raf = requestAnimationFrame(() => this._tick());
+      return;
+    }
+    ctx.clearRect(0, 0, W, H);
+
+    // — Draw Rich Gradient Orbs —
+    for (const orb of this.orbs) {
+      orb.x += orb.vx + Math.sin(time + orb.phase) * 0.45;
+      orb.y += orb.vy + Math.cos(time * 0.7 + orb.phase) * 0.3;
+      if (orb.x < -orb.r) orb.x = W + orb.r;
+      if (orb.x > W + orb.r) orb.x = -orb.r;
+      if (orb.y < -orb.r) orb.y = H + orb.r;
+      if (orb.y > H + orb.r) orb.y = -orb.r;
+
+      const t = (Math.sin(time * 0.6 + orb.phase) + 1) / 2;
+      const r1 = Math.round(orb.colors[0][0] + (orb.colors[1][0] - orb.colors[0][0]) * t);
+      const g1 = Math.round(orb.colors[0][1] + (orb.colors[1][1] - orb.colors[0][1]) * t);
+      const b1 = Math.round(orb.colors[0][2] + (orb.colors[1][2] - orb.colors[0][2]) * t);
+
+      const grad = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, orb.r);
+      grad.addColorStop(0,    `rgba(${r1},${g1},${b1},0.48)`);
+      grad.addColorStop(0.45, `rgba(${r1},${g1},${b1},0.24)`);
+      grad.addColorStop(0.8,  `rgba(${r1},${g1},${b1},0.08)`);
+      grad.addColorStop(1,    `rgba(${r1},${g1},${b1},0)`);
+      ctx.beginPath();
+      ctx.arc(orb.x, orb.y, orb.r, 0, Math.PI * 2);
+      ctx.fillStyle = grad;
+      ctx.fill();
+    }
+
+    // — Determine Active Focus Target (Autonomous Organic Lissajous Wandering or Mouse) —
+    const isTouchDevice = ('ontouchstart' in window) || (window.innerWidth < 768);
+    const isUserActive = (Date.now() - (this.lastUserInteraction || 0)) < 3000 && mouse.x > 0 && mouse.y > 0;
+
+    let targetX = mouse.x;
+    let targetY = mouse.y;
+
+    if (!isUserActive || (isTouchDevice && (mouse.x <= 0 || mouse.y <= 0))) {
+      targetX = (W * 0.5) + (W * 0.38) * Math.sin(time * 0.85) * Math.cos(time * 0.4);
+      targetY = (H * 0.45) + (H * 0.32) * Math.sin(time * 0.7 + 1.2);
+    }
+
+    const node2X = (W * 0.5) + (W * 0.30) * Math.cos(time * 0.65 + 2.2);
+    const node2Y = (H * 0.5) + (H * 0.25) * Math.sin(time * 0.8 + 0.5);
+
+    // — Interactive Constellation Mesh & Dot Grid —
+    const dotRadius = 1.6;
+    const influenceR = isTouchDevice ? 120 : 150;
+    const nearDots = [];
+    const nearDots2 = [];
+
+    for (const dot of this.dots) {
+      const dx = dot.x - targetX;
+      const dy = dot.y - targetY;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      const prox = Math.max(0, 1 - dist / influenceR);
+
+      const dx2 = dot.x - node2X;
+      const dy2 = dot.y - node2Y;
+      const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+      const prox2 = Math.max(0, 1 - dist2 / (influenceR * 0.85));
+
+      const maxProx = Math.max(prox, prox2 * 0.7);
+
+      const baseAlpha = 0.20 + 0.08 * Math.sin(time * 1.3 + dot.x * 0.02 + dot.y * 0.015);
+      ctx.beginPath();
+      ctx.arc(dot.x, dot.y, dotRadius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(39,126,255,${baseAlpha})`;
+      ctx.fill();
+
+      if (maxProx > 0) {
+        if (prox > 0) nearDots.push({ x: dot.x, y: dot.y, proximity: prox });
+        if (prox2 > 0) nearDots2.push({ x: dot.x, y: dot.y, proximity: prox2 });
+
+        ctx.beginPath();
+        ctx.arc(dot.x, dot.y, dotRadius + maxProx * 3.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(0,168,150,${maxProx * 0.9})`;
+        if (!isTouchDevice) {
+          ctx.shadowColor = '#00a896';
+          ctx.shadowBlur = maxProx * 10;
+        }
+        ctx.fill();
+        if (!isTouchDevice) {
+          ctx.shadowBlur = 0;
+        }
+      }
+    }
+
+    if (nearDots.length > 0) {
+      for (const nd of nearDots) {
+        ctx.beginPath();
+        ctx.moveTo(targetX, targetY);
+        ctx.lineTo(nd.x, nd.y);
+        ctx.strokeStyle = `rgba(39,126,255,${nd.proximity * 0.38})`;
+        ctx.lineWidth = nd.proximity * 1.5;
+        ctx.stroke();
+      }
+    }
+
+    if (nearDots2.length > 0) {
+      for (const nd of nearDots2) {
+        ctx.beginPath();
+        ctx.moveTo(node2X, node2Y);
+        ctx.lineTo(nd.x, nd.y);
+        ctx.strokeStyle = `rgba(0,168,150,${nd.proximity * 0.25})`;
+        ctx.lineWidth = nd.proximity * 1.2;
+        ctx.stroke();
+      }
+    }
+
+    this.raf = requestAnimationFrame(() => this._tick());
+  }
+
+  destroy() {
+    if (this.io) this.io.disconnect();
+    if (this.raf) cancelAnimationFrame(this.raf);
+    if (this.canvas && this.canvas.parentNode) {
+      this.canvas.parentNode.removeChild(this.canvas);
+    }
+  }
+}
+
+function initMathAurora() {
+  const container = document.getElementById('stemosAtmosphere');
+  if (container && !container._aurora) {
+    container._aurora = new AuroraCanvas(container);
+  }
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initMathAurora);
+} else {
+  initMathAurora();
+}
+
 // ── ICONS ──────────────────────────────────────────────────
 const ICONS = {
   zap:  `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>`,
@@ -2952,7 +3266,8 @@ let persistentMicStream = null;
 function removeAttachedDoc() {
   currentAttachedDoc = null;
   document.getElementById('docPreviewContainer').style.display = 'none';
-  document.getElementById('token-count').textContent = 'Context: 8K · 16 Slots (100% GPU VRAM · 24GB UMA)';
+  const tc = document.getElementById('token-count');
+  if (tc) { tc.textContent = ''; tc.style.display = 'none'; }
 }
 
 const esc = (str) => String(str).replace(/[&<>"']/g, match => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
@@ -3460,7 +3775,7 @@ function welcomeHTML() {
   return `<div class="welcome" id="welcome">
     <div class="hero-brand-section">
       <div class="hero-logo-aura"></div>
-      <div class="hero-emblem-squircle">
+      <div class="hero-emblem-squircle soft-element" style="--delay: 0.15s;">
         <!-- Green eco leaf + AI icon (logo eco hoja) -->
         <svg width="42" height="42" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.5 10-10 10Z" fill="url(#ecoLeafGrad)"/>
@@ -3468,83 +3783,83 @@ function welcomeHTML() {
           <circle cx="16" cy="8" r="2" fill="#ffffff" opacity="0.9"/>
         </svg>
       </div>
-      <h2 class="welcome-title">Welcome to <span>yzai</span></h2>
-      <p class="welcome-subtitle">Ultra efficient AI assistant powered by local hardware.</p>
-      <div class="stemos-bilingual-badge">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      <h2 class="welcome-title soft-element" style="--delay: 0.25s;">Welcome to <span>yzai</span></h2>
+      <p class="welcome-subtitle soft-element" style="--delay: 0.35s;">Ultra efficient AI assistant powered by local hardware.</p>
+      <div class="stemos-bilingual-badge soft-element" style="--delay: 0.45s;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"/></svg>
         <span>Español &amp; English · Escribe en el idioma que prefieras</span>
       </div>
     </div>
 
     <!-- stemOS Hardware & Eco Telemetry HUD -->
     <div class="stemos-telemetry-grid">
-      <!-- Card 1: 15W / 80W Eco Draw -->
-      <div class="stemos-telemetry-card" title="Consumo ultra-eficiente de energía">
+      <!-- Card 1: Eco Power -->
+      <div class="stemos-telemetry-card soft-element" style="--delay: 0.55s;" title="Eco Power · Consumo ultra-eficiente">
         <div class="card-top">
-          <span class="stemos-mcp-badge" style="background:rgba(16,185,129,0.12);color:#059669;border-color:rgba(16,185,129,0.25);display:inline-flex;align-items:center;gap:4px;">
+          <span class="stemos-mcp-badge" style="background:rgba(16,185,129,0.15);color:#059669;border-color:rgba(16,185,129,0.3);display:inline-flex;align-items:center;gap:4px;">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
             <span>ECO POWER</span>
           </span>
-          <div class="card-icon" style="background:rgba(16,185,129,0.12);color:#10b981;">
+          <div class="card-icon" style="background:rgba(16,185,129,0.14);color:#10b981;">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
         </div>
-        <div class="card-val">15W <small>reposo</small> <span style="color:#cbd5e1;font-weight:400;">/</span> 80W <small style="color:#0284c7;font-weight:700;">máx</small></div>
+        <div class="card-val">15W <small>idle</small> <span style="color:#94a3b8;font-weight:400;">/</span> 80W <small style="color:#0284c7;font-weight:700;">max</small></div>
         <div class="micro-bar"><div class="micro-bar-fill" style="width:25%;background:linear-gradient(90deg,#10b981,#0284c7);"></div></div>
-        <div class="card-sub">Ultra-eficiente 7nm · Mini PC Node</div>
+        <div class="card-sub">Ultra-efficient 7nm · Node</div>
       </div>
 
-      <!-- Card 2: 100 usuarios simultáneos -->
-      <div class="stemos-telemetry-card" title="Capacidad de concurrencia de slots">
+      <!-- Card 2: Concurrent Up to -->
+      <div class="stemos-telemetry-card soft-element" style="--delay: 0.65s;" title="Concurrencia de usuarios simultáneos">
         <div class="card-top">
-          <span class="stemos-mcp-badge" style="background:rgba(14,165,233,0.12);color:#0284c7;border-color:rgba(14,165,233,0.25);display:inline-flex;align-items:center;gap:4px;">
+          <span class="stemos-mcp-badge" style="background:rgba(14,165,233,0.15);color:#0284c7;border-color:rgba(14,165,233,0.3);display:inline-flex;align-items:center;gap:4px;">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            <span>CONCURRENCIA</span>
+            <span>CONCURRENT UP TO</span>
           </span>
-          <div class="card-icon" style="background:rgba(14,165,233,0.12);color:#0ea5e9;">
+          <div class="card-icon" style="background:rgba(14,165,233,0.14);color:#0ea5e9;">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
           </div>
         </div>
-        <div class="card-val">100 <small>usuarios</small></div>
+        <div class="card-val">100 <small>users</small></div>
         <div class="micro-bar"><div class="micro-bar-fill" style="width:85%;background:linear-gradient(90deg,#0ea5e9,#38bdf8);"></div></div>
-        <div class="card-sub">16 Slots Concurrentes · 0 Espera</div>
+        <div class="card-sub">at same time</div>
       </div>
 
-      <!-- Card 3: Powering stemBOT -->
-      <div class="stemos-telemetry-card" title="Motor neuronal que alimenta la plataforma stemOS / stemBOT">
+      <!-- Card 3: stemOS AI Core -->
+      <div class="stemos-telemetry-card soft-element" style="--delay: 0.75s;" title="stemOS AI Core · Feynman Engine & JóvenesSTEM Core">
         <div class="card-top">
-          <span class="stemos-mcp-badge" style="background:rgba(99,102,241,0.12);color:#4f46e5;border-color:rgba(99,102,241,0.25);display:inline-flex;align-items:center;gap:4px;">
+          <span class="stemos-mcp-badge" style="background:rgba(99,102,241,0.15);color:#4f46e5;border-color:rgba(99,102,241,0.3);display:inline-flex;align-items:center;gap:4px;">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M9 9h6v6H9z"/><path d="M9 1v3M15 1v3M9 20v3M15 20v3M20 9h3M20 14h3M1 9h3M1 14h3"/></svg>
-            <span>stemOS CORE</span>
+            <span>STEMOS AI CORE</span>
           </span>
-          <div class="card-icon" style="background:rgba(99,102,241,0.12);color:#6366f1;">
+          <div class="card-icon" style="background:rgba(99,102,241,0.14);color:#6366f1;">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L3 7v10l9 5 9-5V7l-9-5z"/><path d="M12 22V12"/><path d="M21 7l-9 5-9-5"/></svg>
           </div>
         </div>
-        <div class="card-val" style="color:#0284c7;font-size:1.18rem;">Powering <span style="color:#059669;">stemBOT</span></div>
+        <div class="card-val" style="font-size:1.15rem;color:#0284c7;">Feynman Engine</div>
         <div class="micro-bar"><div class="micro-bar-fill" style="width:100%;background:linear-gradient(90deg,#6366f1,#10b981);"></div></div>
-        <div class="card-sub">MoE 35B Local · Privacidad Total</div>
+        <div class="card-sub">JóvenesSTEM AI Core · stemBOT Engine</div>
       </div>
 
-      <!-- Card 4: Ultra-Speed Throughput -->
-      <div class="stemos-telemetry-card" title="Velocidad y latencia de inferencia">
+      <!-- Card 4: Mixture of Experts with -->
+      <div class="stemos-telemetry-card soft-element" style="--delay: 0.85s;" title="Mixture of Experts with 35B Parameters">
         <div class="card-top">
-          <span class="stemos-mcp-badge" style="background:rgba(245,158,11,0.12);color:#d97706;border-color:rgba(245,158,11,0.25);display:inline-flex;align-items:center;gap:4px;">
+          <span class="stemos-mcp-badge" style="background:rgba(245,158,11,0.15);color:#d97706;border-color:rgba(245,158,11,0.3);display:inline-flex;align-items:center;gap:4px;">
             <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-            <span>ULTRA-SPEED</span>
+            <span>MIXTURE OF EXPERTS WITH</span>
           </span>
-          <div class="card-icon" style="background:rgba(245,158,11,0.12);color:#f59e0b;">
+          <div class="card-icon" style="background:rgba(245,158,11,0.14);color:#f59e0b;">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
           </div>
         </div>
-        <div class="card-val">~30 <small>tokens/s</small></div>
+        <div class="card-val">35B <small>parameters</small></div>
         <div class="micro-bar"><div class="micro-bar-fill" style="width:90%;background:linear-gradient(90deg,#f59e0b,#10b981);"></div></div>
-        <div class="card-sub">Modo Texto Puro · 8K Ctx VRAM</div>
+        <div class="card-sub">Ultra-Speed · ~30 tokens/s</div>
       </div>
     </div>
 
     <div class="welcome-chips-grid">
-      <div class="welcome-chip-card" onclick="quickPrompt('Help me design a clean, robust, and high-performance architecture for...')">
+      <div class="welcome-chip-card soft-element" style="--delay: 0.95s;" onclick="quickPrompt('Help me design a clean, robust, and high-performance architecture for...')">
         <span class="chip-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#0284c7" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
         </span>
@@ -3553,7 +3868,7 @@ function welcomeHTML() {
           <span>Clean design, robust APIs and modern frameworks</span>
         </div>
       </div>
-      <div class="welcome-chip-card" onclick="quickPrompt('Explain in depth the mechanics and mathematics of transformers and attention mechanisms...')">
+      <div class="welcome-chip-card soft-element" style="--delay: 1.05s;" onclick="quickPrompt('Explain in depth the mechanics and mathematics of transformers and attention mechanisms...')">
         <span class="chip-icon">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 4.44-2.04Z"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-4.44-2.04Z"/></svg>
         </span>
