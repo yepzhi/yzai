@@ -146,8 +146,8 @@ body {
 .logo-icon::after {
   display: none;
 }
-.logo-text { font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; }
-.logo-sub  { font-family: var(--font-display); font-size: 11px; color: var(--primary); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-top: 4px; }
+.logo-text { font-family: var(--font-display); font-size: 22px; font-weight: 800; letter-spacing: -0.5px; line-height: 1; color: #0f172a; }
+.logo-sub  { font-family: var(--font-display); font-size: 11px; color: #059669; text-transform: uppercase; font-weight: 800; letter-spacing: 1px; margin-top: 4px; }
 
 .close-drawer-btn {
   width: 36px; height: 36px; border-radius: 10px;
@@ -159,13 +159,16 @@ body {
 .close-drawer-btn:active { transform: scale(0.9); }
 
 .new-chat-btn {
-  margin: 0 20px 16px; padding: 14px 18px;
-  background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01));
-  border: 1px solid var(--border-light); border-radius: 14px;
-  color: #fff; font-size: 14px; font-weight: 500; font-family: var(--font-body);
+  margin: 0 16px 16px; padding: 12px 18px;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
+  border: none !important; border-radius: 14px;
+  color: #ffffff !important; font-size: 14px; font-weight: 700; font-family: var(--font-body);
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
   cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
-  transition: all 0.3s ease; position: relative; overflow: hidden;
+  transition: all 0.25s ease; position: relative; overflow: hidden;
 }
+.new-chat-btn svg { stroke: #ffffff !important; }
+.new-chat-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(16, 185, 129, 0.45); }
 .new-chat-btn::before {
   content: ''; position: absolute; inset: 0; background: linear-gradient(135deg, var(--primary), var(--cyan)); opacity: 0; transition: opacity 0.3s ease; z-index: -1;
 }
@@ -174,20 +177,21 @@ body {
 .new-chat-btn:active { transform: translateY(1px) scale(0.98); }
 
 .drawer-section-label {
-  font-size: 11px; color: var(--muted); font-weight: 600;
+  font-size: 11px; color: #475569; font-weight: 700;
   text-transform: uppercase; letter-spacing: 1.2px;
   padding: 16px 20px 8px; font-family: var(--font-display);
 }
 
 .drawer-actions { padding: 0 12px; margin-bottom: 10px; }
 .drawer-action-btn {
-  width: 100%; padding: 12px 14px;
-  background: transparent; border: none; border-radius: 12px;
-  color: var(--text-dim); font-size: 14px; font-weight: 500;
+  width: 100%; padding: 10px 14px;
+  background: #ffffff; border: 1px solid rgba(16, 185, 129, 0.16); border-radius: 12px;
+  color: #0f172a; font-size: 13.5px; font-weight: 600;
   cursor: pointer; display: flex; align-items: center; gap: 12px;
+  margin-bottom: 6px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);
   transition: all 0.2s ease; text-align: left;
 }
-.drawer-action-btn:hover { background: var(--surface2); color: var(--text); }
+.drawer-action-btn:hover { background: #f1f5f9; border-color: rgba(16, 185, 129, 0.35); color: #059669; }
 .drawer-action-btn:active { transform: scale(0.98); }
 
 .conv-list {
@@ -738,9 +742,10 @@ think::before {
   font-size: 9.5px;
   padding: 2px 8px;
   border-radius: 6px;
-  background: rgba(139, 92, 246, 0.2);
-  color: var(--primary-hover);
-  border: 1px solid rgba(139, 92, 246, 0.3);
+  background: rgba(16, 185, 129, 0.12);
+  color: #047857;
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  font-weight: 700;
 }
 .attach-menu-item {
   display: flex;
@@ -911,18 +916,17 @@ think::before {
 
 .input-hint {
   text-align: center;
-  font-size: 11px;
-  color: var(--muted);
-  font-weight: 500;
+  font-size: 11.5px;
+  color: #047857 !important;
+  font-weight: 700;
   margin: 0 auto 8px;
   font-family: var(--font-mono);
   pointer-events: all;
-  background: rgba(0,0,0,0.5);
-  padding: 4px 14px;
+  background: #ffffff !important;
+  padding: 5px 16px;
   border-radius: 100px;
-  /* blur disabled */
-  -webkit-/* blur disabled */
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.28) !important;
+  box-shadow: 0 2px 10px rgba(16, 185, 129, 0.1) !important;
   width: fit-content;
   max-width: 90vw;
 }
@@ -1128,7 +1132,7 @@ think::before {
     height: 13px;
   }
   .welcome-chip-card .chip-content strong {
-    font-size: 0.46rem;
+    font-size: 12.5px;
     font-weight: 500;
     line-height: 1.15;
     letter-spacing: -0.15px;
@@ -1385,9 +1389,10 @@ think::before {
 
 /* Welcome card — glassmorphism hero */
 .welcome-icon {
-  background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(59,130,246,0.15)) !important;
-  border: 1px solid rgba(139,92,246,0.4) !important;
-  box-shadow: 0 0 80px rgba(139,92,246,0.3), inset 0 1px rgba(255,255,255,0.3) !important;
+  background: rgba(16, 185, 129, 0.1) !important;
+  border: 1px solid rgba(16, 185, 129, 0.28) !important;
+  box-shadow: 0 10px 30px rgba(16, 185, 129, 0.15) !important;
+  color: #10b981 !important;
 }
 
 /* Input bar — crystal glass */
@@ -1398,13 +1403,19 @@ think::before {
 
 /* Menu/action buttons — glass pills */
 .menu-btn, .action-btn {
-  background: rgba(255,255,255,0.06) !important;
-  
-  -webkit-
-  border: 1px solid rgba(255,255,255,0.12) !important;
-  box-shadow: inset 0 1px rgba(255,255,255,0.1), 0 4px 12px rgba(0,0,0,0.2) !important;
+  background: #ffffff !important;
+  border: 1px solid rgba(16, 185, 129, 0.24) !important;
+  color: #0f172a !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04) !important;
   transition: all 0.2s cubic-bezier(0.16,1,0.3,1) !important;
 }
+.menu-btn svg, .action-btn svg { stroke: #0f172a !important; }
+.menu-btn:hover, .action-btn:hover {
+  background: #f1f5f9 !important;
+  border-color: #10b981 !important;
+  color: #059669 !important;
+}
+.menu-btn:hover svg, .action-btn:hover svg { stroke: #059669 !important; }
 .menu-btn:hover, .action-btn:hover {
   background: rgba(139,92,246,0.15) !important;
   border-color: rgba(139,92,246,0.4) !important;
@@ -1413,16 +1424,14 @@ think::before {
 }
 
 /* Aurora canvas integration for yzai */
-#yzai-aurora {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  opacity: 0.92; mix-blend-mode: screen;
-}
+#yzai-aurora { display: none !important; }
 
 /* Liquid Glass Message Bubbles */
 .msg.user .bubble {
-  background: linear-gradient(135deg, #2563eb, #7c3aed) !important;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%) !important;
   border: 1px solid rgba(255, 255, 255, 0.25) !important;
-  box-shadow: 0 10px 30px -5px rgba(37, 99, 235, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.3) !important;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.25) !important;
+  color: #ffffff !important;
   contain: layout style;
 }
 
@@ -1735,7 +1744,7 @@ think::before {
   <div class="orb orb-3"></div>
 </div>
 <!-- Aurora interactive dot canvas -->
-<canvas id="yzai-aurora"></canvas>
+<!-- Aurora canvas disabled for light eco theme & battery saving -->
 
 <!-- DRAWER OVERLAY -->
 <div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
@@ -1757,7 +1766,7 @@ think::before {
     </button>
   </div>
 
-  <button class="new-chat-btn" onclick="newChat(); closeDrawer()" data-starborder data-sb-color="#8b5cf6" data-sb-speed="3">
+  <button class="new-chat-btn" onclick="newChat(); closeDrawer()" >
     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
     New Conversation
   </button>
@@ -1854,7 +1863,7 @@ think::before {
         </div>
         <h2 class="welcome-title">Welcome to <span>yzai</span></h2>
         <p>Your premium, 100% private AI assistant powered by local hardware.</p>
-        <div class="bilingual-badge" data-shiny data-shiny-speed="3.5">
+        <div class="bilingual-badge">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
           <span>Español &amp; English · Escribe en el idioma que prefieras</span>
         </div>
@@ -1957,7 +1966,7 @@ think::before {
           </div>
           <div class="attach-menu-divider"></div>
           <div class="attach-menu-item" onclick="triggerFileInput('.pdf,.txt,.md,.json,.jsonl,.csv,.tsv,.js,.ts,.jsx,.tsx,.py,.sh,.bash,.html,.css,.xml,.yaml,.yml,.toml,.ini,.log,.sql,.cpp,.c,.h,.java,.rs,.go,.php,.rb,.swift,.kt,.vue,.svelte,.env,.r')">
-            <div class="attach-item-icon" style="background:rgba(255,255,255,0.08);color:#fff;">
+            <div class="attach-item-icon" style="background:rgba(16,185,129,0.12);color:#059669;">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
             </div>
             <div class="attach-item-info">
@@ -1971,7 +1980,7 @@ think::before {
       <button class="mic-btn" id="micBtn" onclick="toggleMic()" title="Hablar por micrófono / Modo Voz" aria-label="Microphone">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
       </button>
-      <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send" data-starborder data-sb-color="#8b5cf6" data-sb-speed="3">
+      <button class="send-btn" id="sendBtn" onclick="sendMessage()" aria-label="Send" >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
       </button>
       <button class="stop-btn" id="stopBtn" onclick="stopGeneration()" aria-label="Stop" style="display:none">
@@ -2973,7 +2982,7 @@ function welcomeHTML() {
     </div>
     <h2 class="welcome-title">Welcome to <span>yzai</span></h2>
     <p>Your premium, 100% private AI assistant powered by local hardware.</p>
-    <div class="bilingual-badge" data-shiny data-shiny-speed="3.5">
+    <div class="bilingual-badge">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
       <span>Español &amp; English · Escribe en el idioma que prefieras</span>
     </div>
