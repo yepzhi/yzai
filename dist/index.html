@@ -371,16 +371,16 @@ body {
   object-fit: cover;
 }
 .messages {
-  padding: 16px 16px 180px;
+  padding: 16px 16px 140px;
   display: flex; flex-direction: column; gap: 24px;
-  max-width: 860px; margin: 0 auto; min-height: 100%;
+  max-width: 860px; margin: 0 auto;
 }
 .messages:has(.welcome) {
-  padding: 8px 16px 110px !important;
+  padding: 0 16px 140px !important;
 }
 
 .welcome {
-  flex: 1; display: flex; flex-direction: column;
+  display: flex; flex-direction: column;
   align-items: center; justify-content: flex-start !important;
   text-align: center; padding: 6px 16px 80px;
   animation: welcomeAppear 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; margin: 0 auto;
@@ -1602,7 +1602,8 @@ think::before {
   width: auto !important;
   max-width: fit-content !important;
   margin: 0 auto !important;
-  padding: 5px 12px !important;
+  padding: 4px 14px !important;
+  height: auto !important;
   border-radius: 999px !important;
   display: inline-flex !important;
   align-items: center !important;
@@ -2239,14 +2240,12 @@ think::before {
 <!-- DRAWER -->
 <div class="drawer" id="drawer">
   <div class="drawer-header">
-    <div class="drawer-logo">
-      <div class="logo-icon">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2C12 7.52 7.52 12 2 12C7.52 12 12 16.48 12 22C12 16.48 16.48 12 22 12C16.48 12 12 7.52 12 2Z" fill="url(#aiGrad)"/><circle cx="12" cy="12" r="2.5" fill="#ffffff" opacity="0.9"/></svg>
-      </div>
-      <div>
-        <div class="logo-text">yzai</div>
-        <div class="logo-sub">Pro · Local AI</div>
-      </div>
+    <div class="drawer-logo" style="display:flex; align-items:baseline; gap:6px;">
+      <span style="font-family:var(--font-display); font-size:24px; font-weight:800; letter-spacing:-0.03em; color:#0f172a; line-height:1;">yzai</span>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round" style="display:inline-block; vertical-align:baseline; filter:drop-shadow(0 1px 4px rgba(16,185,129,0.35)); flex-shrink:0;">
+        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+      </svg>
     </div>
     <button class="close-drawer-btn" onclick="closeDrawer()">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
@@ -2346,13 +2345,12 @@ think::before {
 
     <!-- Right Actions -->
     <div style="display:flex; align-items:center; gap:8px;">
-      <button class="action-btn" onclick="newChat()" aria-label="New Conversation" title="New Conversation" style="display:inline-flex; align-items:center; gap:6px; padding:0 12px; height:34px; border-radius:10px; font-size:12px; font-weight:600; color:#0284c7; white-space:nowrap;">
+      <button class="action-btn" onclick="newChat()" aria-label="New Conversation" title="New Conversation" style="display:inline-flex; align-items:center; gap:6px; padding:0 12px; height:34px; width:auto; border-radius:10px; font-size:12px; font-weight:600; color:#0284c7; white-space:nowrap;">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         <span class="hide-mobile">New Conversation</span>
       </button>
-      <button class="action-btn" onclick="openSystemModal()" aria-label="Servicios Locales y Ajustes" title="Servicios Locales y Ajustes" style="display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:0 10px; height:34px; border-radius:10px;">
-        <span style="display:inline-block; width:8px; height:8px; min-width:8px; min-height:8px; max-width:8px; max-height:8px; border-radius:50%; aspect-ratio:1/1; flex-shrink:0; background:#10b981; box-shadow:0 0 8px rgba(16,185,129,0.85);"></span>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <button class="action-btn" onclick="openSystemModal()" aria-label="Servicios Locales y Ajustes" title="Servicios Locales y Ajustes" style="display:inline-flex; align-items:center; justify-content:center; gap:6px; padding:0; height:34px; width:34px; border-radius:10px;">
+        <span style="display:block; width:8px; height:8px; border-radius:50%; background:#10b981; box-shadow:0 0 8px rgba(16,185,129,0.85); flex-shrink:0;"></span>
       </button>
     </div>
   </div>
