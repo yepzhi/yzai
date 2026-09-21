@@ -1961,7 +1961,7 @@ think::before {
     </div>
 
     <!-- Centered Context / Slot Status Badge (cleanly elevated above toolbar) -->
-    <div class="input-hint" id="token-count">Context: 8K · 16 Slots (100% GPU)</div>
+    <div class="input-hint" id="token-count">Context: 8K · 2 Slots (100% GPU VRAM · 24GB UMA)</div>
 
     <!-- Centered Toolbar for Mode toggles (aligned with input container width) -->
     <div class="input-top-bar">
@@ -2534,7 +2534,7 @@ let persistentMicStream = null;
 function removeAttachedDoc() {
   currentAttachedDoc = null;
   document.getElementById('docPreviewContainer').style.display = 'none';
-  document.getElementById('token-count').textContent = 'Context: 8K · 16 Slots (100% GPU)';
+  document.getElementById('token-count').textContent = 'Context: 8K · 2 Slots (100% GPU VRAM · 24GB UMA)';
 }
 
 const esc = (str) => String(str).replace(/[&<>"']/g, match => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[match]));
@@ -2923,10 +2923,10 @@ function updateModelHeader() {
   const activeName = document.getElementById('activeName');
   if (activeName) activeName.textContent = '@yepzhi AI · Qwen 3.6 35B MoE';
   const activeSub = document.getElementById('activeSub');
-  if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Qwen 3.6 MoE (A3B): Ready</span>';
+  if (activeSub) activeSub.innerHTML = '<span style="color:#3FB950;font-weight:600;">Qwen 3.6 MoE (A3B): Ready · ~25 t/s</span>';
   const tokenCount = document.getElementById('token-count');
   if (tokenCount && tokenCount.textContent.includes('Context:')) {
-    tokenCount.textContent = 'Context: 8K · 16 Slots (100% GPU)';
+    tokenCount.textContent = 'Context: 8K · 2 Slots (100% GPU VRAM · 24GB UMA)';
   }
 }
 
