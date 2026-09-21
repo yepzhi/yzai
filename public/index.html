@@ -5200,6 +5200,65 @@ function getBestNaturalVoice() {
   return voices[0] || null;
 }
 
+function getBestEnglishVoice() {
+  if (!synthesis) return null;
+  let voices = [];
+  try { voices = synthesis.getVoices() || []; } catch(e) {}
+  if (!voices.length && availableVoices.length) voices = availableVoices;
+  if (!voices.length) return null;
+
+  const isEn = (v) => {
+    const l = (v.lang || '').toLowerCase();
+    return l.startsWith('en') || l.includes('en-') || l.includes('en_');
+  };
+
+  const enVoices = voices.filter(isEn);
+  if (!enVoices.length) return voices[0] || null;
+
+  // 1. Natural / Neural English
+  const naturalEn = enVoices.find(v => (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Online')));
+  if (naturalEn) return naturalEn;
+
+  // 2. Apple Samantha / Siri / Daniel
+  const appleEn = enVoices.find(v => /Samantha|Siri|Daniel|Karen|Moira|Tessa/i.test(v.name));
+  if (appleEn) return appleEn;
+
+  // 3. Microsoft Jenny / Guy / David / Zira / Aria
+  const msEn = enVoices.find(v => /Jenny|Guy|David|Zira|Aria/i.test(v.name));
+  if (msEn) return msEn;
+
+  // 4. Google US English
+  const googleEn = enVoices.find(v => v.name.includes('Google') && v.lang.toLowerCase().includes('en-us'));
+  if (googleEn) return googleEn;
+
+  return enVoices.find(v => (v.lang || '').toLowerCase() === 'en-us') || enVoices[0] || null;
+}
+
+function detectTextLanguage(text) {
+  if (!text) return 'es';
+  if (/[áéíóúüñ¿¡]/i.test(text)) return 'es';
+  const words = text.toLowerCase().match(/\b[a-zñáéíóúü]+\b/gi) || [];
+  if (!words.length) return 'es';
+  const esStopwords = new Set([
+    'el','la','los','las','un','una','unos','unas','de','del','a','al','en','para','por','con','sin','sobre',
+    'y','e','o','u','pero','que','como','cuando','donde','es','son','era','fue','ser','estar','tiene','tienen',
+    'este','esta','estos','estas','ese','esa','esos','esas','su','sus','mi','mis','tu','tus','yo','no','si','ya',
+    'muy','mas','bien','tambien','hacer','puede','puedes','hola','gracias','bueno','aqui','esta'
+  ]);
+  const enStopwords = new Set([
+    'the','a','an','and','or','but','if','as','what','when','where','how','which','who','this','that','these',
+    'those','i','you','he','she','it','we','they','my','your','his','her','its','our','their','is','are','was',
+    'were','be','been','being','have','has','had','do','does','did','will','would','should','can','could','of',
+    'in','to','for','with','on','at','from','by','about','not','so','then','there','here','all','any','hello','hi'
+  ]);
+  let es = 0, en = 0;
+  for (const w of words) {
+    if (esStopwords.has(w)) es++;
+    if (enStopwords.has(w)) en++;
+  }
+  return en > es ? 'en' : 'es';
+}
+
 window._activeSpeechUtterances = window._activeSpeechUtterances || new Set();
 
 const VoiceQueue = {
@@ -5207,12 +5266,17 @@ const VoiceQueue = {
   isPlaying: false,
   isStreamComplete: false,
   watchdogTimer: null,
+  currentAudio: null,
+  currentUtterance: null,
+  currentLang: 'es',
+  blobCache: new Map(), // chunkText -> objectURL
+  activeAbortCtrl: null,
 
   push(text) {
     if (!text) return;
     const clean = text
       .replace(/<think>[\s\S]*?<\/think>/g, '')
-      .replace(/```[\s\S]*?```/g, ' código omitido ')
+      .replace(/```[\s\S]*?```/g, (this.currentLang === 'en' ? ' code omitted ' : ' código omitido '))
       .replace(/`([^`]+)`/g, '$1')
       .replace(/https?:\/\/[^\s]+/g, '')
       .replace(/[*_~\[\]\(\)\<\>#]/g, '')
@@ -5220,13 +5284,46 @@ const VoiceQueue = {
       .trim();
     if (!clean || clean.length < 2) return;
     this.queue.push(clean);
+    this.prefetchNext();
     if (!this.isPlaying) {
       this.playNext();
     }
   },
 
+  prefetchNext() {
+    const useNeural = localStorage.getItem('yzai_use_neural_voice') !== 'false';
+    if (!useNeural || !this.queue.length) return;
+    const nextChunk = this.queue[0];
+    if (!nextChunk || this.blobCache.has(nextChunk)) return;
+
+    const endpoint = (typeof window !== 'undefined' && window.PIPER_TTS_ENDPOINT)
+      ? window.PIPER_TTS_ENDPOINT
+      : (location.hostname.includes('yzai.yepzhi.com') ? '/v1/audio/speech' : 'https://yzai.yepzhi.com/v1/audio/speech');
+
+    const voice = (this.currentLang === 'en') ? 'fable' : 'stembot';
+    const controller = new AbortController();
+    fetch(endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        input: nextChunk,
+        model: 'tts-1',
+        voice: voice,
+        speed: 1.0
+      }),
+      signal: controller.signal
+    }).then(async res => {
+      if (!res.ok) return;
+      const blob = await res.blob();
+      if (blob && blob.size > 100) {
+        const url = URL.createObjectURL(blob);
+        this.blobCache.set(nextChunk, url);
+      }
+    }).catch(() => {});
+  },
+
   playNext() {
-    if (this.isPlaying || !synthesis) return;
+    if (this.isPlaying) return;
 
     if (!this.queue.length) {
       this.isPlaying = false;
@@ -5255,66 +5352,67 @@ const VoiceQueue = {
     this.isPlaying = true;
     const chunk = this.queue.shift();
 
-    // Detener micrófono para desbloquear el altavoz principal en iOS/Android
+    // Trigger pre-fetch for upcoming chunk in background
+    this.prefetchNext();
+
+    // Detener micrófono para desbloquear altavoz en móviles
     if (isListening) {
       stopMic();
     }
 
-    try {
-      if (synthesis.paused) synthesis.resume();
-    } catch(e) {}
-
-    const utterance = new SpeechSynthesisUtterance(chunk);
-    utterance.lang = 'es-MX';
-    utterance.rate = 1.05;
-    utterance.pitch = 1.0;
-    utterance.volume = 1.0;
-
-    const bestVoice = getBestNaturalVoice();
-    if (bestVoice) {
-      utterance.voice = bestVoice;
-      utterance.lang = bestVoice.lang || 'es-MX';
-    }
-
-    // Prevenir bug de recolección de basura (GC) en Chrome/Safari
-    window._activeSpeechUtterances.add(utterance);
-
-    updateVoiceLiveUI('speaking', 'YZAI speaking...', `"${chunk}"`);
+    const isEn = (this.currentLang === 'en') || (detectTextLanguage(chunk) === 'en');
+    const piperVoice = isEn ? 'fable' : 'stembot'; // Piper HQ Lessac High para EN, Claude High para ES
 
     let done = false;
     const finishChunk = () => {
       if (done) return;
       done = true;
       if (this.watchdogTimer) { clearTimeout(this.watchdogTimer); this.watchdogTimer = null; }
-      if (window._activeSpeechUtterances) {
-        window._activeSpeechUtterances.delete(utterance);
+      if (this.activeAbortCtrl) { this.activeAbortCtrl = null; }
+      if (this.currentAudio) {
+        try { this.currentAudio.pause(); } catch(e) {}
+        this.currentAudio = null;
+      }
+      if (window._activeSpeechUtterances && this.currentUtterance) {
+        window._activeSpeechUtterances.delete(this.currentUtterance);
+        this.currentUtterance = null;
       }
       this.isPlaying = false;
       setTimeout(() => {
         this.playNext();
-      }, 35);
+      }, 30);
     };
 
-    utterance.onend = finishChunk;
-    utterance.onerror = (err) => {
-      console.warn('[SpeechSynthesis Error]', err);
-      finishChunk();
-    };
-
-    // Watchdog timer: si el navegador no dispara onend, avanzar después de tiempo estimado
-    const estimatedDuration = Math.max(4500, (chunk.length / 8) * 1000 + 4500);
-    this.watchdogTimer = setTimeout(() => {
-      if (this.isPlaying) {
-        console.log('[Voice Watchdog] Forcing next chunk');
-        finishChunk();
-      }
-    }, estimatedDuration);
-
+    // Fallback Web Speech API
     const fallbackSpeech = () => {
       if (done) return;
+      if (!synthesis) {
+        finishChunk();
+        return;
+      }
       try {
         activateMediaAudioSession();
         if (synthesis.paused) synthesis.resume();
+        const utterance = new SpeechSynthesisUtterance(chunk);
+        utterance.rate = 1.02;
+        utterance.pitch = 1.0;
+        utterance.volume = 1.0;
+        if (isEn) {
+          utterance.lang = 'en-US';
+          const ev = getBestEnglishVoice();
+          if (ev) utterance.voice = ev;
+        } else {
+          utterance.lang = 'es-MX';
+          const sv = getBestNaturalVoice();
+          if (sv) utterance.voice = sv;
+        }
+        this.currentUtterance = utterance;
+        window._activeSpeechUtterances.add(utterance);
+        utterance.onend = finishChunk;
+        utterance.onerror = (e) => {
+          console.warn('[WebSpeech fallback error]', e);
+          finishChunk();
+        };
         synthesis.speak(utterance);
       } catch (e) {
         console.warn('[Speech speak failed]', e);
@@ -5322,41 +5420,77 @@ const VoiceQueue = {
       }
     };
 
-    // Try Piper Neural TTS (es_MX-claude-high / stembot - High Definition, same as StemBot)
+    // Watchdog timer en caso de atasco de audio
+    const estimatedDuration = Math.max(5000, (chunk.length / 8) * 1000 + 4500);
+    this.watchdogTimer = setTimeout(() => {
+      if (this.isPlaying) {
+        console.log('[Voice Watchdog] Forcing next chunk');
+        finishChunk();
+      }
+    }, estimatedDuration);
+
     const useNeural = localStorage.getItem('yzai_use_neural_voice') !== 'false';
+    const playAudioUrl = (audioUrl, revokeOnEnd = false) => {
+      if (done) {
+        if (revokeOnEnd) URL.revokeObjectURL(audioUrl);
+        return;
+      }
+      activateMediaAudioSession();
+      const audio = new Audio(audioUrl);
+      this.currentAudio = audio;
+      updateVoiceLiveUI('speaking', isEn ? 'YZAI speaking (Piper HQ)...' : 'YZAI hablando (Piper HQ)...', `"${chunk}"`);
+      audio.onended = () => {
+        if (revokeOnEnd) URL.revokeObjectURL(audioUrl);
+        finishChunk();
+      };
+      audio.onerror = (e) => {
+        if (revokeOnEnd) URL.revokeObjectURL(audioUrl);
+        console.warn('[Piper Audio play error, falling back]', e);
+        fallbackSpeech();
+      };
+      audio.play().catch((err) => {
+        console.warn('[Audio play blocked, falling back]', err);
+        fallbackSpeech();
+      });
+    };
 
     if (useNeural && typeof fetch !== 'undefined') {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000);
+      // Usar cache de pre-fetch si está disponible para latencia cero entre oraciones
+      if (this.blobCache.has(chunk)) {
+        const cachedUrl = this.blobCache.get(chunk);
+        this.blobCache.delete(chunk);
+        playAudioUrl(cachedUrl, true);
+        return;
+      }
 
-      fetch('/v1/audio/speech', {
+      const endpoint = (typeof window !== 'undefined' && window.PIPER_TTS_ENDPOINT)
+        ? window.PIPER_TTS_ENDPOINT
+        : (location.hostname.includes('yzai.yepzhi.com') ? '/v1/audio/speech' : 'https://yzai.yepzhi.com/v1/audio/speech');
+
+      const abortCtrl = new AbortController();
+      this.activeAbortCtrl = abortCtrl;
+      const timeout = setTimeout(() => abortCtrl.abort(), 12000);
+
+      fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           input: chunk,
           model: 'tts-1',
-          voice: 'stembot',
-          speed: 0.95
+          voice: piperVoice,
+          speed: 1.0
         }),
-        signal: controller.signal
+        signal: abortCtrl.signal
       }).then(async res => {
         clearTimeout(timeout);
-        if (!res.ok) throw new Error('Piper Neural TTS non-200 response');
+        if (!res.ok) throw new Error(`Piper Neural TTS HTTP ${res.status}`);
         const blob = await res.blob();
+        if (!blob || blob.size < 100) throw new Error('Invalid audio blob');
         const audioUrl = URL.createObjectURL(blob);
-        const audio = new Audio(audioUrl);
-        updateVoiceLiveUI('speaking', 'YZAI hablando (Voz Neural)...', `"${chunk}"`);
-        audio.onended = () => {
-          URL.revokeObjectURL(audioUrl);
-          finishChunk();
-        };
-        audio.onerror = () => {
-          URL.revokeObjectURL(audioUrl);
-          fallbackSpeech();
-        };
-        audio.play().catch(fallbackSpeech);
+        playAudioUrl(audioUrl, true);
       }).catch(err => {
         clearTimeout(timeout);
+        console.warn('[Piper Neural fetch failed, falling back to Web Speech]', err);
         fallbackSpeech();
       });
       return;
@@ -5367,6 +5501,23 @@ const VoiceQueue = {
 
   clear() {
     if (this.watchdogTimer) { clearTimeout(this.watchdogTimer); this.watchdogTimer = null; }
+    if (this.activeAbortCtrl) {
+      try { this.activeAbortCtrl.abort(); } catch(e) {}
+      this.activeAbortCtrl = null;
+    }
+    if (this.currentAudio) {
+      try {
+        this.currentAudio.pause();
+        this.currentAudio.currentTime = 0;
+      } catch(e) {}
+      this.currentAudio = null;
+    }
+    if (this.blobCache && this.blobCache.size) {
+      for (const url of this.blobCache.values()) {
+        try { URL.revokeObjectURL(url); } catch(e) {}
+      }
+      this.blobCache.clear();
+    }
     this.queue = [];
     this.isPlaying = false;
     this.isStreamComplete = false;
@@ -5400,13 +5551,8 @@ function stopAllTTS() {
 }
 
 function speakText(text, onComplete) {
-  if (!synthesis) {
-    alert('Your browser does not support speech synthesis (TTS). We suggest Google Chrome or Safari.');
-    return;
-  }
-  try {
-    if (synthesis.paused) synthesis.resume();
-  } catch(e) {}
+  unlockAudioAndVoices();
+  activateMediaAudioSession();
 
   VoiceQueue.clear();
   if (typeof onComplete === 'function') {
@@ -5415,7 +5561,7 @@ function speakText(text, onComplete) {
 
   const clean = text
     .replace(/<think>[\s\S]*?<\/think>/g, '')
-    .replace(/```[\s\S]*?```/g, ' code omitted ')
+    .replace(/```[\s\S]*?```/g, '')
     .replace(/`([^`]+)`/g, '$1')
     .replace(/https?:\/\/[^\s]+/g, '')
     .replace(/[*_~\[\]\(\)\<\>#]/g, '')
@@ -5423,6 +5569,9 @@ function speakText(text, onComplete) {
     .trim();
 
   if (!clean) return;
+
+  // Detect language of response (English vs Spanish)
+  VoiceQueue.currentLang = detectTextLanguage(clean);
 
   const sentences = clean.match(/[^.!?\n]+[.!?\n]+|[^.!?\n]+$/g) || [clean];
   sentences.forEach(s => {
@@ -5433,7 +5582,7 @@ function speakText(text, onComplete) {
   VoiceQueue.isStreamComplete = true;
   setTimeout(() => {
     if (!VoiceQueue.isPlaying) VoiceQueue.playNext();
-  }, 60);
+  }, 40);
 }
 
 // ── GLOBAL AUDIO CONTEXT (singleton) ──────────────────────
